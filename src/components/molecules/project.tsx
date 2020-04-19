@@ -68,6 +68,7 @@ const ProjectSettings = () => {
             <Icon name={colorMode === "light" ? "moon" : "sun"} mr={2} />
             {colorMode === "light" ? "Dark mode" : "Light mode"}
           </MenuItem>
+          <MenuItem color={`mode.${colorMode}.text`}>Log out</MenuItem>
         </MenuGroup>
       </MenuList>
     </Menu>

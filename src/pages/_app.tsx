@@ -10,7 +10,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     <>
       <Head>
         <title>Meeshkan Webapp</title>
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/icon.png" />
       </Head>
       <ThemeProvider theme={customTheme}>
         <CSSReset />
