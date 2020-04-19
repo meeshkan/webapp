@@ -11,7 +11,7 @@ import {
 
 type CardProps = {
   children: object;
-  gridArea: string;
+  gridArea?: string;
   heading?: string;
   pageLink?: string;
 };
@@ -22,37 +22,38 @@ const Card = ({ children, gridArea, heading, pageLink }: CardProps) => {
     <Box
       bg={`mode.${colorMode}.card`}
       p={4}
+      maxH="80vh"
       rounded="sm"
-      h="100%"
       gridArea={gridArea}
       overflow="scroll"
     >
       {pageLink ? (
         <Link
-          pos="sticky"
           href={pageLink}
-          top={0}
-          bg={`mode.${colorMode}.card`}
           color={`mode.${colorMode}.title`}
           _hover={{ color: `mode.${colorMode}.titleHover` }}
         >
-          <Stack isInline justify="space-between">
+          <Stack
+            isInline
+            justify="space-between"
+            borderBottom="1px solid"
+            borderColor={`mode.${colorMode}.icon`}
+          >
             <Heading
               as="h2"
               fontSize="normal"
               letterSpacing="wide"
               lineHeight="normal"
               fontWeight={800}
-              pb={2}
+              mb={2}
             >
               {heading}
             </Heading>
             <Icon name="arrow-forward" />
           </Stack>
-          <Divider borderColor={`mode.${colorMode}.icon`} />
         </Link>
       ) : (
-        <Box pos="sticky" top={0} bg={`mode.${colorMode}.card`}>
+        <Box>
           {heading ? (
             <Heading
               as="h2"
