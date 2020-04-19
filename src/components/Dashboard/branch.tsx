@@ -4,7 +4,7 @@ import Card from "../molecules/card";
 
 const Production = () => {
   return (
-    <Card gridArea="1 / 3 / 3 / 4" heading="Branch tests">
+    <Card gridArea="1 / 3 / 3 / 4" heading="Branch tests" pageLink="/branch">
       <Text>placeholder</Text>
     </Card>
   );

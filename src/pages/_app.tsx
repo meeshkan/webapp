@@ -1,7 +1,7 @@
 import { AppProps } from "next/app";
 import { ThemeProvider, CSSReset, ColorModeProvider } from "@chakra-ui/core";
 import customTheme from "../theme";
-import Navigation from "../components/navigation";
+import Navigation from "../components/organisms/navigation";
 import Head from "next/head";
 import Layout from "../components/layout";
 

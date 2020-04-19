@@ -4,7 +4,7 @@ import Card from "../molecules/card";
 
 const Chart = () => {
   return (
-    <Card gridArea="2 / 1 / 3 / 3" heading="Branch tests">
+    <Card gridArea="2 / 1 / 3 / 3" heading="Bugs">
       <Text>placeholder</Text>
     </Card>
   );

@@ -57,15 +57,17 @@ const customTheme = {
         background: "#F5F7FA", // gray.50
         card: theme.colors.white,
         title: "#1F2933", // gray.900
-        text: "",
-        icon: "",
+        titleHover: "#DC1853", // red.500
+        text: "#3E4C59", // gray.700
+        icon: "#E4E7EB", // gray.100
       },
       dark: {
         background: "#323F4B", // gray.800
         card: "#1F2933", // gray.900
         title: theme.colors.white,
-        text: "",
-        icon: "",
+        titleHover: "#F0759A", // red.300
+        text: "#CBD2D9", // gray.200
+        icon: "#323F4B", // gray.800
       },
     },
   },
