@@ -1,9 +1,10 @@
 import React from "react";
-import { Icon, Flex, useColorMode, IconButton, Stack } from "@chakra-ui/core";
+import { Icon, Flex, useColorMode } from "@chakra-ui/core";
 import Project from "../molecules/project";
+import Link from "next/link";
 
 const Navigation = () => {
-  const { colorMode, toggleColorMode } = useColorMode();
+  const { colorMode } = useColorMode();
   return (
     <>
       <Flex
@@ -16,9 +17,9 @@ const Navigation = () => {
         pos="sticky"
         top={4}
       >
-        <a href="/">
+        <Link href="/">
           <Icon name="Logo" color={`mode.${colorMode}.title`} h={8} w="auto" />
-        </a>
+        </Link>
         <Project />
       </Flex>
     </>

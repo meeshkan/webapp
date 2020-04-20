@@ -4,10 +4,11 @@ import {
   useColorMode,
   Heading,
   Divider,
-  Link,
   Icon,
   Stack,
+  Link,
 } from "@chakra-ui/core";
+import { useRouter } from "next/router";
 
 type CardProps = {
   children: object;
@@ -18,6 +19,12 @@ type CardProps = {
 
 const Card = ({ children, gridArea, heading, pageLink }: CardProps) => {
   const { colorMode } = useColorMode();
+  const router = useRouter();
+
+  const handleClick = (e) => {
+    e.preventDefault();
+    router.push(pageLink);
+  };
   return (
     <Box
       bg={`mode.${colorMode}.card`}
@@ -30,6 +37,7 @@ const Card = ({ children, gridArea, heading, pageLink }: CardProps) => {
       {pageLink ? (
         <Link
           href={pageLink}
+          onClick={handleClick}
           color={`mode.${colorMode}.title`}
           _hover={{ color: `mode.${colorMode}.titleHover` }}
         >

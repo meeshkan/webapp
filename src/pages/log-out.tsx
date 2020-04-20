@@ -1,8 +1,9 @@
 import React from "react";
-import {} from "@chakra-ui/core";
+import { Text, useColorMode } from "@chakra-ui/core";
 
 const LogOutPage = () => {
-  return <>yo</>;
+  const { colorMode } = useColorMode();
+  return <Text color={`mode.${colorMode}.text`}>yo</Text>;
 };
 
 export default LogOutPage;

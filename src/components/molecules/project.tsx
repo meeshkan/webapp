@@ -12,8 +12,8 @@ import {
   Image,
   Text,
   Icon,
-  Button,
 } from "@chakra-ui/core";
+import Link from "next/link";
 
 const ProjectSettings = () => {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -55,8 +55,12 @@ const ProjectSettings = () => {
         </MenuItem>
         <MenuDivider />
         <MenuGroup>
-          <MenuItem color={`mode.${colorMode}.text`}>Docs</MenuItem>
-          <MenuItem color={`mode.${colorMode}.text`}>Support</MenuItem>
+          <MenuItem color={`mode.${colorMode}.text`}>
+            <Link href="/docs">Docs</Link>
+          </MenuItem>
+          <MenuItem color={`mode.${colorMode}.text`}>
+            <Link href="/support">Support</Link>
+          </MenuItem>
           <MenuItem
             aria-label={`Switch to ${
               colorMode === "light" ? "dark" : "light"
@@ -68,7 +72,9 @@ const ProjectSettings = () => {
             <Icon name={colorMode === "light" ? "moon" : "sun"} mr={2} />
             {colorMode === "light" ? "Dark mode" : "Light mode"}
           </MenuItem>
-          <MenuItem color={`mode.${colorMode}.text`}>Log out</MenuItem>
+          <MenuItem color={`mode.${colorMode}.text`}>
+            <Link href="/log-out">Log out</Link>
+          </MenuItem>
         </MenuGroup>
       </MenuList>
     </Menu>
