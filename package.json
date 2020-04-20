@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "deploy": "npm run build && npm run export"
   },
   "dependencies": {
     "@chakra-ui/core": "^0.7.0",
