@@ -35,7 +35,11 @@ const ProjectSettings = () => {
         </Text>
         <Icon name="chevron-down" mr={2} color={`mode.${colorMode}.text`} />
       </MenuButton>
-      <MenuList border="none">
+      <MenuList
+        border="none"
+        placement="bottom-end"
+        backgroundColor={`mode.${colorMode}.background`}
+      >
         <MenuOptionGroup
           defaultValue="Web app"
           title="Project repo"
