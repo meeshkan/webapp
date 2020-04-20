@@ -26,7 +26,7 @@ const Settings = () => {
 
       <Stack isInline my={2}>
         <Text color={`mode.${colorMode}.text`}>Current plan:</Text>
-        <Link href="/">
+        <Link href="/sdf">
           <Text
             color={`mode.${colorMode}.title`}
             cursor="pointer"
