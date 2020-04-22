@@ -14,9 +14,6 @@ import {
   Icon,
 } from "@chakra-ui/core";
 import Link from "next/link";
-// import { Query } from "react-apollo";
-// import gql from "graphql-tag";
-// import PropTypes from "prop-types";
 
 const ProjectSettings = () => {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -58,21 +55,12 @@ const ProjectSettings = () => {
             </MenuItemOption>
           </MenuOptionGroup>
           <MenuItem color={`mode.${colorMode}.text`}>
-            <Icon name="external-link" mr={3} />
-            Authorize another
+            <a href="https://github.com/apps/meeshkan/installations/new">
+              Authorize another
+            </a>
           </MenuItem>
           <MenuDivider />
-          <MenuGroup>
-            <MenuItem color={`mode.${colorMode}.text`}>
-              <Link href="/docs">
-                <a>Docs</a>
-              </Link>
-            </MenuItem>
-            <MenuItem color={`mode.${colorMode}.text`}>
-              <Link href="/support">
-                <a>Support</a>
-              </Link>
-            </MenuItem>
+          <MenuGroup title="Other" color={`mode.${colorMode}.title`}>
             <MenuItem
               aria-label={`Switch to ${
                 colorMode === "light" ? "dark" : "light"
@@ -85,7 +73,12 @@ const ProjectSettings = () => {
               {colorMode === "light" ? "Dark mode" : "Light mode"}
             </MenuItem>
             <MenuItem color={`mode.${colorMode}.text`}>
-              <Link href="/log-out">
+              <Link href="/docs">
+                <a>Docs</a>
+              </Link>
+            </MenuItem>
+            <MenuItem color={`mode.${colorMode}.text`}>
+              <Link href="/api/logout">
                 <a>Log out</a>
               </Link>
             </MenuItem>

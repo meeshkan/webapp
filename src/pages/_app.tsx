@@ -3,6 +3,7 @@ import { ThemeProvider, CSSReset, ColorModeProvider } from "@chakra-ui/core";
 import customTheme from "../theme";
 import Navigation from "../components/organisms/navigation";
 import Head from "next/head";
+import Layout from "../components/layout";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -14,8 +15,10 @@ function MyApp({ Component, pageProps }: AppProps) {
       <ThemeProvider theme={customTheme}>
         <CSSReset />
         <ColorModeProvider>
-          <Navigation />
-          <Component {...pageProps} />
+          <Layout>
+            <Navigation />
+            <Component {...pageProps} />
+          </Layout>
         </ColorModeProvider>
       </ThemeProvider>
     </>

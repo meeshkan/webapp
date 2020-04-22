@@ -1,32 +1,68 @@
 import React from "react";
-import {} from "@chakra-ui/core";
+import {
+  Heading,
+  Box,
+  Button,
+  useColorMode,
+  Grid,
+  Skeleton,
+} from "@chakra-ui/core";
 import { useFetchUser } from "../utils/user";
-import Layout from "../components/layout";
-import Link from "next/link";
+import { useRouter } from "next/router";
+
+// cards
+import Settings from "../components/Dashboard/settings";
+import Production from "../components/Dashboard/production";
+import Branch from "../components/Dashboard/branch";
+import Chart from "../components/Dashboard/chart";
 
 export default function Home() {
+  const { colorMode } = useColorMode();
   const { user, loading } = useFetchUser();
+  const router = useRouter();
 
   return (
-    // @ts-ignore
-    <Layout user={user}>
-      {!loading && (
-        <section>
-          {!user && (
-            <p>
-              <a href="/api/login">Login</a>
-            </p>
-          )}
-          {user && (
-            <div>
-              <Link href="/dashboard">
-                <a>Dashboard</a>
-              </Link>
-              <a href="/api/logout">Logout</a>
-            </div>
-          )}
-        </section>
+    <>
+      {!user && (
+        <Box as="section" my={12}>
+          <Heading
+            as="h2"
+            color={`mode.${colorMode}.title`}
+            textAlign="center"
+            mb={4}
+          >
+            Sign in to start using Meeshkan
+          </Heading>
+          <Button
+            d="flex"
+            my={4}
+            mx="auto"
+            rounded="sm"
+            fontWeight="900"
+            variantColor="red"
+            onClick={() => router.push("/api/login")}
+          >
+            Sign in / Sign up
+          </Button>
+        </Box>
       )}
-    </Layout>
+      {user && (
+        <Grid
+          templateColumns="repeat(3, 1fr)"
+          templateRows="repeat(2, 1fr)"
+          gap={8}
+          // pos="fixed"
+          // bottom={8}
+          // right={8}
+          // left={8}
+          // top={128}
+        >
+          <Settings loading={!loading} />
+          <Production />
+          <Branch />
+          <Chart />
+        </Grid>
+      )}
+    </>
   );
 }
