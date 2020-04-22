@@ -1,0 +1,5 @@
+{
+  "sideEffects": false,
+  "module": "../es/Skeleton/index.js",
+  "typings": "index.d.ts"
+}

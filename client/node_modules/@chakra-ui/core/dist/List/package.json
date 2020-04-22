@@ -1,0 +1,5 @@
+{
+  "sideEffects": false,
+  "module": "../es/List/index.js",
+  "typings": "index.d.ts"
+}

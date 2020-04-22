@@ -1,0 +1,5 @@
+{
+  "sideEffects": false,
+  "module": "../es/Tooltip/index.js",
+  "typings": "index.d.ts"
+}

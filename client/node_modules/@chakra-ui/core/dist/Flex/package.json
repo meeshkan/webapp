@@ -1,0 +1,5 @@
+{
+  "sideEffects": false,
+  "module": "../es/Flex/index.js",
+  "typings": "index.d.ts"
+}

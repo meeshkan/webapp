@@ -1,0 +1,5 @@
+{
+  "sideEffects": false,
+  "module": "../es/FormControl/index.js",
+  "typings": "index.d.ts"
+}

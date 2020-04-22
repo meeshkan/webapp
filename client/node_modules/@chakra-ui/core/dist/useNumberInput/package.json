@@ -1,0 +1,5 @@
+{
+  "sideEffects": false,
+  "module": "../es/useNumberInput/index.js",
+  "typings": "index.d.ts"
+}

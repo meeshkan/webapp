@@ -1,0 +1,5 @@
+{
+  "sideEffects": false,
+  "module": "../es/Divider/index.js",
+  "typings": "index.d.ts"
+}

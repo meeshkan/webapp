@@ -1,0 +1,5 @@
+{
+  "sideEffects": false,
+  "module": "../es/CircularProgress/index.js",
+  "typings": "index.d.ts"
+}

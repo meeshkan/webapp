@@ -1,0 +1,5 @@
+{
+  "sideEffects": false,
+  "module": "../es/Stat/index.js",
+  "typings": "index.d.ts"
+}

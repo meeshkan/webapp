@@ -1,0 +1,5 @@
+{
+  "sideEffects": false,
+  "module": "../es/Toast/index.js",
+  "typings": "index.d.ts"
+}

@@ -1,0 +1,5 @@
+{
+  "sideEffects": false,
+  "module": "../es/useDisclosure/index.js",
+  "typings": "index.d.ts"
+}

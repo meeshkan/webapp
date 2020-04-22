@@ -1,0 +1,5 @@
+{
+  "sideEffects": false,
+  "module": "../es/Switch/index.js",
+  "typings": "index.d.ts"
+}

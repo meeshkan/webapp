@@ -1,0 +1,5 @@
+{
+  "sideEffects": false,
+  "module": "../es/FormErrorMessage/index.js",
+  "typings": "index.d.ts"
+}

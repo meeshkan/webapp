@@ -1,0 +1,5 @@
+{
+  "sideEffects": false,
+  "module": "../es/Popover/index.js",
+  "typings": "index.d.ts"
+}
