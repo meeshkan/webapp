@@ -1,5 +1,0 @@
-{
-  "sideEffects": false,
-  "module": "../es/Drawer/index.js",
-  "typings": "index.d.ts"
-}

@@ -1,5 +1,0 @@
-{
-  "sideEffects": false,
-  "module": "../es/Kbd/index.js",
-  "typings": "index.d.ts"
-}

@@ -1,5 +1,0 @@
-{
-  "sideEffects": false,
-  "module": "../es/Callout/index.js",
-  "typings": "index.d.ts"
-}

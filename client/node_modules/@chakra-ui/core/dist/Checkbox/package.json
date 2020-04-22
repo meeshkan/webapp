@@ -1,5 +1,0 @@
-{
-  "sideEffects": false,
-  "module": "../es/Checkbox/index.js",
-  "typings": "index.d.ts"
-}

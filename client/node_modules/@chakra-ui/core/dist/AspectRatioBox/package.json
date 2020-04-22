@@ -1,5 +1,0 @@
-{
-  "sideEffects": false,
-  "module": "../es/AspectRatioBox/index.js",
-  "typings": "index.d.ts"
-}

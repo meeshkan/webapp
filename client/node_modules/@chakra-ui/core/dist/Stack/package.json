@@ -1,5 +1,0 @@
-{
-  "sideEffects": false,
-  "module": "../es/Stack/index.js",
-  "typings": "index.d.ts"
-}

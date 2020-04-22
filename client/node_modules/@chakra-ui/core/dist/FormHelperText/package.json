@@ -1,5 +1,0 @@
-{
-  "sideEffects": false,
-  "module": "../es/FormHelperText/index.js",
-  "typings": "index.d.ts"
-}

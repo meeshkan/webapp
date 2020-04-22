@@ -1,5 +1,0 @@
-{
-  "sideEffects": false,
-  "module": "../es/ControlBox/index.js",
-  "typings": "index.d.ts"
-}

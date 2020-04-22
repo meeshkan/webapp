@@ -1,5 +1,0 @@
-{
-  "sideEffects": false,
-  "module": "../es/useClipboard/index.js",
-  "typings": "index.d.ts"
-}

@@ -1,5 +1,0 @@
-{
-  "sideEffects": false,
-  "module": "../es/usePrevious/index.js",
-  "typings": "index.d.ts"
-}

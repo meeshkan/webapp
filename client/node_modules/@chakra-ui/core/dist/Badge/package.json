@@ -1,5 +1,0 @@
-{
-  "sideEffects": false,
-  "module": "../es/Badge/index.js",
-  "typings": "index.d.ts"
-}

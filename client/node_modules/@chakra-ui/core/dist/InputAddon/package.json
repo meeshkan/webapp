@@ -1,5 +1,0 @@
-{
-  "sideEffects": false,
-  "module": "../es/InputAddon/index.js",
-  "typings": "index.d.ts"
-}
