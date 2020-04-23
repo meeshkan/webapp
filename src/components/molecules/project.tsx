@@ -14,9 +14,12 @@ import {
   Icon,
 } from "@chakra-ui/core";
 import Link from "next/link";
+import { useFetchUser } from "../../utils/user";
 
 const ProjectSettings = () => {
   const { colorMode, toggleColorMode } = useColorMode();
+  const { user } = useFetchUser();
+
   return (
     <>
       <Menu closeOnSelect={false}>
@@ -26,21 +29,35 @@ const ProjectSettings = () => {
           backgroundColor={`mode.${colorMode}.background`}
         >
           <Image
-            src="https://media.graphcms.com/GFjpdH7nTwSWUMaHn6HY"
+            src={user.picture}
             size={10}
             roundedLeft="sm"
             borderColor={`mode.${colorMode}.background`}
           />
           <Text ml={2} mr={8} color={`mode.${colorMode}.text`}>
-            Web app
+            {user.nickname}
           </Text>
           <Icon name="chevron-down" mr={2} color={`mode.${colorMode}.text`} />
         </MenuButton>
         <MenuList
           border="none"
           placement="bottom-end"
-          backgroundColor={`mode.${colorMode}.background`}
+          backgroundColor={`mode.${colorMode}.card`}
         >
+          <MenuGroup title="Settings" color={`mode.${colorMode}.title`}>
+            <MenuItem
+              aria-label={`Switch to ${
+                colorMode === "light" ? "dark" : "light"
+              } mode`}
+              color={`mode.${colorMode}.text`}
+              onClick={toggleColorMode}
+              transition="all 0.2s"
+            >
+              <Icon name={colorMode === "light" ? "moon" : "sun"} mr={2} />
+              {colorMode === "light" ? "Dark mode" : "Light mode"}
+            </MenuItem>
+          </MenuGroup>
+          <MenuDivider />
           <MenuOptionGroup
             defaultValue="Web app"
             title="Project repo"
@@ -61,17 +78,6 @@ const ProjectSettings = () => {
           </MenuItem>
           <MenuDivider />
           <MenuGroup title="Other" color={`mode.${colorMode}.title`}>
-            <MenuItem
-              aria-label={`Switch to ${
-                colorMode === "light" ? "dark" : "light"
-              } mode`}
-              color={`mode.${colorMode}.text`}
-              onClick={toggleColorMode}
-              transition="all 0.2s"
-            >
-              <Icon name={colorMode === "light" ? "moon" : "sun"} mr={2} />
-              {colorMode === "light" ? "Dark mode" : "Light mode"}
-            </MenuItem>
             <MenuItem color={`mode.${colorMode}.text`}>
               <Link href="/docs">
                 <a>Docs</a>
