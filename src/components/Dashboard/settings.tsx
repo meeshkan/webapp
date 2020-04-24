@@ -26,27 +26,31 @@ const Settings = () => {
 
       <Stack isInline my={2}>
         <Text color={`mode.${colorMode}.text`}>Current plan:</Text>
-        <Link href="/">
-          <Text
-            color={`mode.${colorMode}.title`}
-            cursor="pointer"
-            fontWeight={600}
-          >
-            Pro
-          </Text>
+        <Link href="/sdf">
+          <a>
+            <Text
+              color={`mode.${colorMode}.title`}
+              cursor="pointer"
+              fontWeight={600}
+            >
+              Pro
+            </Text>
+          </a>
         </Link>
       </Stack>
 
       <Stack isInline my={2}>
         <Text color={`mode.${colorMode}.text`}>Configuration:</Text>
         <Link href="/settings">
-          <Text
-            color={`mode.${colorMode}.title`}
-            cursor="pointer"
-            fontWeight={600}
-          >
-            Strict
-          </Text>
+          <a>
+            <Text
+              color={`mode.${colorMode}.title`}
+              cursor="pointer"
+              fontWeight={600}
+            >
+              Strict
+            </Text>
+          </a>
         </Link>
       </Stack>
     </Card>

@@ -41,24 +41,26 @@ const Card = ({ children, gridArea, heading, pageLink }: CardProps) => {
           color={`mode.${colorMode}.title`}
           _hover={{ color: `mode.${colorMode}.titleHover` }}
         >
-          <Stack
-            isInline
-            justify="space-between"
-            borderBottom="1px solid"
-            borderColor={`mode.${colorMode}.icon`}
-          >
-            <Heading
-              as="h2"
-              fontSize="normal"
-              letterSpacing="wide"
-              lineHeight="normal"
-              fontWeight={800}
-              mb={2}
+          <a>
+            <Stack
+              isInline
+              justify="space-between"
+              borderBottom="1px solid"
+              borderColor={`mode.${colorMode}.icon`}
             >
-              {heading}
-            </Heading>
-            <Icon name="arrow-forward" />
-          </Stack>
+              <Heading
+                as="h2"
+                fontSize="normal"
+                letterSpacing="wide"
+                lineHeight="normal"
+                fontWeight={800}
+                mb={2}
+              >
+                {heading}
+              </Heading>
+              <Icon name="arrow-forward" />
+            </Stack>
+          </a>
         </Link>
       ) : (
         <Box>

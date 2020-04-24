@@ -2,7 +2,7 @@ import React from "react";
 import { Stack, useColorMode } from "@chakra-ui/core";
 import customTheme from "../theme";
 
-const Layout = ({ children }) => {
+export default function Layout({ children }) {
   const { colorMode } = useColorMode();
   const brandColorTheme = customTheme.colors.mode[colorMode];
   return (
@@ -15,6 +15,4 @@ const Layout = ({ children }) => {
       {children}
     </Stack>
   );
-};
-
-export default Layout;
+}

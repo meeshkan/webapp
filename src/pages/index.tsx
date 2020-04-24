@@ -1,30 +1,20 @@
 import React from "react";
-import { Grid } from "@chakra-ui/core";
+import { useColorMode, Text, Skeleton } from "@chakra-ui/core";
+import { useFetchUser } from "../utils/user";
 
-// Cards
-import Settings from "../components/Dashboard/settings";
-import Production from "../components/Dashboard/production";
-import Branch from "../components/Dashboard/branch";
-import Chart from "../components/Dashboard/chart";
+export default function Home() {
+  const { colorMode } = useColorMode();
+  const { user, loading } = useFetchUser();
 
-function Dashboard() {
   return (
-    <Grid
-      templateColumns="repeat(3, 1fr)"
-      templateRows="repeat(2, 1fr)"
-      gap={8}
-      // pos="fixed"
-      // bottom={8}
-      // right={8}
-      // left={8}
-      // top={128}
-    >
-      <Settings />
-      <Production />
-      <Branch />
-      <Chart />
-    </Grid>
+    <>
+      {user && (
+        <Skeleton isLoaded={!loading}>
+          <Text color={`mode.${colorMode}.text`}>
+            Lets put the project picker here
+          </Text>
+        </Skeleton>
+      )}
+    </>
   );
 }
-
-export default Dashboard;
