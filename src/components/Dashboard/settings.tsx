@@ -9,7 +9,7 @@ const Settings = () => {
     <Card
       gridArea="1 / 1 / 2 / 2"
       heading="Project details"
-      pageLink="/settings"
+      headingLink="/settings"
     >
       <Stack isInline my={2}>
         <Text color={`mode.${colorMode}.text`}>Repository:</Text>

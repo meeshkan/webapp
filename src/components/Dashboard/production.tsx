@@ -7,7 +7,7 @@ const Production = () => {
     <Card
       gridArea="1 / 2 / 2 / 3"
       heading="Production tests"
-      pageLink="/production"
+      headingLink="/production"
     >
       <Test
         branchName="master@HEAD"

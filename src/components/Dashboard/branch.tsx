@@ -63,7 +63,7 @@ const branchTests = [
 
 const Branch = () => {
   return (
-    <Card gridArea="1 / 3 / 3 / 4" heading="Branch tests" pageLink="/branch">
+    <Card gridArea="1 / 3 / 3 / 4" heading="Branch tests" headingLink="/branch">
       {branchTests.map((test) => (
         <Test branchName={test.name} date={test.date} status={test.status} />
       ))}
