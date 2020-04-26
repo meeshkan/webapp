@@ -5,8 +5,7 @@ import {
   MenuList,
   MenuItem,
   MenuGroup,
-  MenuOptionGroup,
-  MenuItemOption,
+  Link as ChakraLink,
   MenuDivider,
   useColorMode,
   Image,
@@ -15,6 +14,7 @@ import {
 } from "@chakra-ui/core";
 import Link from "next/link";
 import { useFetchUser } from "../../utils/user";
+import { repos } from "../../data/repoQuery";
 
 const ProjectSettings = () => {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -58,23 +58,35 @@ const ProjectSettings = () => {
             </MenuItem>
           </MenuGroup>
           <MenuDivider />
-          <MenuOptionGroup
+          <MenuGroup
             defaultValue="Web app"
             title="Project repo"
-            type="radio"
             color={`mode.${colorMode}.title`}
           >
-            <MenuItemOption color={`mode.${colorMode}.text`} value="Web app">
-              Web app
-            </MenuItemOption>
-            <MenuItemOption color={`mode.${colorMode}.text`} value="Website">
-              Website
-            </MenuItemOption>
-          </MenuOptionGroup>
+            {repos.map((repo, index) => (
+              <Link
+                href={`/${repo.organization.toLowerCase()}-${repo.repository.toLowerCase()}/dashboard`}
+                key={index}
+              >
+                <MenuItem
+                  color={`mode.${colorMode}.text`}
+                  d="flex"
+                  alignContent="center"
+                >
+                  <Image src={repo.image} h={4} w={4} mr={2} />
+                  {repo.repository}
+                </MenuItem>
+              </Link>
+            ))}
+          </MenuGroup>
           <MenuItem color={`mode.${colorMode}.text`}>
-            <a href="https://github.com/apps/meeshkan/installations/new">
+            <ChakraLink
+              isExternal
+              href="https://github.com/apps/meeshkan/installations/new"
+            >
+              <Icon name="external-link" mr={2} />
               Authorize another
-            </a>
+            </ChakraLink>
           </MenuItem>
           <MenuDivider />
           <MenuGroup title="Other" color={`mode.${colorMode}.title`}>
