@@ -6,36 +6,11 @@ import {
   Image,
   useColorMode,
   Heading,
+  Icon,
+  Link,
 } from "@chakra-ui/core";
 import Card from "../components/molecules/card";
-
-const repos = [
-  {
-    image: "https://via.placeholder.com/40",
-    organization: "meeshkan",
-    repository: "webapp",
-  },
-  {
-    image: "https://via.placeholder.com/40",
-    organization: "willacompany",
-    repository: "mono",
-  },
-  {
-    image: "https://via.placeholder.com/40",
-    organization: "eggheadio",
-    repository: "illustrated-dev",
-  },
-  {
-    image: "https://via.placeholder.com/40",
-    organization: "chakra-ui",
-    repository: "chakra-ui",
-  },
-  {
-    image: "https://via.placeholder.com/40",
-    organization: "KenzoBenzo",
-    repository: "personal-portfolio",
-  },
-];
+import { repos } from "../data/repoQuery";
 
 export default function Home() {
   const { colorMode } = useColorMode();
@@ -44,7 +19,7 @@ export default function Home() {
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
         {repos.map((repo, index) => (
           <Card
-            link={`${repo.organization.toLowerCase()}-${repo.repository.toLowerCase()}/dashboard`}
+            link={`/${repo.organization.toLowerCase()}-${repo.repository.toLowerCase()}/dashboard`}
             key={index}
           >
             <Stack spacing={4} isInline>
@@ -55,7 +30,6 @@ export default function Home() {
                 </Text>
                 <Heading
                   as="h3"
-                  color={`mode.${colorMode}.title`}
                   lineHeight="none"
                   fontSize="md"
                   fontWeight={900}
@@ -66,6 +40,22 @@ export default function Home() {
             </Stack>
           </Card>
         ))}
+
+        <Link
+          href="https://github.com/apps/meeshkan/installations/new"
+          bg={`mode.${colorMode}.card`}
+          p={4}
+          rounded="sm"
+          color={`mode.${colorMode}.title`}
+          _hover={{ color: `mode.${colorMode}.titleHover` }}
+        >
+          <Stack spacing={4} align="center" isInline>
+            <Icon h={10} w={10} name="add" stroke="2px" />
+            <Heading as="h3" lineHeight="none" fontSize="md" fontWeight={900}>
+              Authorize a repository
+            </Heading>
+          </Stack>
+        </Link>
       </Grid>
     </>
   );

@@ -22,12 +22,17 @@ const Card = ({
 
   const handleClick = (e) => {
     e.preventDefault();
-    router.push(headingLink);
+    router.push(headingLink || link);
   };
   return (
     <>
       {link ? (
-        <Link href={link} onClick={handleClick}>
+        <Link
+          href={link}
+          onClick={handleClick}
+          color={`mode.${colorMode}.title`}
+          _hover={{ color: `mode.${colorMode}.titleHover` }}
+        >
           <Box
             bg={`mode.${colorMode}.card`}
             p={4}

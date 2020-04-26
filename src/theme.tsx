@@ -92,6 +92,17 @@ const customTheme = {
       ),
       viewBox: "0 0 149 30",
     },
+    add: {
+      path: (
+        <path
+          d="M8 12H12M12 12H16M12 12V16M12 12V8M20 12C20 16.4183 16.4183 20 12 20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4C16.4183 4 20 7.58172 20 12Z"
+          stroke="currentColor"
+          fill="none"
+          strokeLinecap="round"
+        />
+      ),
+      viewBox: "0 0 24 24",
+    },
   },
   fonts: {
     body: `Inter, sans-serif`,
