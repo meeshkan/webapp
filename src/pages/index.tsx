@@ -56,7 +56,7 @@ export default function Home({ projects }) {
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
       {projects.map(({ organizationName, organizationImage, repositoryName, index }) => (
-          <Link key={organizationName} href={`/${organizationName}/`}>
+          <Link key={organizationName} href={`/${organizationName}/${repositoryName}`}>
             <a>
           <Card key={index}>
             <Stack spacing={4} isInline>
