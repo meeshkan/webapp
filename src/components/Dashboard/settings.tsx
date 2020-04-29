@@ -19,7 +19,7 @@ const Settings = () => {
             cursor="pointer"
             fontWeight={600}
           >
-            Stripe/web-app
+            meeshkan/test-repo
           </Text>
         </ChakraLink>
       </Stack>

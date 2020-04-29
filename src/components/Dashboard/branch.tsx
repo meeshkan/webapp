@@ -5,57 +5,57 @@ import { Test, statusBadge } from "../molecules/test";
 
 const branchTests = [
   {
-    name: "master@HEAD",
+    name: "MEM-400@32sf12b",
     date: "Mar 12",
     status: statusBadge.inProgress,
   },
   {
-    name: "master@9a8d22a",
+    name: "MEM-134@9a8d22a",
     date: "Mar 11",
     status: statusBadge.success,
   },
   {
-    name: "master@759fb8b",
+    name: "MEM-213@759fb8b",
     date: "Mar 9",
     status: statusBadge.success,
   },
   {
-    name: "master@759fb8b",
+    name: "MEM-443@759fb8b",
     date: "Mar 9",
     status: statusBadge.failed,
   },
   {
-    name: "master@759fb8b",
+    name: "MEM-123@759fb8b",
     date: "Mar 9",
     status: statusBadge.failed,
   },
   {
-    name: "master@759fb8b",
+    name: "MEM-53@759fb8b",
     date: "Mar 9",
     status: statusBadge.failed,
   },
   {
-    name: "master@759fb8b",
+    name: "MEM-124@759fb8b",
     date: "Mar 9",
     status: statusBadge.failed,
   },
   {
-    name: "master@759fb8b",
+    name: "MEM-214@759fb8b",
     date: "Mar 9",
     status: statusBadge.failed,
   },
   {
-    name: "master@759fb8b",
+    name: "MEM-222@759fb8b",
     date: "Mar 9",
     status: statusBadge.failed,
   },
   {
-    name: "master@759fb8b",
+    name: "MEM-201@759fb8b",
     date: "Mar 9",
     status: statusBadge.failed,
   },
   {
-    name: "master@759fb8b",
+    name: "MEM-33@759fb8b",
     date: "Mar 9",
     status: statusBadge.failed,
   },

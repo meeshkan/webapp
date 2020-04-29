@@ -73,7 +73,7 @@ const ProjectSettings = () => {
                   d="flex"
                   alignContent="center"
                 >
-                  <Image src={repo.image} h={4} w={4} mr={2} />
+                  <Image src={`https://media.graphcms.com/${repo.image}`} h={4} w={4} mr={2} />
                   {repo.repository}
                 </MenuItem>
               </Link>
