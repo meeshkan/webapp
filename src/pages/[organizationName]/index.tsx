@@ -1,33 +1,106 @@
 import React from "react";
-import { Grid } from "@chakra-ui/core";
+import Link from 'next/link';
+import {
+  Stack,
+  Text,
+  Grid,
+  Image,
+  useColorMode,
+  Heading,
+  Icon,
+  Link as ChakraLink
+} from "@chakra-ui/core";
+import Card from "../../components/molecules/card";
+import { GraphQLClient } from "graphql-request";
 
-// cards
-import Settings from "../../components/Dashboard/settings";
-import Production from "../../components/Dashboard/production";
-import Branch from "../../components/Dashboard/branch";
-import Chart from "../../components/Dashboard/chart";
+const graphcms = new GraphQLClient(process.env.gcms);
 
-const Dashboard = () => {
-  return (
-    <>
-    <h1>Hello world!!!!!!</h1>
-    <Grid
-      templateColumns="repeat(3, 1fr)"
-      templateRows="repeat(2, 1fr)"
-      gap={8}
-      // pos="fixed"
-      // bottom={8}
-      // right={8}
-      // left={8}
-      // top={128}
-    >
-      <Settings />
-      <Production />
-      <Branch />
-      <Chart />
-    </Grid>
-    </>
+export async function getStaticProps({ paths }) {
+  const { organizationProjects } = await graphcms.request(
+    `
+    query OrganizationPageQuery($organizationName: String) {
+      projects(where: { organizationName: $organizationName }) {
+        organizationName
+        organizationImage {
+          handle
+        }
+        repositoryName
+      }
+    }
+  `,
+  {
+    organizationName: paths.organizationName,
+  }
   );
-};
 
-export default Dashboard;
+  return {
+    props: {
+      organizationProjects
+    }
+  }
+}
+
+export async function getStaticPaths() {
+  const { projects } = await graphcms.request(
+    `
+     {
+        projects {
+          organizationName
+          organizationImage {
+            handle
+          }
+          repositoryName
+        }
+      }
+  `
+  );
+
+  return {
+    paths: projects.map(({ organizationName }) => ({
+      params: { organizationName },
+    })),
+    fallback: false,
+  };
+}
+
+export default function ({ organizationProjects }) {
+  const { colorMode } = useColorMode();
+  console.log(organizationProjects)
+  return(
+    <>
+      <Grid templateColumns="repeat(4, 1fr)" gap={6}>
+      {organizationProjects.map(({ organizationName, organizationImage, repositoryName, index }) => (
+          <Link key={organizationName} href={`/${organizationName}/${repositoryName}`}>
+            <a>
+          <Card key={index}>
+            <Stack spacing={4} isInline>
+              <Image
+                size={10}
+                src={`https://media.graphcms.com/${organizationImage.handle}`}
+                bg="gray.50"
+                border="1px solid"
+                borderColor={`mode.${colorMode}.icon`}
+                rounded="sm"
+              />
+              <Stack spacing={2}>
+                <Text color={`mode.${colorMode}.text`} lineHeight="none">
+                  {organizationName}
+                </Text>
+                <Heading
+                  as="h3"
+                  lineHeight="none"
+                  fontSize="md"
+                  fontWeight={900}
+                >
+                  {repositoryName}
+                </Heading>
+              </Stack>
+            </Stack>
+          </Card>
+          </a>
+          </Link>
+        ))}
+      </Grid>
+    </>
+  )
+} 
