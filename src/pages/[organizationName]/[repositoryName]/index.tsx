@@ -48,7 +48,21 @@ export async function getServerSideProps(context) {
 }
 
 const Dashboard = ( props ) => {
-  console.log(props.currentRepository[0])
+  const tests = props.currentRepository[0].tests;
+  console.log('PRESORTED TESTS', tests)
+  
+  let branchTests = []
+  let productionTests = []
+  tests.forEach((test) => {
+    if (test.testType === "master") {
+      productionTests.push(test)
+    } else {
+      branchTests.push(test)
+    }
+  })
+  console.log('ARRAY OF BRANCH TESTS', branchTests)
+  console.log('ARRAY OF PRODUCTION TESTS', productionTests)
+
   return (
     <>
     <h1>We made it to the repo page! You're so smart.</h1>
@@ -60,8 +74,8 @@ const Dashboard = ( props ) => {
       <Settings
         repositoryName={props.currentRepository[0].repositoryName}
       />
-      <Production />
-      <Branch />
+      <Production tests={productionTests} />
+      <Branch tests={branchTests} />
       <Chart />
     </Grid>
     </>

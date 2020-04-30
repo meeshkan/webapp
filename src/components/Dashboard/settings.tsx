@@ -5,7 +5,6 @@ import Link from "next/link";
 
 const Settings = ({repositoryName}) => {
   const { colorMode } = useColorMode();
-  console.log(repositoryName)
   return (
     <Card
       gridArea="1 / 1 / 2 / 2"

@@ -1,34 +1,14 @@
 import React from "react";
 import Card from "../molecules/card";
-import { Test, statusBadge } from "../molecules/test";
+import { Test } from "../molecules/test";
 
-const Production = () => {
+const Production = ({ tests }) => {
+   console.log('Production tests', tests)
   return (
-    <Card
-      gridArea="1 / 2 / 2 / 3"
-      heading="Production tests"
-      headingLink="/production"
-    >
-      <Test
-        branchName="master@HEAD"
-        date="Mar 12"
-        status={statusBadge.inProgress}
-      />
-      <Test
-        branchName="master@9a8d22a"
-        date="Mar 11"
-        status={statusBadge.failed}
-      />
-      <Test
-        branchName="master@759fb8b"
-        date="Mar 9"
-        status={statusBadge.success}
-      />
-      <Test
-        branchName="master@759fb8b"
-        date="Mar 9"
-        status={statusBadge.failed}
-      />
+    <Card gridArea="1 / 3 / 3 / 4" heading="Production tests" headingLink="/production">
+        {tests.map((test, index) => (
+        <Test key={index} id={test.id} branchName={test.branchName} date={test.testDate} status={test.testStatus} />
+      ))}
     </Card>
   );
 };

@@ -1,19 +1,14 @@
 import React from "react";
 import { Stack, Text, Badge, Box, useColorMode } from "@chakra-ui/core";
 
-export enum statusBadge {
-  inProgress = "In Progress",
-  success = "Success",
-  failed = "Failed",
-}
-
 type TestProps = {
   branchName: string;
   date: string;
-  status: statusBadge;
+  status: string;
+  id: string;
 };
 
-export const Test = ({ branchName, date, status }: TestProps) => {
+export const Test = ({ branchName, date, id, status }: TestProps) => {
   const { colorMode } = useColorMode();
   return (
     <Box my={3} borderBottom="1px solid" borderColor={`mode.${colorMode}.icon`}>
@@ -23,15 +18,15 @@ export const Test = ({ branchName, date, status }: TestProps) => {
           lineHeight="normal"
           color={`mode.${colorMode}.title`}
         >
-          {branchName}
+          {branchName}@{id}
         </Text>
         <Badge
           variantColor={
-            status === "In Progress"
+            status === "inProgress"
               ? "yellow"
-              : status === "Success"
+              : status === "success"
               ? "cyan"
-              : status === "Failed"
+              : status === "failed"
               ? "red"
               : null
           }
