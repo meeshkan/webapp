@@ -5,10 +5,9 @@ type TestProps = {
   branchName: string;
   date: string;
   status: string;
-  id: string;
 };
 
-export const Test = ({ branchName, date, id, status }: TestProps) => {
+export const Test = ({ branchName, date, status }: TestProps) => {
   const { colorMode } = useColorMode();
   return (
     <Box my={3} borderBottom="1px solid" borderColor={`mode.${colorMode}.icon`}>
@@ -18,7 +17,7 @@ export const Test = ({ branchName, date, id, status }: TestProps) => {
           lineHeight="normal"
           color={`mode.${colorMode}.title`}
         >
-          {branchName}@{id}
+          {branchName}
         </Text>
         <Badge
           variantColor={

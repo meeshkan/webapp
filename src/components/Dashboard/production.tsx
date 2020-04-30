@@ -7,7 +7,7 @@ const Production = ({ tests }) => {
   return (
     <Card gridArea="1 / 3 / 3 / 4" heading="Production tests" headingLink="/production">
         {tests.map((test, index) => (
-        <Test key={index} id={test.id} branchName={test.branchName} date={test.testDate} status={test.testStatus} />
+        <Test key={index} branchName={test.branchName} date={test.testDate} status={test.testStatus} />
       ))}
     </Card>
   );
