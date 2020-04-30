@@ -11,7 +11,7 @@ const Branch = ({ tests }: BranchProps) => {
   const { colorMode } = useColorMode();
   return (
     <Card gridArea="1 / 3 / 3 / 4" heading="Branch tests" headingLink="/branch">
-      { tests.length === 0 ?
+      { !tests.length ?
         <Text mt={2} color={`mode.${colorMode}.text`}>
           You haven't done any branch tests yet.
         </Text>

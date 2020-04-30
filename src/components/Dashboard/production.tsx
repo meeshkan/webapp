@@ -11,7 +11,7 @@ const Production = ({ tests }: ProductionProps) => {
   const { colorMode } = useColorMode();
   return (
     <Card gridArea="1 / 2 / 2 / 3" heading="Production tests" headingLink="/production">
-      { tests.length === 0 ?
+      { !tests.length ?
         <Text mt={2} color={`mode.${colorMode}.text`}>
           You haven't done any production tests yet.
         </Text>
