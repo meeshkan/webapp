@@ -13,6 +13,10 @@ import {
 import Card from "../components/molecules/card";
 import { GraphQLClient } from "graphql-request";
 
+type HomeProps = {
+  projects: Array<any>;
+};
+
 const graphcms = new GraphQLClient(process.env.gcms);
 
 export async function getStaticProps() {
@@ -49,13 +53,13 @@ export async function getStaticProps() {
   };
 }
 
-export default function Home({ projects }) {
+export default function Home({ projects }: HomeProps) {
   const { colorMode } = useColorMode();
   return(
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
       {projects.map(({ organizationName, organizationImage, repositoryName, index }) => (
-          <Link key={organizationName} href={`/${organizationName}/${repositoryName}`}>
+          <Link key={repositoryName} href={`/${organizationName}/${repositoryName}`}>
             <a>
           <Card key={index}>
             <Stack spacing={4} isInline>

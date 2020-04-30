@@ -9,6 +9,10 @@ import Chart from "../../../components/Dashboard/chart";
 
 import { GraphQLClient } from "graphql-request";
 
+type DashboardProps = {
+  currentRepository: Array<any>;
+};
+
 const graphcms = new GraphQLClient(process.env.gcms);
 
 export async function getServerSideProps(context) {
@@ -47,7 +51,7 @@ export async function getServerSideProps(context) {
   }
 }
 
-const Dashboard = ( props ) => {
+const Dashboard = ( props: DashboardProps ) => {
   const tests = props.currentRepository[0].tests;
   
   let branchTests = []

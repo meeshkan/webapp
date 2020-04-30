@@ -3,7 +3,11 @@ import { Text, Stack, useColorMode, Link as ChakraLink } from "@chakra-ui/core";
 import Card from "../molecules/card";
 import Link from "next/link";
 
-const Settings = ({repositoryName}) => {
+type SettingsProps = {
+  repositoryName: string;
+};
+
+const Settings = ({ repositoryName }: SettingsProps) => {
   const { colorMode } = useColorMode();
   return (
     <Card
