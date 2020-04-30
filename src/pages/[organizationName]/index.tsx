@@ -15,61 +15,45 @@ import { GraphQLClient } from "graphql-request";
 
 const graphcms = new GraphQLClient(process.env.gcms);
 
-export async function getStaticProps({ paths }) {
-  const { organizationProjects } = await graphcms.request(
-    `
-    query OrganizationPageQuery($organizationName: String) {
-      projects(where: { organizationName: $organizationName }) {
-        organizationName
-        organizationImage {
-          handle
-        }
-        repositoryName
+export async function getServerSideProps(context) {
+  const {
+    params: { organizationName }
+  } = context;
+
+  const query = `
+  query OrganizationPageQuery($organizationName: String) {
+    projects(where: { organizationName: $organizationName }) {
+      organizationName
+      organizationImage {
+        handle
       }
+      repositoryName
     }
-  `,
-  {
-    organizationName: paths.organizationName,
   }
-  );
+`
+
+  const request = await graphcms.request(query, {
+    organizationName: organizationName
+  });
+
+  let { projects } = request;
+
+  console.log(request)
 
   return {
     props: {
-      organizationProjects
+      projects
     }
   }
 }
 
-export async function getStaticPaths() {
-  const { projects } = await graphcms.request(
-    `
-     {
-        projects {
-          organizationName
-          organizationImage {
-            handle
-          }
-          repositoryName
-        }
-      }
-  `
-  );
-
-  return {
-    paths: projects.map(({ organizationName }) => ({
-      params: { organizationName },
-    })),
-    fallback: false,
-  };
-}
-
-export default function ({ organizationProjects }) {
+export default function ({ projects }) {
   const { colorMode } = useColorMode();
-  console.log(organizationProjects)
+  console.log(projects)
   return(
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
-      {organizationProjects.map(({ organizationName, organizationImage, repositoryName, index }) => (
+      {projects.map(({ organizationName, organizationImage, repositoryName, index }) => (
           <Link key={organizationName} href={`/${organizationName}/${repositoryName}`}>
             <a>
           <Card key={index}>

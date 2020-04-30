@@ -11,7 +11,7 @@ import { GraphQLClient } from "graphql-request";
 
 const graphcms = new GraphQLClient(process.env.gcms);
 
-export async function getServerProps(context) {
+export async function getServerSideProps(context) {
   const {
     params: { repositoryName }
   } = context;
@@ -47,17 +47,19 @@ export async function getServerProps(context) {
   }
 }
 
-const Dashboard = ({ currentRepository }) => {
-  console.log(currentRepository)
+const Dashboard = ( props ) => {
+  console.log(props.currentRepository[0])
   return (
     <>
-    <h1>{currentRepository}</h1>
+    <h1>We made it to the repo page! You're so smart.</h1>
     <Grid
       templateColumns="repeat(3, 1fr)"
       templateRows="repeat(2, 1fr)"
       gap={8}
     >
-      <Settings />
+      <Settings
+        repositoryName={props.currentRepository[0].repositoryName}
+      />
       <Production />
       <Branch />
       <Chart />

@@ -3,8 +3,9 @@ import { Text, Stack, useColorMode, Link as ChakraLink } from "@chakra-ui/core";
 import Card from "../molecules/card";
 import Link from "next/link";
 
-const Settings = () => {
+const Settings = ({repositoryName}) => {
   const { colorMode } = useColorMode();
+  console.log(repositoryName)
   return (
     <Card
       gridArea="1 / 1 / 2 / 2"
@@ -19,7 +20,7 @@ const Settings = () => {
             cursor="pointer"
             fontWeight={600}
           >
-            meeshkan/test-repo
+            {repositoryName}
           </Text>
         </ChakraLink>
       </Stack>
