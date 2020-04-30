@@ -49,7 +49,6 @@ export async function getServerSideProps(context) {
 
 const Dashboard = ( props ) => {
   const tests = props.currentRepository[0].tests;
-  console.log('PRESORTED TESTS', tests)
   
   let branchTests = []
   let productionTests = []
@@ -60,12 +59,9 @@ const Dashboard = ( props ) => {
       branchTests.push(test)
     }
   })
-  console.log('ARRAY OF BRANCH TESTS', branchTests)
-  console.log('ARRAY OF PRODUCTION TESTS', productionTests)
 
   return (
     <>
-    <h1>We made it to the repo page! You're so smart.</h1>
     <Grid
       templateColumns="repeat(3, 1fr)"
       templateRows="repeat(2, 1fr)"
