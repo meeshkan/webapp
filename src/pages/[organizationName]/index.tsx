@@ -38,8 +38,6 @@ export async function getServerSideProps(context) {
 
   let { projects } = request;
 
-  console.log(request)
-
   return {
     props: {
       projects
@@ -49,7 +47,6 @@ export async function getServerSideProps(context) {
 
 export default function ({ projects }) {
   const { colorMode } = useColorMode();
-  console.log(projects)
   return(
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>

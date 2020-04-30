@@ -51,7 +51,6 @@ export async function getStaticProps() {
 
 export default function Home({ projects }) {
   const { colorMode } = useColorMode();
-  console.log(projects)
   return(
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>

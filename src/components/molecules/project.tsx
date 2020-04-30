@@ -65,7 +65,7 @@ const ProjectSettings = () => {
           >
             {repos.map((repo, index) => (
               <Link
-                href={`/${repo.organization.toLowerCase()}-${repo.repository.toLowerCase()}/dashboard`}
+                href={`/${repo.organization.toLowerCase()}/${repo.repository.toLowerCase()}/`}
                 key={index}
               >
                 <MenuItem
