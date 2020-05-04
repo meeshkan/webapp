@@ -4,10 +4,11 @@ import Card from "../molecules/card";
 import Link from "next/link";
 
 type SettingsProps = {
-  repositoryName: string;
+  repositoryName: String;
+  organizationName: String;
 };
 
-const Settings = ({ repositoryName }: SettingsProps) => {
+const Settings = ({ repositoryName, organizationName }: SettingsProps) => {
   const { colorMode } = useColorMode();
   return (
     <Card
@@ -23,7 +24,7 @@ const Settings = ({ repositoryName }: SettingsProps) => {
             cursor="pointer"
             fontWeight={600}
           >
-            {repositoryName}
+            {`${organizationName}/${repositoryName}`}
           </Text>
         </ChakraLink>
       </Stack>
