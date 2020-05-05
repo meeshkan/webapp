@@ -1,5 +1,5 @@
 import React from "react";
-import Link from 'next/link';
+import Link from "next/link";
 import {
   Stack,
   Text,
@@ -8,87 +8,94 @@ import {
   useColorMode,
   Heading,
   Icon,
-  Link as ChakraLink
+  Link as ChakraLink,
 } from "@chakra-ui/core";
-import Card from "../components/molecules/card";
-import { GraphQLClient } from "graphql-request";
+// import Card from "../components/molecules/card";
+// import { GraphQLClient } from "graphql-request";
+import { useFetchUser } from "../utils/user";
 
-type HomeProps = {
-  projects: Array<any>;
-};
+// type HomeProps = {
+//   projects: Array<any>;
+// };
 
-const graphcms = new GraphQLClient(process.env.gcms);
+// const graphcms = new GraphQLClient(process.env.gcms);
 
-export async function getStaticProps() {
-  const { projects } = await graphcms.request(
-    `
-    query ByUser($user: String) {
-      projects(where: {user: $user}) {
-        tests {
-          branchName
-          failureMessage
-          id
-          testDate
-          testStatus
-          testType
-        }
-        user
-        organizationName
-        organizationImage {
-          handle
-        }
-        repositoryName
-      }
-    }
-  `,
-    {
-      user: "KenzoBenzo",
-    }
-  );
+// export async function getServerSideProps() {
+//   const { projects } = await graphcms.request(
+//     `
+//     query ByUser($user: String) {
+//       projects(where: {user: $user}) {
+//         tests {
+//           branchName
+//           failureMessage
+//           id
+//           testDate
+//           testStatus
+//           testType
+//         }
+//         user
+//         organizationName
+//         organizationImage {
+//           handle
+//         }
+//         repositoryName
+//       }
+//     }
+//   `,
+//     {
+//       user: "KenzoBenzo",
+//     }
+//   );
 
-  return {
-    props: {
-      projects,
-    },
-  };
-}
+//   return {
+//     props: {
+//       projects,
+//     },
+//   };
+// }
 
-export default function Home({ projects }: HomeProps) {
+export default function Home(/*{ projects }: HomeProps*/) {
   const { colorMode } = useColorMode();
-  return(
+  const { user } = useFetchUser();
+  return (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
-      {projects.map(({ organizationName, organizationImage, repositoryName, index }) => (
-          <Link key={repositoryName} href={`/${organizationName}/${repositoryName}`}>
-            <a>
-          <Card key={index}>
-            <Stack spacing={4} isInline>
-              <Image
-                size={10}
-                src={`https://media.graphcms.com/${organizationImage.handle}`}
-                bg="gray.50"
-                border="1px solid"
-                borderColor={`mode.${colorMode}.icon`}
-                rounded="sm"
-              />
-              <Stack spacing={2}>
-                <Text color={`mode.${colorMode}.text`} lineHeight="none">
-                  {organizationName}
-                </Text>
-                <Heading
-                  as="h3"
-                  lineHeight="none"
-                  fontSize="md"
-                  fontWeight={900}
-                >
-                  {repositoryName}
-                </Heading>
-              </Stack>
-            </Stack>
-          </Card>
-          </a>
-          </Link>
-        ))}
+        {/* {projects.map(
+          ({ organizationName, organizationImage, repositoryName, index }) => (
+            <Link
+              key={repositoryName}
+              href={`/${organizationName}/${repositoryName}`}
+            >
+              <a>
+                <Card key={index}>
+                  <Stack spacing={4} isInline>
+                    <Image
+                      size={10}
+                      src={`https://media.graphcms.com/${organizationImage.handle}`}
+                      bg="gray.50"
+                      border="1px solid"
+                      borderColor={`mode.${colorMode}.icon`}
+                      rounded="sm"
+                    />
+                    <Stack spacing={2}>
+                      <Text color={`mode.${colorMode}.text`} lineHeight="none">
+                        {organizationName}
+                      </Text>
+                      <Heading
+                        as="h3"
+                        lineHeight="none"
+                        fontSize="md"
+                        fontWeight={900}
+                      >
+                        {repositoryName}
+                      </Heading>
+                    </Stack>
+                  </Stack>
+                </Card>
+              </a>
+            </Link>
+          )
+        )} */}
         <ChakraLink
           href="https://github.com/apps/meeshkan/installations/new"
           bg={`mode.${colorMode}.card`}
@@ -104,7 +111,9 @@ export default function Home({ projects }: HomeProps) {
             </Heading>
           </Stack>
         </ChakraLink>
+
+        <pre>{JSON.stringify(user, null, 2)}</pre>
       </Grid>
     </>
-  )
-} 
+  );
+}

@@ -7,77 +7,77 @@ import Production from "../../../components/Dashboard/production";
 import Branch from "../../../components/Dashboard/branch";
 import Chart from "../../../components/Dashboard/chart";
 
-import { GraphQLClient } from "graphql-request";
+// import { GraphQLClient } from "graphql-request";
 
-type DashboardProps = {
-  currentRepository: Array<any>;
-};
+// type DashboardProps = {
+//   currentRepository: Array<any>;
+// };
 
-const graphcms = new GraphQLClient(process.env.gcms);
+// const graphcms = new GraphQLClient(process.env.gcms);
 
-export async function getServerSideProps(context) {
-  const {
-    params: { repositoryName }
-  } = context;
+// export async function getServerSideProps(context) {
+//   const {
+//     params: { repositoryName }
+//   } = context;
 
-  const query = `
-    query RepositoryDataQuery($repositoryName: String) {
-      currentRepository: projects(where: {repositoryName: $repositoryName}) {
-        tests {
-          branchName
-          failureMessage
-          id
-          testDate
-          testStatus
-          testType
-        }
-        user
-        organizationName
-        repositoryName
-      }
-    }
-  `
+//   const query = `
+//     query RepositoryDataQuery($repositoryName: String) {
+//       currentRepository: projects(where: {repositoryName: $repositoryName}) {
+//         tests {
+//           branchName
+//           failureMessage
+//           id
+//           testDate
+//           testStatus
+//           testType
+//         }
+//         user
+//         organizationName
+//         repositoryName
+//       }
+//     }
+//   `
 
-  const request = await graphcms.request(query, {
-    repositoryName: repositoryName
-  });
+//   const request = await graphcms.request(query, {
+//     repositoryName: repositoryName
+//   });
 
-  let { currentRepository } = request;
+//   let { currentRepository } = request;
 
-  return {
-    props: {
-      currentRepository
-    }
-  }
-}
+//   return {
+//     props: {
+//       currentRepository
+//     }
+//   }
+// }
 
-const Dashboard = ( props: DashboardProps ) => {
-  const tests = props.currentRepository[0].tests;
-  
-  let branchTests = []
-  let productionTests = []
-  tests.forEach((test) => {
-    if (test.testType === "master") {
-      productionTests.push(test)
-    } else {
-      branchTests.push(test)
-    }
-  })
+const Dashboard = (/*props: DashboardProps*/) => {
+  // const tests = props.currentRepository[0].tests;
+
+  // let branchTests = []
+  // let productionTests = []
+  // tests.forEach((test) => {
+  //   if (test.testType === "master") {
+  //     productionTests.push(test)
+  //   } else {
+  //     branchTests.push(test)
+  //   }
+  // })
 
   return (
     <>
-    <Grid
-      templateColumns="repeat(3, 1fr)"
-      templateRows="repeat(2, 1fr)"
-      gap={8}
-    >
-      <Settings
+      <Grid
+        templateColumns="repeat(3, 1fr)"
+        templateRows="repeat(2, 1fr)"
+        gap={8}
+      >
+        {/* <Settings
         repositoryName={props.currentRepository[0].repositoryName}
       />
       <Production tests={productionTests} />
-      <Branch tests={branchTests} />
-      <Chart />
-    </Grid>
+      <Branch tests={branchTests} /> */}
+        <Chart />
+      </Grid>
     </>
   );
 };
