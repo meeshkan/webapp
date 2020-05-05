@@ -1,5 +1,6 @@
 import React from "react";
 import fetch from "isomorphic-unfetch";
+import { GraphQLClient } from 'graphql-request';
 
 // Use a global to save the user, so we don't have to fetch it again after page navigations
 let userState;
@@ -13,6 +14,26 @@ export const fetchUser = async () => {
 
   const res = await fetch("/api/me");
   userState = res.ok ? await res.json() : null;
+  if (userState !== null) {
+    // fetch the user on github
+    const ghLogin = userState.nickname;
+    const endpoint = 'https://api.github.com/graphql';
+
+    const graphQLClient = new GraphQLClient(endpoint, {
+      headers: {
+        authorization: `Bearer ${process.env.GITHUB_USER_INFO_AUTH_TOKEN}`,
+      },
+    });
+  
+    const query = `query {
+      user(login: "${ghLogin}") {
+              id
+          }
+      }`;
+
+    const data = await graphQLClient.request(query);
+    userState.node_id = data.user.id;
+  }
   return userState;
 };
 
