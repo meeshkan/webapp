@@ -60,8 +60,6 @@ export const fetchUser = async () => {
       ${projectsQuery.join('\n')}
       }`);
     userState.projects = projectsData;
-    
-
   }
   return userState;
 };
