@@ -52,6 +52,7 @@ export const fetchUser = async () => {
     const projectsQuery = gcmsData.projects.map((project, i) => `q${i}: repository(id: "${project.githubRepositoryNodeId}") {
             owner {
                 login
+                avatarUrl
             }
             id
             name
