@@ -43,14 +43,6 @@ const Navigation = () => {
           <section>
             {!user && (
               <Stack isInline spacing={4}>
-                <Button
-                  rounded="sm"
-                  fontWeight="900"
-                  variantColor="red"
-                  onClick={() => router.push("/api/login")}
-                >
-                  Sign in / Sign up
-                </Button>
                 <IconButton
                   aria-label={`Switch to ${
                     colorMode === "light" ? "dark" : "light"

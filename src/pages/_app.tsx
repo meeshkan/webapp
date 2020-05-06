@@ -52,7 +52,18 @@ function MyApp({ Component, pageProps }: AppProps) {
                     variantColor="red"
                     onClick={() => router.push("/api/login")}
                   >
-                    Sign in / Sign up
+                    Sign in
+                  </Button>
+                  <Button
+                    d="flex"
+                    my={4}
+                    mx="auto"
+                    rounded="sm"
+                    fontWeight="900"
+                    variantColor="red"
+                    onClick={() => router.push("/api/login")}
+                  >
+                    Sign up
                   </Button>
                 </Box>
               </Skeleton>
