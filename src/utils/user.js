@@ -17,22 +17,51 @@ export const fetchUser = async () => {
   if (userState !== null) {
     // fetch the user on github
     const ghLogin = userState.nickname;
-    const endpoint = 'https://api.github.com/graphql';
 
-    const graphQLClient = new GraphQLClient(endpoint, {
+    const ghGraphQLClient = new GraphQLClient('https://api.github.com/graphql', {
       headers: {
         authorization: `Bearer ${process.env.GITHUB_USER_INFO_AUTH_TOKEN}`,
       },
     });
   
-    const query = `query {
+    const ghData = await ghGraphQLClient.request(`query {
       user(login: "${ghLogin}") {
               id
           }
-      }`;
+      }`);
+    userState.node_id = ghData.user.id;
 
-    const data = await graphQLClient.request(query);
-    userState.node_id = data.user.id;
+    const gcmsGraphQLClient = new GraphQLClient('https://api.github.com/graphql', {
+      headers: {
+        authorization: `Bearer ${process.env.GRAPHCMS_QUERY_AUTH_TOKEN}`,
+      },
+    });
+
+    const gcmsData = await gcmsGraphQLClient.request(`query {
+      projects(where: {
+        user: { githubUserNodeId: "${userState.node_id}" }
+      }) {
+        githubRepositoryNodeId
+        githubOrganizationNodeId
+        organizationImage {
+          fileName
+        }
+      }
+    }`);
+    const projectsQuery = gcmsData.projects.map(project => `${githubRepositoryNodeId}: {
+        repository(id: "${githubRepositoryNodeId}") {
+            owner {
+                login
+            }
+            name
+        }
+    }`);
+    const projectsData = await ghGraphQLClient.request(`query {
+      ${projectsQuery.join('\n')}
+      }`);
+    userState.projects = projectsData;
+    
+
   }
   return userState;
 };
