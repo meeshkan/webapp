@@ -48,10 +48,12 @@ export const fetchUser = async () => {
         }
       }
     }`);
-    const projectsQuery = gcmsData.projects.map(project => `${githubRepositoryNodeId}: repository(id: "${githubRepositoryNodeId}") {
+
+    const projectsQuery = gcmsData.projects.map((project, i) => `q${i}: repository(id: "${project.githubRepositoryNodeId}") {
             owner {
                 login
             }
+            id
             name
         }`);
     const projectsData = await ghGraphQLClient.request(`query {
