@@ -59,7 +59,7 @@ export const fetchUser = async () => {
     const projectsData = await ghGraphQLClient.request(`query {
       ${projectsQuery.join('\n')}
       }`);
-    userState.projects = projectsData;
+    userState.projects = Object.values(projectsData);
   }
   return userState;
 };
