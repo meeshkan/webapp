@@ -63,21 +63,20 @@ const ProjectSettings = () => {
             title="Project repo"
             color={`mode.${colorMode}.title`}
           >
-            {repos.map((repo, index) => (
-              <Link
-                href={`/${repo.organization.toLowerCase()}-${repo.repository.toLowerCase()}/dashboard`}
-                key={index}
-              >
-                <MenuItem
-                  color={`mode.${colorMode}.text`}
-                  d="flex"
-                  alignContent="center"
-                >
-                  <Image src={repo.image} h={4} w={4} mr={2} />
-                  {repo.repository}
-                </MenuItem>
-              </Link>
-            ))}
+            {user.projects.map(
+              ({ owner: { login, avatarUrl }, name }, index) => (
+                <Link href={`/${login}/${name}`} key={index}>
+                  <MenuItem
+                    color={`mode.${colorMode}.text`}
+                    d="flex"
+                    alignContent="center"
+                  >
+                    <Image src={avatarUrl} h={4} w={4} mr={2} />
+                    {name}
+                  </MenuItem>
+                </Link>
+              )
+            )}
           </MenuGroup>
           <MenuItem color={`mode.${colorMode}.text`}>
             <ChakraLink

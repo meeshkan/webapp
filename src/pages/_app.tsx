@@ -8,6 +8,7 @@ import {
   Button,
   useColorMode,
   Skeleton,
+  Flex,
 } from "@chakra-ui/core";
 import customTheme from "../theme";
 import Navigation from "../components/organisms/navigation";
@@ -43,17 +44,25 @@ function MyApp({ Component, pageProps }: AppProps) {
                   >
                     Sign in to start using Meeshkan
                   </Heading>
-                  <Button
-                    d="flex"
-                    my={4}
-                    mx="auto"
-                    rounded="sm"
-                    fontWeight="900"
-                    variantColor="red"
-                    onClick={() => router.push("/api/login")}
-                  >
-                    Sign in / Sign up
-                  </Button>
+                  <Flex justify="center">
+                    <Button
+                      rounded="sm"
+                      mr={4}
+                      fontWeight="900"
+                      variantColor="red"
+                      onClick={() => router.push("/api/login")}
+                    >
+                      Sign in
+                    </Button>
+                    <Button
+                      rounded="sm"
+                      fontWeight="900"
+                      variantColor="red"
+                      onClick={() => router.push("/api/login")}
+                    >
+                      Sign up
+                    </Button>
+                  </Flex>
                 </Box>
               </Skeleton>
             )}
