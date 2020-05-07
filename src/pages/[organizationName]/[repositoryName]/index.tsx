@@ -58,8 +58,8 @@ const Dashboard = ({ repositoryName }) => {
         gap={8}
       >
         <Settings
-        // organizationName={organizationName}
-        // repositoryName={repositoryName}
+          // organizationName={organizationName}
+          repositoryName={repositoryName}
         />
         <Production tests={productionTests} />
         <Branch tests={branchTests} />

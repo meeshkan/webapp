@@ -65,8 +65,6 @@ export default function Home() {
             </Heading>
           </Stack>
         </ChakraLink>
-
-        {/* <pre>{JSON.stringify(user, null, 2)}</pre> */}
       </Grid>
     </>
   );

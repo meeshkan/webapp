@@ -13,42 +13,44 @@ import {
 import { useFetchUser } from "../../utils/user";
 import Card from "../../components/molecules/card";
 
-export default function OrganizationPage({organizationName}) {
+export default function OrganizationPage({ organizationName }) {
   const { colorMode } = useColorMode();
   const { user } = useFetchUser();
-  const projects = user.projects.filter(project => project.owner.login === organizationName);
+  const projects = user.projects.filter(
+    (project) => project.owner.login === organizationName
+  );
   return (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
         {projects.map(({ owner: { login, avatarUrl }, name }, index) => (
           <Link key={name} href={`/${organizationName}/${name}`}>
             <a>
-          <Card key={index}>
-            <Stack spacing={4} isInline>
-              <Image
-                size={10}
-                src={avatarUrl}
-                bg="gray.50"
-                border="1px solid"
-                borderColor={`mode.${colorMode}.icon`}
-                rounded="sm"
-              />
-              <Stack spacing={2}>
-                <Text color={`mode.${colorMode}.text`} lineHeight="none">
-                  {organizationName}
-                </Text>
-                <Heading
-                  as="h3"
-                  lineHeight="none"
-                  fontSize="md"
-                  fontWeight={900}
-                >
-                  {name}
-                </Heading>
-              </Stack>
-            </Stack>
-          </Card>
-          </a>
+              <Card key={index}>
+                <Stack spacing={4} isInline>
+                  <Image
+                    size={10}
+                    src={avatarUrl}
+                    bg="gray.50"
+                    border="1px solid"
+                    borderColor={`mode.${colorMode}.icon`}
+                    rounded="sm"
+                  />
+                  <Stack spacing={2}>
+                    <Text color={`mode.${colorMode}.text`} lineHeight="none">
+                      {organizationName}
+                    </Text>
+                    <Heading
+                      as="h3"
+                      lineHeight="none"
+                      fontSize="md"
+                      fontWeight={900}
+                    >
+                      {name}
+                    </Heading>
+                  </Stack>
+                </Stack>
+              </Card>
+            </a>
           </Link>
         ))}
         <ChakraLink

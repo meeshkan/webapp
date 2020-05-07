@@ -5,10 +5,10 @@ import Link from "next/link";
 
 type SettingsProps = {
   repositoryName: String;
-  organizationName: String;
+  // organizationName: String;
 };
 
-const Settings = (/*{ repositoryName, organizationName }: SettingsProps*/) => {
+const Settings = ({ repositoryName }: SettingsProps) => {
   const { colorMode } = useColorMode();
   return (
     <Card
@@ -18,30 +18,16 @@ const Settings = (/*{ repositoryName, organizationName }: SettingsProps*/) => {
     >
       <Stack isInline my={2}>
         <Text color={`mode.${colorMode}.text`}>Repository:</Text>
-        <ChakraLink href="/">
-          <Text
-            color={`mode.${colorMode}.title`}
-            cursor="pointer"
-            fontWeight={600}
-          >
-            UPDATE ME
-          </Text>
-        </ChakraLink>
+        <Text color={`mode.${colorMode}.title`} fontWeight={600}>
+          {repositoryName}
+        </Text>
       </Stack>
 
       <Stack isInline my={2}>
         <Text color={`mode.${colorMode}.text`}>Current plan:</Text>
-        <Link href="/sdf">
-          <a>
-            <Text
-              color={`mode.${colorMode}.title`}
-              cursor="pointer"
-              fontWeight={600}
-            >
-              Pro
-            </Text>
-          </a>
-        </Link>
+        <Text color={`mode.${colorMode}.title`} fontWeight={600}>
+          Free
+        </Text>
       </Stack>
 
       <Stack isInline my={2}>
