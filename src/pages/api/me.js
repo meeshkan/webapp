@@ -4,7 +4,7 @@ import { GraphQLClient } from 'graphql-request';
 export default async function me(req, res) {
   try {
     const session = await auth0.getSession(req);
-    if (!session.user) {
+    if (!session || !session.user) {
       res.status(400);
       res.send();
     }
