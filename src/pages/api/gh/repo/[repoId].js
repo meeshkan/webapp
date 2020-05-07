@@ -1,16 +1,13 @@
-import auth0 from '../../utils/auth0';
+import auth0 from '../../../../utils/auth0';
 import { GraphQLClient } from 'graphql-request';
 
 export default async function me(req, res) {
   try {
-    const session = await auth0.getSession(req);
-    if (!session.user) {
-      res.status(400);
-      res.send();
-    }
-    const { user } = session;
-    // fetch the user on github
+    const { user } = await auth0.getSession(req);
     const ghLogin = user.nickname;
+    const {
+      query: { repoId },
+    } = req;
     const ghGraphQLClient = new GraphQLClient('https://api.github.com/graphql', {
       headers: {
         authorization: `Bearer ${process.env.GITHUB_USER_INFO_AUTH_TOKEN}`,
@@ -22,7 +19,7 @@ export default async function me(req, res) {
               id
           }
       }`);
-    user.node_id = ghData.user.id;
+    ghData.user.id;
 
     const gcmsGraphQLClient = new GraphQLClient('https://api-eu-central-1.graphcms.com/v2/ck9bm6pqe04r901yy473r544s/master', {
       headers: {
@@ -31,34 +28,34 @@ export default async function me(req, res) {
     });
 
     const gcmsData = await gcmsGraphQLClient.request(`query {
-      projects(where: {
-        user: { githubUserNodeId: "${user.node_id}" }
+      project(where: {
+        githubRepositoryNodeId: "${repoId}"
       }) {
         githubRepositoryNodeId
         githubOrganizationNodeId
+        user {
+          githubUserNodeId
+        }
         organizationImage {
           fileName
+        }
+        tests {
+          branchName
+          testDate
+          testStatus
+          failureMessage
+          testType
         }
       }
     }`);
 
-    const projectsQuery = gcmsData.projects.map((project, i) => `q${i}: repository(id: "${project.githubRepositoryNodeId}") {
-            owner {
-                login
-                avatarUrl
-            }
-            id
-            name
-        }`);
-    if (projectsQuery.length > 0 ){
-      const projectsData = await ghGraphQLClient.request(`query {
-        ${projectsQuery.join('\n')}
-        }`);
-      user.projects = Object.values(projectsData);
+    if (ghData.user.id !== gcmsData.user.githubUserNodeId) {
+      // someone is being naughty...
+      res.status(403);
+      res.json({"msg": "You seem to be pretty good at hacking! You should come work for Meeshkan."});
     } else {
-      user.projects = [];
+      res.json(gcmsData);
     }
-    res.json(user);
   } catch (error) {
     console.error(error);
     res.status(error.status || 500).end(error.message);

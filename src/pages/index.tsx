@@ -10,68 +10,27 @@ import {
   Icon,
   Link as ChakraLink,
 } from "@chakra-ui/core";
-// import Card from "../components/molecules/card";
-// import { GraphQLClient } from "graphql-request";
+import Card from "../components/molecules/card";
 import { useFetchUser } from "../utils/user";
 
-// type HomeProps = {
-//   projects: Array<any>;
-// };
-
-// const graphcms = new GraphQLClient(process.env.gcms);
-
-// export async function getServerSideProps() {
-//   const { projects } = await graphcms.request(
-//     `
-//     query ByUser($user: String) {
-//       projects(where: {user: $user}) {
-//         tests {
-//           branchName
-//           failureMessage
-//           id
-//           testDate
-//           testStatus
-//           testType
-//         }
-//         user
-//         organizationName
-//         organizationImage {
-//           handle
-//         }
-//         repositoryName
-//       }
-//     }
-//   `,
-//     {
-//       user: "KenzoBenzo",
-//     }
-//   );
-
-//   return {
-//     props: {
-//       projects,
-//     },
-//   };
-// }
-
-export default function Home(/*{ projects }: HomeProps*/) {
+export default function Home() {
   const { colorMode } = useColorMode();
   const { user } = useFetchUser();
   return (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
-        {/* {projects.map(
-          ({ organizationName, organizationImage, repositoryName, index }) => (
+        {user.projects.map(
+          ({ owner: { login, avatarUrl }, name }, index) => (
             <Link
-              key={repositoryName}
-              href={`/${organizationName}/${repositoryName}`}
+              key={name}
+              href={`/${login}/${name}`}
             >
               <a>
                 <Card key={index}>
                   <Stack spacing={4} isInline>
                     <Image
                       size={10}
-                      src={`https://media.graphcms.com/${organizationImage.handle}`}
+                      src={avatarUrl}
                       bg="gray.50"
                       border="1px solid"
                       borderColor={`mode.${colorMode}.icon`}
@@ -79,7 +38,7 @@ export default function Home(/*{ projects }: HomeProps*/) {
                     />
                     <Stack spacing={2}>
                       <Text color={`mode.${colorMode}.text`} lineHeight="none">
-                        {organizationName}
+                        {login}
                       </Text>
                       <Heading
                         as="h3"
@@ -87,7 +46,7 @@ export default function Home(/*{ projects }: HomeProps*/) {
                         fontSize="md"
                         fontWeight={900}
                       >
-                        {repositoryName}
+                        {name}
                       </Heading>
                     </Stack>
                   </Stack>
@@ -95,7 +54,7 @@ export default function Home(/*{ projects }: HomeProps*/) {
               </a>
             </Link>
           )
-        )} */}
+        )}
         <ChakraLink
           href="https://github.com/apps/meeshkan/installations/new"
           bg={`mode.${colorMode}.card`}

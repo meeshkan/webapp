@@ -1,5 +1,5 @@
 import React from "react";
-// import Link from "next/link";
+import Link from "next/link";
 import {
   Stack,
   Text,
@@ -10,58 +10,24 @@ import {
   Icon,
   Link as ChakraLink,
 } from "@chakra-ui/core";
-// import Card from "../../components/molecules/card";
-// import { GraphQLClient } from "graphql-request";
+import { useFetchUser } from "../../utils/user";
+import Card from "../../components/molecules/card";
 
-// type OrganizationPageProps = {
-//   projects: Array<any>;
-// };
-
-// const graphcms = new GraphQLClient(process.env.gcms);
-
-// export async function getServerSideProps(context) {
-//   const {
-//     params: { organizationName }
-//   } = context;
-
-//   const query = `
-//   query OrganizationPageQuery($organizationName: String) {
-//     projects(where: { organizationName: $organizationName }) {
-//       organizationName
-//       organizationImage {
-//         handle
-//       }
-//       repositoryName
-//     }
-//   }
-// `
-
-//   const request = await graphcms.request(query, {
-//     organizationName: organizationName
-//   });
-
-//   let { projects } = request;
-
-//   return {
-//     props: {
-//       projects
-//     }
-//   }
-// }
-
-export default function OrganizationPage(/*{ projects }: OrganizationPageProps*/) {
+export default function OrganizationPage({organizationName}) {
   const { colorMode } = useColorMode();
+  const { user } = useFetchUser();
+  const projects = user.projects.filter(project => project.owner.login === organizationName);
   return (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
-        {/* {projects.map(({ organizationName, organizationImage, repositoryName, index }) => (
-          <Link key={repositoryName} href={`/${organizationName}/${repositoryName}`}>
+        {projects.map(({ owner: { login, avatarUrl }, name }, index) => (
+          <Link key={name} href={`/${organizationName}/${name}`}>
             <a>
           <Card key={index}>
             <Stack spacing={4} isInline>
               <Image
                 size={10}
-                src={`https://media.graphcms.com/${organizationImage.handle}`}
+                src={avatarUrl}
                 bg="gray.50"
                 border="1px solid"
                 borderColor={`mode.${colorMode}.icon`}
@@ -77,14 +43,14 @@ export default function OrganizationPage(/*{ projects }: OrganizationPageProps*/
                   fontSize="md"
                   fontWeight={900}
                 >
-                  {repositoryName}
+                  {name}
                 </Heading>
               </Stack>
             </Stack>
           </Card>
           </a>
           </Link>
-        ))} */}
+        ))}
         <ChakraLink
           href="https://github.com/apps/meeshkan/installations/new"
           bg={`mode.${colorMode}.card`}
