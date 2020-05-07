@@ -1,4 +1,4 @@
-import auth0 from '../../utils/auth0';
+import auth0 from '../../../../utils/auth0';
 import { GraphQLClient } from 'graphql-request';
 
 export default async function me(req, res) {
