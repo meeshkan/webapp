@@ -64,17 +64,19 @@ const ProjectSettings = () => {
             color={`mode.${colorMode}.title`}
           >
             {repos.map((repo, index) => (
-              <Link
-                href={`/${repo.organization.toLowerCase()}/${repo.repository.toLowerCase()}/`}
-                key={index}
-              >
+              <Link href={`/update-me`} key={index}>
                 <MenuItem
                   color={`mode.${colorMode}.text`}
                   d="flex"
                   alignContent="center"
                 >
-                  <Image src={`https://media.graphcms.com/${repo.image}`} h={4} w={4} mr={2} />
-                  {repo.repository}
+                  <Image
+                    src={`https://media.graphcms.com/${repo.image}`}
+                    h={4}
+                    w={4}
+                    mr={2}
+                  />
+                  UPDATE ME
                 </MenuItem>
               </Link>
             ))}
