@@ -11,25 +11,25 @@ import fetch from "isomorphic-unfetch";
 
 const Dashboard = ({ organizationName, repositoryName }) => {
   const [repo, setRepo] = React.useState({ tests: [] });
- 
+
   React.useEffect(() => {
     const fetchData = async () => {
-      const res = await fetch("/api/gh/repo/"+repositoryName);
+      const res = await fetch("/api/gh/repo/" + repositoryName);
       const result = res.ok ? await res.json() : null;
       setRepo(result);
     };
     fetchData();
   }, []);
 
-  let branchTests = []
-  let productionTests = []
+  let branchTests = [];
+  let productionTests = [];
   repo.tests.forEach((test) => {
-  if (test.testType === "master") {
-      productionTests.push(test)
+    if (test.testType === "master") {
+      productionTests.push(test);
     } else {
-        branchTests.push(test)
+      branchTests.push(test);
     }
-  })
+  });
 
   return (
     <>
@@ -38,12 +38,12 @@ const Dashboard = ({ organizationName, repositoryName }) => {
         templateRows="repeat(2, 1fr)"
         gap={8}
       >
-      <Settings
-        organizationName={organizationName}
-        repositoryName={repositoryName}
-      />
-      <Production tests={productionTests} />
-      <Branch tests={branchTests} />
+        <Settings
+        // organizationName={organizationName}
+        // repositoryName={repositoryName}
+        />
+        <Production tests={productionTests} />
+        <Branch tests={branchTests} />
         <Chart />
       </Grid>
     </>

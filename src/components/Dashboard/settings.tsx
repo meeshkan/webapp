@@ -8,7 +8,7 @@ type SettingsProps = {
   organizationName: String;
 };
 
-const Settings = ({ repositoryName, organizationName }: SettingsProps) => {
+const Settings = (/*{ repositoryName, organizationName }: SettingsProps*/) => {
   const { colorMode } = useColorMode();
   return (
     <Card
@@ -24,7 +24,7 @@ const Settings = ({ repositoryName, organizationName }: SettingsProps) => {
             cursor="pointer"
             fontWeight={600}
           >
-            {`${organizationName}/${repositoryName}`}
+            UPDATE ME
           </Text>
         </ChakraLink>
       </Stack>

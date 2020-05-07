@@ -19,42 +19,37 @@ export default function Home() {
   return (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
-        {user.projects.map(
-          ({ owner: { login, avatarUrl }, name }, index) => (
-            <Link
-              key={name}
-              href={`/${login}/${name}`}
-            >
-              <a>
-                <Card key={index}>
-                  <Stack spacing={4} isInline>
-                    <Image
-                      size={10}
-                      src={avatarUrl}
-                      bg="gray.50"
-                      border="1px solid"
-                      borderColor={`mode.${colorMode}.icon`}
-                      rounded="sm"
-                    />
-                    <Stack spacing={2}>
-                      <Text color={`mode.${colorMode}.text`} lineHeight="none">
-                        {login}
-                      </Text>
-                      <Heading
-                        as="h3"
-                        lineHeight="none"
-                        fontSize="md"
-                        fontWeight={900}
-                      >
-                        {name}
-                      </Heading>
-                    </Stack>
+        {user.projects.map(({ owner: { login, avatarUrl }, name }, index) => (
+          <Link key={name} href={`/${login}/${name}`}>
+            <a>
+              <Card key={index}>
+                <Stack spacing={4} isInline>
+                  <Image
+                    size={10}
+                    src={avatarUrl}
+                    bg="gray.50"
+                    border="1px solid"
+                    borderColor={`mode.${colorMode}.icon`}
+                    rounded="sm"
+                  />
+                  <Stack spacing={2}>
+                    <Text color={`mode.${colorMode}.text`} lineHeight="none">
+                      {login}
+                    </Text>
+                    <Heading
+                      as="h3"
+                      lineHeight="none"
+                      fontSize="md"
+                      fontWeight={900}
+                    >
+                      {name}
+                    </Heading>
                   </Stack>
-                </Card>
-              </a>
-            </Link>
-          )
-        )}
+                </Stack>
+              </Card>
+            </a>
+          </Link>
+        ))}
         <ChakraLink
           href="https://github.com/apps/meeshkan/installations/new"
           bg={`mode.${colorMode}.card`}
@@ -71,7 +66,7 @@ export default function Home() {
           </Stack>
         </ChakraLink>
 
-        <pre>{JSON.stringify(user, null, 2)}</pre>
+        {/* <pre>{JSON.stringify(user, null, 2)}</pre> */}
       </Grid>
     </>
   );
