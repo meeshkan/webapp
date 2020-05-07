@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import {
   Stack,
   Text,
@@ -7,26 +8,31 @@ import {
   useColorMode,
   Heading,
   Icon,
-  Link,
+  Link as ChakraLink,
 } from "@chakra-ui/core";
 import Card from "../components/molecules/card";
-import { repos } from "../data/repoQuery";
+import { useFetchUser } from "../utils/user";
 
 export default function Home() {
   const { colorMode } = useColorMode();
+  const { user } = useFetchUser();
   return (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
-        {repos.map((repo, index) => (
-          <Card
-            link={`/${repo.organization.toLowerCase()}-${repo.repository.toLowerCase()}/dashboard`}
-            key={index}
-          >
+        {user.projects.map(({ owner: { login, avatarUrl }, name }, index) => (
+          <Card key={index} link={`/${login}/${name}`}>
             <Stack spacing={4} isInline>
-              <Image size={10} src={repo.image} rounded="sm" />
+              <Image
+                size={10}
+                src={avatarUrl}
+                bg="gray.50"
+                border="1px solid"
+                borderColor={`mode.${colorMode}.icon`}
+                rounded="sm"
+              />
               <Stack spacing={2}>
                 <Text color={`mode.${colorMode}.text`} lineHeight="none">
-                  {repo.organization.toLowerCase()}
+                  {login}
                 </Text>
                 <Heading
                   as="h3"
@@ -34,14 +40,13 @@ export default function Home() {
                   fontSize="md"
                   fontWeight={900}
                 >
-                  {repo.repository.toLowerCase()}
+                  {name}
                 </Heading>
               </Stack>
             </Stack>
           </Card>
         ))}
-
-        <Link
+        <ChakraLink
           href="https://github.com/apps/meeshkan/installations/new"
           bg={`mode.${colorMode}.card`}
           p={4}
@@ -55,7 +60,7 @@ export default function Home() {
               Authorize a repository
             </Heading>
           </Stack>
-        </Link>
+        </ChakraLink>
       </Grid>
     </>
   );

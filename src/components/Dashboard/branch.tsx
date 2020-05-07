@@ -1,72 +1,30 @@
 import React from "react";
 import Card from "../molecules/card";
-import { Test, statusBadge } from "../molecules/test";
-// import { GraphQLClient } from "graphql-request";
+import { Test } from "../molecules/test";
+import { Text, useColorMode } from "@chakra-ui/core";
 
-const branchTests = [
-  {
-    name: "master@HEAD",
-    date: "Mar 12",
-    status: statusBadge.inProgress,
-  },
-  {
-    name: "master@9a8d22a",
-    date: "Mar 11",
-    status: statusBadge.success,
-  },
-  {
-    name: "master@759fb8b",
-    date: "Mar 9",
-    status: statusBadge.success,
-  },
-  {
-    name: "master@759fb8b",
-    date: "Mar 9",
-    status: statusBadge.failed,
-  },
-  {
-    name: "master@759fb8b",
-    date: "Mar 9",
-    status: statusBadge.failed,
-  },
-  {
-    name: "master@759fb8b",
-    date: "Mar 9",
-    status: statusBadge.failed,
-  },
-  {
-    name: "master@759fb8b",
-    date: "Mar 9",
-    status: statusBadge.failed,
-  },
-  {
-    name: "master@759fb8b",
-    date: "Mar 9",
-    status: statusBadge.failed,
-  },
-  {
-    name: "master@759fb8b",
-    date: "Mar 9",
-    status: statusBadge.failed,
-  },
-  {
-    name: "master@759fb8b",
-    date: "Mar 9",
-    status: statusBadge.failed,
-  },
-  {
-    name: "master@759fb8b",
-    date: "Mar 9",
-    status: statusBadge.failed,
-  },
-];
+type BranchProps = {
+  tests: Array<any>;
+};
 
-const Branch = () => {
+const Branch = ({ tests }: BranchProps) => {
+  const { colorMode } = useColorMode();
   return (
-    <Card gridArea="1 / 3 / 3 / 4" heading="Branch tests" headingLink="/branch">
-      {branchTests.map((test) => (
-        <Test branchName={test.name} date={test.date} status={test.status} />
-      ))}
+    <Card gridArea="1 / 3 / 3 / 4" heading="Branch tests">
+      {!tests.length ? (
+        <Text mt={2} color={`mode.${colorMode}.text`}>
+          You haven't done any branch tests yet.
+        </Text>
+      ) : (
+        tests.map((test, index) => (
+          <Test
+            key={index}
+            branchName={test.branchName}
+            date={test.testDate}
+            status={test.testStatus}
+          />
+        ))
+      )}
     </Card>
   );
 };

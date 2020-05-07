@@ -3,7 +3,12 @@ import { Text, Stack, useColorMode, Link as ChakraLink } from "@chakra-ui/core";
 import Card from "../molecules/card";
 import Link from "next/link";
 
-const Settings = () => {
+type SettingsProps = {
+  repositoryName: String;
+  // organizationName: String;
+};
+
+const Settings = ({ repositoryName }: SettingsProps) => {
   const { colorMode } = useColorMode();
   return (
     <Card
@@ -13,30 +18,16 @@ const Settings = () => {
     >
       <Stack isInline my={2}>
         <Text color={`mode.${colorMode}.text`}>Repository:</Text>
-        <ChakraLink href="/">
-          <Text
-            color={`mode.${colorMode}.title`}
-            cursor="pointer"
-            fontWeight={600}
-          >
-            Stripe/web-app
-          </Text>
-        </ChakraLink>
+        <Text color={`mode.${colorMode}.title`} fontWeight={600}>
+          {repositoryName}
+        </Text>
       </Stack>
 
       <Stack isInline my={2}>
         <Text color={`mode.${colorMode}.text`}>Current plan:</Text>
-        <Link href="/sdf">
-          <a>
-            <Text
-              color={`mode.${colorMode}.title`}
-              cursor="pointer"
-              fontWeight={600}
-            >
-              Pro
-            </Text>
-          </a>
-        </Link>
+        <Text color={`mode.${colorMode}.title`} fontWeight={600}>
+          Free
+        </Text>
       </Stack>
 
       <Stack isInline my={2}>
