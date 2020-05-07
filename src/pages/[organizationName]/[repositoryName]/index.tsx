@@ -54,7 +54,7 @@ const Dashboard = ({ repositoryName }) => {
     <>
       <Grid
         templateColumns="repeat(3, 1fr)"
-        templateRows="repeat(2, 1fr)"
+        templateRows="repeat(2, minmax(204px, 45%))"
         gap={8}
       >
         <Settings
