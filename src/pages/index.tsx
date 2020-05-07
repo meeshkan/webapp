@@ -13,7 +13,7 @@ import {
 import Card from "../components/molecules/card";
 import { useFetchUser } from "../utils/user";
 
-export default function Home(/*{ projects }: HomeProps*/) {
+export default function Home() {
   const { colorMode } = useColorMode();
   const { user } = useFetchUser();
   return (
