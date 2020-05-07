@@ -5,21 +5,21 @@ import Link from "next/link";
 
 type SettingsProps = {
   repositoryName: String;
-  // organizationName: String;
+  organizationName: String;
 };
 
-const Settings = ({ repositoryName }: SettingsProps) => {
+const Settings = ({ repositoryName, organizationName }: SettingsProps) => {
   const { colorMode } = useColorMode();
   return (
     <Card
       gridArea="1 / 1 / 2 / 2"
       heading="Project details"
-      headingLink="/settings"
+      headingLink={`/${organizationName}/${repositoryName}/configuration`}
     >
       <Stack isInline my={2}>
         <Text color={`mode.${colorMode}.text`}>Repository:</Text>
         <Text color={`mode.${colorMode}.title`} fontWeight={600}>
-          {repositoryName}
+          {`${organizationName}/${repositoryName}`}
         </Text>
       </Stack>
 
