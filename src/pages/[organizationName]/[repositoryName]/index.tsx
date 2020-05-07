@@ -8,7 +8,6 @@ import Branch from "../../../components/Dashboard/branch";
 import Chart from "../../../components/Dashboard/chart";
 
 import fetch from "isomorphic-unfetch";
-import { useFetchUser } from "../../../utils/user";
 
 const Dashboard = ({ organizationName, repositoryName }) => {
   const [repo, setRepo] = React.useState({ tests: [] });
@@ -39,11 +38,12 @@ const Dashboard = ({ organizationName, repositoryName }) => {
         templateRows="repeat(2, 1fr)"
         gap={8}
       >
-        {/* <Settings
-        repositoryName={props.currentRepository[0].repositoryName}
+      <Settings
+        organizationName={organizationName}
+        repositoryName={repositoryName}
       />
       <Production tests={productionTests} />
-      <Branch tests={branchTests} /> */}
+      <Branch tests={branchTests} />
         <Chart />
       </Grid>
     </>
