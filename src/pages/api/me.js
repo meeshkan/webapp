@@ -42,7 +42,7 @@ export default async function me(req, res) {
       }
     }`);
 
-    const projectsQuery = gcmsData.projects.map((project, i) => `q${i}: repository(id: "${project.githubRepositoryNodeId}") {
+    const projectsQuery = gcmsData.projects.map((project, i) => `q${i}: repository(name: "${project.githubRepositoryName}", owner: "${project.githubOwnerName}") {
             owner {
                 login
                 avatarUrl
