@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Grid } from "@chakra-ui/core";
 
 // cards
@@ -8,13 +8,31 @@ import Branch from "../../../components/Dashboard/branch";
 import Chart from "../../../components/Dashboard/chart";
 
 import fetch from "isomorphic-unfetch";
+import { useFetchUser } from "../../../utils/user";
 
-const Dashboard = ({ organizationName, repositoryName }) => {
-  const [repo, setRepo] = React.useState({ tests: [] });
+export async function getServerSideProps(context) {
+  const {
+    params: { repositoryName },
+  } = context;
 
-  React.useEffect(() => {
+  return {
+    props: { repositoryName },
+  };
+}
+
+const Dashboard = ({ repositoryName }) => {
+  const [repo, setRepo] = useState({
+    tests: [],
+  });
+
+  const { user } = useFetchUser();
+  const repoId = user.projects.filter(
+    (project) => project.name === repositoryName
+  );
+
+  useEffect(() => {
     const fetchData = async () => {
-      const res = await fetch("/api/gh/repo/" + repositoryName);
+      const res = await fetch(`/api/gh/repo/${repoId[0].id}`);
       const result = res.ok ? await res.json() : null;
       setRepo(result);
     };
@@ -23,6 +41,7 @@ const Dashboard = ({ organizationName, repositoryName }) => {
 
   let branchTests = [];
   let productionTests = [];
+
   repo.tests.forEach((test) => {
     if (test.testType === "master") {
       productionTests.push(test);
