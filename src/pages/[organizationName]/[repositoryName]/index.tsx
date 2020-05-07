@@ -7,62 +7,30 @@ import Production from "../../../components/Dashboard/production";
 import Branch from "../../../components/Dashboard/branch";
 import Chart from "../../../components/Dashboard/chart";
 
-// import { GraphQLClient } from "graphql-request";
+import fetch from "isomorphic-unfetch";
+import { useFetchUser } from "../../../utils/user";
 
-// type DashboardProps = {
-//   currentRepository: Array<any>;
-// };
+const Dashboard = ({ organizationName, repositoryName }) => {
+  const [repo, setRepo] = React.useState({ tests: [] });
+ 
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch("/api/gh/repo/"+repositoryName);
+      const result = res.ok ? await res.json() : null;
+      setRepo(result);
+    };
+    fetchData();
+  }, []);
 
-// const graphcms = new GraphQLClient(process.env.gcms);
-
-// export async function getServerSideProps(context) {
-//   const {
-//     params: { repositoryName }
-//   } = context;
-
-//   const query = `
-//     query RepositoryDataQuery($repositoryName: String) {
-//       currentRepository: projects(where: {repositoryName: $repositoryName}) {
-//         tests {
-//           branchName
-//           failureMessage
-//           id
-//           testDate
-//           testStatus
-//           testType
-//         }
-//         user
-//         organizationName
-//         repositoryName
-//       }
-//     }
-//   `
-
-//   const request = await graphcms.request(query, {
-//     repositoryName: repositoryName
-//   });
-
-//   let { currentRepository } = request;
-
-//   return {
-//     props: {
-//       currentRepository
-//     }
-//   }
-// }
-
-const Dashboard = (/*props: DashboardProps*/) => {
-  // const tests = props.currentRepository[0].tests;
-
-  // let branchTests = []
-  // let productionTests = []
-  // tests.forEach((test) => {
-  //   if (test.testType === "master") {
-  //     productionTests.push(test)
-  //   } else {
-  //     branchTests.push(test)
-  //   }
-  // })
+  let branchTests = []
+  let productionTests = []
+  repo.tests.forEach((test) => {
+  if (test.testType === "master") {
+      productionTests.push(test)
+    } else {
+        branchTests.push(test)
+    }
+  })
 
   return (
     <>
