@@ -3,7 +3,12 @@ import { GraphQLClient } from 'graphql-request';
 
 export default async function me(req, res) {
   try {
-    const { user } = await auth0.getSession(req);
+    const session = await auth0.getSession(req);
+    if (!session.user) {
+      res.status(400);
+      res.send();
+    }
+    const { user } = session;
     // fetch the user on github
     const ghLogin = user.nickname;
 
