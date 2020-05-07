@@ -36,6 +36,8 @@ export default async function me(req, res) {
       }) {
         githubRepositoryNodeId
         githubOrganizationNodeId
+        githubOwnerName
+        githubRepositoryName
         organizationImage {
           fileName
         }
