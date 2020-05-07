@@ -6,7 +6,7 @@ export default async function me(req, res) {
     const session = await auth0.getSession(req);
     if (!session || !session.user) {
       res.status(400);
-      res.send();
+      res.send('Not logged in');
     }
     const { user } = session;
     // fetch the user on github
