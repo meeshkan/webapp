@@ -21,7 +21,7 @@ export default async function me(req, res) {
       }`);
     ghData.user.id;
 
-    const gcmsGraphQLClient = new GraphQLClient('https://api.github.com/graphql', {
+    const gcmsGraphQLClient = new GraphQLClient('https://api-eu-central-1.graphcms.com/v2/ck9bm6pqe04r901yy473r544s/master', {
       headers: {
         authorization: `Bearer ${process.env.GRAPHCMS_QUERY_AUTH_TOKEN}`,
       },
