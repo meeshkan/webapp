@@ -20,35 +20,31 @@ export default function Home() {
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
         {user.projects.map(({ owner: { login, avatarUrl }, name }, index) => (
-          <Link key={name} href={`/${login}/${name}`}>
-            <a>
-              <Card key={index}>
-                <Stack spacing={4} isInline>
-                  <Image
-                    size={10}
-                    src={avatarUrl}
-                    bg="gray.50"
-                    border="1px solid"
-                    borderColor={`mode.${colorMode}.icon`}
-                    rounded="sm"
-                  />
-                  <Stack spacing={2}>
-                    <Text color={`mode.${colorMode}.text`} lineHeight="none">
-                      {login}
-                    </Text>
-                    <Heading
-                      as="h3"
-                      lineHeight="none"
-                      fontSize="md"
-                      fontWeight={900}
-                    >
-                      {name}
-                    </Heading>
-                  </Stack>
-                </Stack>
-              </Card>
-            </a>
-          </Link>
+          <Card key={index} link={`/${login}/${name}`}>
+            <Stack spacing={4} isInline>
+              <Image
+                size={10}
+                src={avatarUrl}
+                bg="gray.50"
+                border="1px solid"
+                borderColor={`mode.${colorMode}.icon`}
+                rounded="sm"
+              />
+              <Stack spacing={2}>
+                <Text color={`mode.${colorMode}.text`} lineHeight="none">
+                  {login}
+                </Text>
+                <Heading
+                  as="h3"
+                  lineHeight="none"
+                  fontSize="md"
+                  fontWeight={900}
+                >
+                  {name}
+                </Heading>
+              </Stack>
+            </Stack>
+          </Card>
         ))}
         <ChakraLink
           href="https://github.com/apps/meeshkan/installations/new"
