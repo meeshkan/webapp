@@ -27,7 +27,7 @@ export default async function me(req, res) {
       },
     });
 
-    const gcmsData = await gcmsGraphQLClient.request(`query {
+    const { project } = await gcmsGraphQLClient.request(`query {
       project(where: {
         githubRepositoryNodeId: "${repoId}"
       }) {
@@ -49,12 +49,12 @@ export default async function me(req, res) {
       }
     }`);
 
-    if (ghData.user.id !== gcmsData.user.githubUserNodeId) {
+    if (ghData.user.id !== project.user.githubUserNodeId) {
       // someone is being naughty...
       res.status(403);
       res.json({"msg": "You seem to be pretty good at hacking! You should come work for Meeshkan."});
     } else {
-      res.json(gcmsData);
+      res.json(project);
     }
   } catch (error) {
     console.error(error);
