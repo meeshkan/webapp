@@ -55,7 +55,6 @@ export default async function me(req, res) {
       res.send('Bad data from slack');
     }
 
-    console.log(dataFromSlack);
     const {
       access_token,
       scope,
