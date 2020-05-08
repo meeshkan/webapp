@@ -43,7 +43,7 @@ export default async function me(req, res) {
     params.append('code', code);
     params.append('client_id', process.env.SLACK_OAUTH_APP_CLIENT_ID);
     params.append('client_secret', process.env.SLACK_OAUTH_APP_CLIENT_SECRET);
-    params.append('redirect_uri', 'http://localhost:3000/api/slack/oauth');
+    params.append('redirect_uri', process.env.SLACK_OAUTH_REDIRECT_URI);
     const resFromSlack = await fetch(process.env.SLACK_OAUTH_APP_URL, {
       method: 'post',
       body: params

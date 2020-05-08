@@ -46,7 +46,7 @@ export default function Home() {
             </Stack>
           </Card>
         ))}
-        <a href={`https://slack.com/oauth/v2/authorize?client_id=258714091073.1105258957971&scope=incoming-webhook&state=${user.node_id}&redirect_uri=http://localhost:3000/api/slack/oauth`}><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" /></a>
+        <a href={`https://slack.com/oauth/v2/authorize?client_id=258714091073.1105258957971&scope=incoming-webhook&state=${user.node_id}&redirect_uri=${process.env.SLACK_OAUTH_REDIRECT_URI}`}><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" /></a>
         <ChakraLink
           href="https://github.com/apps/meeshkan/installations/new"
           bg={`mode.${colorMode}.card`}
