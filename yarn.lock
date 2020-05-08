@@ -2025,9 +2025,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001017, caniuse-lite@^1.0.30001043:
-  version "1.0.30001053"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001053.tgz#b7ae027567ce2665b965b0437e4512b296ccd20d"
-  integrity sha512-HtV4wwIZl6GA4Oznse8aR274XUOYGZnQLcf/P8vHgmlfqSNelwD+id8CyHOceqLqt9yfKmo7DUZTh1EuS9pukg==
+  version "1.0.30001054"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001054.tgz#7e82fc42d927980b0ce1426c4813df12381e1a75"
+  integrity sha512-jiKlTI6Ur8Kjfj8z0muGrV6FscpRvefcQVPSuMuXnvRCfExU7zlVLNjmOz1TnurWgUrAY7MMmjyy+uTgIl1XHw==
 
 chalk@^1.1.3:
   version "1.1.3"
@@ -2728,9 +2728,9 @@ ecdsa-sig-formatter@1.0.11:
     safe-buffer "^5.0.1"
 
 electron-to-chromium@^1.3.322, electron-to-chromium@^1.3.413:
-  version "1.3.430"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.430.tgz#33914f7c2db771bdcf30977bd4fd6258ee8a2f37"
-  integrity sha512-HMDYkANGhx6vfbqpOf/hc6hWEmiOipOHGDeRDeUb3HLD3XIWpvKQxFgWf0tgHcr3aNv6I/8VPecplqmQsXoZSw==
+  version "1.3.431"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.431.tgz#705dd8ef46200415ba837b31d927cdc1e43db303"
+  integrity sha512-2okqkXCIda7qDwjYhUFxPcQdZDIZZ/zBLDzVOif7WW/TSNfEhdT6SO07O1x/sFteEHX189Z//UwjbZKKCOn2Fg==
 
 elliptic@^6.0.0, elliptic@^6.5.2:
   version "6.5.2"
@@ -3208,13 +3208,6 @@ graceful-fs@^4.1.11, graceful-fs@^4.1.15, graceful-fs@^4.1.2:
   version "4.2.4"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.4.tgz#2256bde14d3632958c465ebc96dc467ca07a29fb"
   integrity sha512-WjKPNJF79dtJAVniUlGGWHYGz2jWxT6VhN/4m1NdkbZ2nOsEF+cI1Edgql5zCRhs/VsQYRvrXctxktVXZUkixw==
-
-graphql-request@^1.8.2:
-  version "1.8.2"
-  resolved "https://registry.yarnpkg.com/graphql-request/-/graphql-request-1.8.2.tgz#398d10ae15c585676741bde3fc01d5ca948f8fbe"
-  integrity sha512-dDX2M+VMsxXFCmUX0Vo0TopIZIX4ggzOtiCsThgtrKR4niiaagsGTDIHj3fsOMFETpa064vzovI+4YV4QnMbcg==
-  dependencies:
-    cross-fetch "2.2.2"
 
 graphql-request@^1.8.2:
   version "1.8.2"
