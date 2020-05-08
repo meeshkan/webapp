@@ -89,11 +89,16 @@ export default async function me(req, res) {
             }
           }
         }) {
-          sender {
-            githubUserNodeId
-          }
+          id
         }
     }`);
+  
+    await gcmsGraphQLClient.request(`mutation {
+      publishSlackIncomingWebhook(where: {id: "${gcmsResponse.createSlackIncomingWebhook.id}" }) {
+        id
+      }
+    }`);
+
     res.writeHead(301, {
       Location: '/'
     });
