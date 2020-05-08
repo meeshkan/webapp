@@ -4,5 +4,6 @@ module.exports = {
   },
   env: {
     SLACK_OAUTH_REDIRECT_URI: process.env.SLACK_OAUTH_REDIRECT_URI,
+    SLACK_OAUTH_APP_CLIENT_ID: process.env.SLACK_OAUTH_APP_CLIENT_ID
   }
 };
