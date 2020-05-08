@@ -32,17 +32,9 @@ const Settings = ({ repositoryName, organizationName }: SettingsProps) => {
 
       <Stack isInline my={2}>
         <Text color={`mode.${colorMode}.text`}>Configuration:</Text>
-        <Link href="/settings">
-          <a>
-            <Text
-              color={`mode.${colorMode}.title`}
-              cursor="pointer"
-              fontWeight={600}
-            >
-              Strict
-            </Text>
-          </a>
-        </Link>
+        <Text color={`mode.${colorMode}.title`} fontWeight={600}>
+          Finished
+        </Text>
       </Stack>
     </Card>
   );

@@ -1,13 +1,25 @@
 import React from "react";
-import { Text, useColorMode } from "@chakra-ui/core";
+import { Box, Text, useColorMode, Flex, Stack } from "@chakra-ui/core";
+import Card from "../../../components/molecules/card";
 
-const SettingsPage = () => {
+const ConfigurationPage = () => {
   const { colorMode } = useColorMode();
   return (
-    <>
-      <Text color={`mode.${colorMode}.text`}>settings here</Text>
-    </>
+    <Box maxW="1000px" mx="auto" h="100%">
+      <Flex w="100%">
+        <Box bg={`mode.${colorMode}.card`} rounded="sm" mr={20} p={4}>
+          <Text>Build settings</Text>
+          <Text>Environment variables</Text>
+          <Text>Slack integration</Text>
+        </Box>
+        <Stack w="100%">
+          <Card heading="Slack integration">
+            <Text>Add stuff here</Text>
+          </Card>
+        </Stack>
+      </Flex>
+    </Box>
   );
 };
 
-export default SettingsPage;
+export default ConfigurationPage;
