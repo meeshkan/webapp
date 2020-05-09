@@ -113,6 +113,26 @@ const customTheme = {
       ),
       viewBox: "0 0 16 16",
     },
+    info: {
+      path: (
+        <path
+          d="M6 9V5.61538M6 3.69231V3.30769M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6Z"
+          stroke="currentColor"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      ),
+      viewBox: "0 0 12 12",
+    },
+  },
+  opacity: {
+    "0": "0",
+    "20%": "0.2",
+    "40%": "0.4",
+    "60%": "0.6",
+    "80%": "0.8",
+    "100%": "1",
   },
   fonts: {
     body: `Inter, sans-serif`,

@@ -14,7 +14,6 @@ import {
 } from "@chakra-ui/core";
 import Link from "next/link";
 import { useFetchUser } from "../../utils/user";
-import { repos } from "../../data/repoQuery";
 
 const ProjectSettings = () => {
   const { colorMode, toggleColorMode } = useColorMode();
