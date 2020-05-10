@@ -20,6 +20,8 @@
     "isomorphic-unfetch": "^3.0.0",
     "jsonwebtoken": "^8.5.1",
     "next": "9.3.5",
+    "parse-link-header": "^1.0.1",
+    "querystring": "^0.2.0",
     "react": "16.13.1",
     "react-dom": "16.13.1"
   },

@@ -1,4 +1,5 @@
 import auth0 from '../../../utils/auth0';
+import { exchangeSessionForUserId } from '../../../utils/user';
 import { GraphQLClient } from 'graphql-request';
 import fetch from 'isomorphic-unfetch';
 
@@ -20,21 +21,7 @@ export default async function me(req, res) {
       }
     } = req;
 
-    const { user } = session;
-    const ghLogin = user.nickname;
-    const ghGraphQLClient = new GraphQLClient('https://api.github.com/graphql', {
-      headers: {
-        authorization: `Bearer ${process.env.GITHUB_USER_INFO_AUTH_TOKEN}`,
-      },
-    });
-  
-    const ghData = await ghGraphQLClient.request(`query {
-      user(login: "${ghLogin}") {
-              id
-          }
-      }`);
-
-    if (ghData.user.id !== state) {
+    if (session.user.sub !== state) {
         res.status(403);
         res.send('Forbidden');
     }
@@ -48,6 +35,7 @@ export default async function me(req, res) {
       method: 'post',
       body: params
     });
+  
     const dataFromSlack = resFromSlack.ok ? await resFromSlack.json() : null;
     if (!dataFromSlack || !dataFromSlack.ok) {
       console.log("error from slack", code, dataFromSlack);
@@ -85,7 +73,7 @@ export default async function me(req, res) {
           url:"${url}"
           sender:{
             connect: {
-              githubUserNodeId: "${ghData.user.id}"
+              auth0Id: "${session.user.sub}"
             }
           }
         }) {
