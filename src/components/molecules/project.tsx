@@ -52,7 +52,7 @@ const ProjectSettings = () => {
               onClick={toggleColorMode}
               transition="all 0.2s"
             >
-              <Icon name={colorMode === "light" ? "moon" : "sun"} mr={2} />
+              <Icon name={colorMode === "light" ? "moon" : "sun"} mr={3} />
               {colorMode === "light" ? "Dark mode" : "Light mode"}
             </MenuItem>
             <MenuItem color={`mode.${colorMode}.text`}>
@@ -61,6 +61,7 @@ const ProjectSettings = () => {
                 isExternal
                 color={`mode.${colorMode}.text`}
                 _hover={{ textDecor: "none" }}
+                verticalAlign="middle"
               >
                 <Icon name="slack" mr={2} /> Install Slack app
               </ChakraLink>

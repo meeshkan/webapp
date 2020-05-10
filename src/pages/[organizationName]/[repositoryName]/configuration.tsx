@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useFetchUser } from "../../../utils/user";
 import {
   Box,
-  Text,
   useColorMode,
   Grid,
   Stack,
@@ -19,6 +18,9 @@ import {
   IconButton,
 } from "@chakra-ui/core";
 import Card from "../../../components/molecules/card";
+import { ItemLink, stringToUrl } from "../../../components/molecules/navLink";
+
+const items = ["Build settings", "Environment variables", "Slack integration"];
 
 const ConfigurationPage = () => {
   const { colorMode } = useColorMode();
@@ -33,7 +35,15 @@ const ConfigurationPage = () => {
   };
 
   return (
-    <Grid templateColumns="repeat(4, 1fr)" gap={20}>
+    <Grid
+      templateColumns={[
+        "repeat(auto-fit, 1fr)",
+        "repeat(2, 1fr)",
+        "repeat(3, 1fr)",
+        "repeat(4, 1fr)",
+      ]}
+      gap={20}
+    >
       <Box
         bg={`mode.${colorMode}.card`}
         rounded="sm"
@@ -42,9 +52,9 @@ const ConfigurationPage = () => {
         p={4}
         gridArea="1 / 1 / 2 / 2"
       >
-        <Text>Build settings</Text>
-        <Text>Environment variables</Text>
-        <Text>Slack integration</Text>
+        {items.map((link) => (
+          <ItemLink href={stringToUrl(link)}>{link}</ItemLink>
+        ))}
       </Box>
       <Stack w="100%" spacing={8} gridArea="1 / 2 / 4 / 4" overflow="scroll">
         <Card heading="Build settings">
@@ -197,7 +207,7 @@ const ConfigurationPage = () => {
             </LightMode>
           </Stack>
 
-          <Box as="table" textAlign="left" mt={4} width="full">
+          <Box as="table" textAlign="left" mt={8} width="full">
             <Box
               as="tr"
               backgroundColor={`mode.${colorMode}.background`}
@@ -205,10 +215,23 @@ const ConfigurationPage = () => {
               border="1px solid"
               borderColor={`mode.${colorMode}.icon`}
             >
-              <Box as="th" p={2} fontWeight="semibold" fontSize="sm">
+              <Box
+                roundedTop="sm"
+                as="th"
+                p={2}
+                fontWeight="semibold"
+                fontSize="sm"
+                color={`mode.${colorMode}.title`}
+              >
                 Name
               </Box>
-              <Box as="th" p={2} fontWeight="semibold" fontSize="sm">
+              <Box
+                as="th"
+                p={2}
+                fontWeight="semibold"
+                fontSize="sm"
+                color={`mode.${colorMode}.title`}
+              >
                 Value
               </Box>
               <Box as="th" p={2} fontWeight="semibold" fontSize="sm"></Box>
@@ -219,6 +242,8 @@ const ConfigurationPage = () => {
                 as="td"
                 p={2}
                 borderBottomWidth="1px"
+                borderColor={`mode.${colorMode}.icon`}
+                color={`mode.${colorMode}.text`}
                 fontSize="sm"
                 whiteSpace="normal"
               >
@@ -228,19 +253,26 @@ const ConfigurationPage = () => {
                 as="td"
                 p={2}
                 borderBottomWidth="1px"
+                borderColor={`mode.${colorMode}.icon`}
+                color={`mode.${colorMode}.text`}
                 fontSize="sm"
                 whiteSpace="normal"
               >
                 https://api-eu-central-1.graphcms.com/v2/ck9bm6pqe04r901yy473r544s/master
               </Box>
-              <Box as="td" borderBottomWidth="1px">
+              <Box
+                as="td"
+                borderBottomWidth="1px"
+                borderColor={`mode.${colorMode}.icon`}
+              >
                 <IconButton
                   icon="delete"
                   aria-label="Delete button"
                   variant="ghost"
                   rounded="sm"
                   size="sm"
-                  _hover={{ color: "red.500", backgroundColor: "red.50" }}
+                  color={`mode.${colorMode}.text`}
+                  _hover={{ color: "red.500" }}
                 />
               </Box>
             </Box>
