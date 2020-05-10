@@ -12,15 +12,15 @@ import { useFetchUser } from "../../../utils/user";
 
 export async function getServerSideProps(context) {
   const {
-    params: { repositoryName },
+    params: { repositoryName, organizationName },
   } = context;
 
   return {
-    props: { repositoryName },
+    props: { repositoryName, organizationName },
   };
 }
 
-const Dashboard = ({ repositoryName }) => {
+const Dashboard = ({ repositoryName, organizationName }) => {
   const [repo, setRepo] = useState({
     tests: [],
   });
@@ -58,7 +58,7 @@ const Dashboard = ({ repositoryName }) => {
         gap={8}
       >
         <Settings
-          // organizationName={organizationName}
+          organizationName={organizationName}
           repositoryName={repositoryName}
         />
         <Production tests={productionTests} />

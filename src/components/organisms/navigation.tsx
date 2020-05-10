@@ -28,7 +28,7 @@ const Navigation = () => {
         rounded="sm"
         mb={8}
         pos="sticky"
-        top={4}
+        top={8}
       >
         <Link href="/">
           <Icon

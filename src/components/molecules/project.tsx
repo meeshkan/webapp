@@ -14,7 +14,6 @@ import {
 } from "@chakra-ui/core";
 import Link from "next/link";
 import { useFetchUser } from "../../utils/user";
-import { repos } from "../../data/repoQuery";
 
 const ProjectSettings = () => {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -53,8 +52,19 @@ const ProjectSettings = () => {
               onClick={toggleColorMode}
               transition="all 0.2s"
             >
-              <Icon name={colorMode === "light" ? "moon" : "sun"} mr={2} />
+              <Icon name={colorMode === "light" ? "moon" : "sun"} mr={3} />
               {colorMode === "light" ? "Dark mode" : "Light mode"}
+            </MenuItem>
+            <MenuItem color={`mode.${colorMode}.text`}>
+              <ChakraLink
+                href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_OAUTH_APP_CLIENT_ID}&scope=incoming-webhook&state=${user.node_id}&redirect_uri=${process.env.SLACK_OAUTH_REDIRECT_URI}`}
+                isExternal
+                color={`mode.${colorMode}.text`}
+                _hover={{ textDecor: "none" }}
+                verticalAlign="middle"
+              >
+                <Icon name="slack" mr={2} /> Install Slack app
+              </ChakraLink>
             </MenuItem>
           </MenuGroup>
           <MenuDivider />
@@ -82,6 +92,8 @@ const ProjectSettings = () => {
             <ChakraLink
               isExternal
               href="https://github.com/apps/meeshkan/installations/new"
+              color={`mode.${colorMode}.text`}
+              _hover={{ textDecor: "none" }}
             >
               <Icon name="external-link" mr={2} />
               Authorize another
@@ -90,13 +102,18 @@ const ProjectSettings = () => {
           <MenuDivider />
           <MenuGroup title="Other" color={`mode.${colorMode}.title`}>
             <MenuItem color={`mode.${colorMode}.text`}>
-              <Link href="/docs">
-                <a>Docs</a>
-              </Link>
+              <ChakraLink
+                href="https://meeshkan.com/docs/"
+                isExternal
+                color={`mode.${colorMode}.text`}
+                _hover={{ textDecor: "none" }}
+              >
+                Docs
+              </ChakraLink>
             </MenuItem>
             <MenuItem color={`mode.${colorMode}.text`}>
               <Link href="/api/logout">
-                <a>Log out</a>
+                <Text>Log out</Text>
               </Link>
             </MenuItem>
           </MenuGroup>

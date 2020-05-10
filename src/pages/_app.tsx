@@ -1,4 +1,5 @@
 import { AppProps } from "next/app";
+import "../components/layout.css";
 import {
   ThemeProvider,
   CSSReset,
