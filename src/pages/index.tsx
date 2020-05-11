@@ -12,14 +12,16 @@ import {
 } from "@chakra-ui/core";
 import Card from "../components/molecules/card";
 import { useFetchUser } from "../utils/user";
+import { useFetchProjects } from "../utils/projects";
+
 
 export default function Home() {
   const { colorMode } = useColorMode();
-  const { user } = useFetchUser();
+  const { projects, loadingProjects } = useFetchProjects();
   return (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
-        {user.projects.map(({ owner: { login, avatarUrl }, name }, index) => (
+        {projects.map(({ owner: { login, avatarUrl }, name }, index) => (
           <Card key={index} link={`/${login}/${name}`}>
             <Stack spacing={4} isInline>
               <Image

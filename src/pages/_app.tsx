@@ -19,7 +19,7 @@ import { useRouter } from "next/router";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const { colorMode } = useColorMode();
-  const { user, loading } = useFetchUser();
+  const { user, loadingUser } = useFetchUser();
   const router = useRouter();
 
   return (
@@ -34,7 +34,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           <Layout>
             <Navigation />
             {!user && (
-              <Skeleton isLoaded={!loading}>
+              <Skeleton isLoaded={!loadingUser}>
                 <Box as="section" my={12}>
                   <Heading
                     as="h2"

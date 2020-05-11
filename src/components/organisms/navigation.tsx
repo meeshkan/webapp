@@ -15,7 +15,7 @@ import { useRouter } from "next/router";
 
 const Navigation = () => {
   const { colorMode, toggleColorMode } = useColorMode();
-  const { user, loading } = useFetchUser();
+  const { user, loadingUser } = useFetchUser();
   const router = useRouter();
 
   return (
@@ -39,7 +39,7 @@ const Navigation = () => {
             cursor="pointer"
           />
         </Link>
-        {!loading && (
+        {!loadingUser && (
           <section>
             {!user && (
               <Stack isInline spacing={4}>

@@ -9,11 +9,10 @@ export default initAuth0({
   postLogoutRedirectUri: process.env.LOGOUT_REDIRECT_URL,
   session: {
     // The secret used to encrypt the cookie.
-    cookieSecret: "this-is-a-terrible-cookie-secret-and-should-be-changed",
+    cookieSecret: process.env.COOKIE_SECRET,
     // The cookie lifetime (expiration) in seconds. Set to 8 hours by default.
     cookieLifetime: 60 * 60 * 8,
-    // (Optional) Store the access_token in the session. Defaults to false.
-    storeAccessToken: true,
+    storeIdToken: true,
   },
   oidcClient: {
     // (Optional) Configure the timeout in milliseconds for HTTP requests to Auth0.

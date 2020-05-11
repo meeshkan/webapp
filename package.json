@@ -15,6 +15,7 @@
     "@emotion/core": "^10.0.28",
     "@emotion/styled": "^10.0.27",
     "axios": "^0.19.2",
+    "crypto-random-string": "^3.2.0",
     "emotion-theming": "^10.0.27",
     "graphql-request": "^1.8.2",
     "isomorphic-unfetch": "^3.0.0",
