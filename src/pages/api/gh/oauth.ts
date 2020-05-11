@@ -1,17 +1,13 @@
 import auth0 from '../../../utils/auth0';
 import { authenticateAppWithGithub } from '../../../utils/gh';
-import {encrypt} from '../../../utils/sec';
-import { GraphQLClient } from 'graphql-request';
-import fetch from 'isomorphic-unfetch';
-import querystring from 'querystring';
-import  cryptoRandomString from 'crypto-random-string';
+import { isLeft } from "fp-ts/lib/Either";
 
 export default async function me(req, res) {
   try {
     const session = await auth0.getSession(req);
     if (!session) {
         res.status(403);
-        res.send('');
+        res.send('No active session');
     }
 
     // the code parameter is what we will exchange with github
@@ -35,11 +31,17 @@ export default async function me(req, res) {
     params.append('redirect_uri', process.env.GH_OAUTH_REDIRECT_URI);
     params.append('state', state);
 
-    await authenticateAppWithGithub(params, session.user.idToken);
+    const authenticationResult = await authenticateAppWithGithub(params, session.user.idToken);
+    if (isLeft(authenticationResult)) {
+      res.writeHead(404, {
+        Location: '/404'
+      });  
+    } else {
+      res.writeHead(301, {
+        Location: '/'
+      });        
+    }
 
-    res.writeHead(301, {
-      Location: '/'
-    });
     res.end();
   } catch (error) {
     console.error(error);

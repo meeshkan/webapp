@@ -1,9 +1,12 @@
 import parseLinkHeader from 'parse-link-header';
 import { GraphQLClient } from 'graphql-request';
+import crypto from "crypto";
 import { confirmOrCreateUser } from "./user";
-import { decrypt } from './sec';
+import { decrypt, encrypt } from './sec';
 import querystring from 'querystring';
 import { left, right, Either, isLeft } from "fp-ts/lib/Either";
+import fetch from 'isomorphic-unfetch';
+import t from "io-ts";
 
 export interface IOwner {
     login: string;
@@ -125,20 +128,16 @@ const TWENTY_SECONDS = 20;
 const MS_IN_SEC = 1000;
 
 export const fetchGithubAccessToken = async (auth0IdToken, email): Promise<Either<NegativeGithubFetchOutcomes, string>> => {
-    const { user: { githubUser } } = await confirmOrCreateUser(`query {
-        user {
-          githubUser {
-            accessToken
-            refreshToken
-            accessTokenSalt
-            tokenType
-            expiresAt
-            refreshTokenExpiresAt
-            refreshTokenSalt
-            nodeId
-          }
-        }
-      }`, auth0IdToken, email);
+    const { user: { githubUser } } = await confirmOrCreateUser(`githubUser {
+      accessToken
+      refreshToken
+      accessTokenSalt
+      tokenType
+      expiresAt
+      refreshTokenExpiresAt
+      refreshTokenSalt
+      nodeId
+    }`, auth0IdToken, email);
   
     if (githubUser.expiresAt - (new Date().getTime() / MS_IN_SEC) < TWENTY_SECONDS) {
         if (githubUser.refreshTokenExpiresAt - (new Date().getTime() / MS_IN_SEC) < TWENTY_SECONDS) {
@@ -249,9 +248,7 @@ export const authenticateAppWithGithub = async (params, idToken): Promise<Either
     const _dataFromGh = resFromGh.ok ? await resFromGh.text() : null;
     const dataFromGh = querystring.parse(_dataFromGh);
     if (!dataFromGh || !dataFromGh.access_token) {
-      console.log("error from github", code, dataFromGh);
-      res.status(401);
-      res.send('Could not authenticate with github');
+      return left(NegativeGithubFetchOutcomes.LOGIC_ERROR);
     }
 
     const {
@@ -274,7 +271,6 @@ export const authenticateAppWithGithub = async (params, idToken): Promise<Either
       }
     }`);
 
-    console.log(ghViewerId);
     const _8baseGraphQLClient = new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
       headers: {
         authorization: `Bearer ${idToken}`,
@@ -282,19 +278,17 @@ export const authenticateAppWithGithub = async (params, idToken): Promise<Either
     });
 
     // the length MUST be 16 for the cryptographic algorithm
-    const refresh_token_salt = cryptoRandomString({length: 16});
-    const salted_encrypted_refresh_token = encrypt(refresh_token, refresh_token_salt);
-    const access_token_salt = cryptoRandomString({length: 16});
-    const salted_encrypted_access_token = encrypt(access_token, access_token_salt);
+    const salted_encrypted_refresh_token = encrypt(t.string.is(refresh_token) ? refresh_token : refresh_token[0], crypto.randomBytes(16));
+    const salted_encrypted_access_token = encrypt(t.string.is(access_token) ? access_token : access_token[0], crypto.randomBytes(16));
 
     const vars = {
-        accessToken: salted_encrypted_access_token,
-        refreshToken: salted_encrypted_refresh_token,
-        accessTokenSalt: access_token_salt,
-        refreshTokenSalt: refresh_token_salt,
+        accessToken: salted_encrypted_access_token.encryptedData,
+        refreshToken: salted_encrypted_refresh_token.encryptedData,
+        accessTokenSalt: salted_encrypted_access_token.iv,
+        refreshTokenSalt: salted_encrypted_refresh_token.iv,
         tokenType: token_type,
-        expiresAt: (new Date().getTime () / 1000) + expires_in,
-        refreshTokenExpiresAt: (new Date().getTime () / 1000) + refresh_token_expires_in,
+        expiresAt: (new Date().getTime () / MS_IN_SEC) + parseInt(t.string.is(expires_in) ? expires_in : expires_in[0]),
+        refreshTokenExpiresAt: (new Date().getTime () / MS_IN_SEC) + parseInt(t.string.is(refresh_token_expires_in) ? refresh_token_expires_in : refresh_token_expires_in[0]),
         nodeId: ghViewerId.viewer.id
     };
     // we create the refresh token
@@ -323,9 +317,9 @@ export const authenticateAppWithGithub = async (params, idToken): Promise<Either
         }
       }`, vars);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       // the user exists already, so we update instead
-      await _8baseGraphQLClient(`mutation(
+      await _8baseGraphQLClient.request(`mutation(
         $accessToken:String!
         $refreshToken:String!
         $accessTokenSalt:String!
@@ -353,5 +347,5 @@ export const authenticateAppWithGithub = async (params, idToken): Promise<Either
         }
       }`, vars);
     }
-    return access_token;
+    return right(t.string.is(access_token) ? access_token : access_token[0]);
 }

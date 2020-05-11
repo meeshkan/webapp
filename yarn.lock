@@ -3439,6 +3439,11 @@ invariant@^2.2.2:
   dependencies:
     loose-envify "^1.0.0"
 
+io-ts@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-2.2.2.tgz#82b9ef96d95a3fb27a1abf5f29f59b07cc9b8cca"
+  integrity sha512-cXXIL4CR5/sWfKw/Ssc/cbZJGG13J4pJv9/RN6SlWJyh+foAPEUE0I9sWTX1kG24dvhiCM9fpO4F+2AsP+WzaQ==
+
 is-absolute-url@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/is-absolute-url/-/is-absolute-url-2.1.0.tgz#50530dfb84fcc9aa7dbe7852e83a37b93b9f2aa6"

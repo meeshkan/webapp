@@ -1,5 +1,5 @@
-import auth0 from '../../utils/auth0';
-import { getAllGhRepos } from '../../utils/gh';
+import auth0 from '../../../utils/auth0';
+import { getAllGhRepos } from '../../../utils/gh';
 
 export default async function me(req, res) {
   try {

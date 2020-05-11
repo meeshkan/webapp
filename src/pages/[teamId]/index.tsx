@@ -10,19 +10,34 @@ import {
   Icon,
   Link as ChakraLink,
 } from "@chakra-ui/core";
-import { useFetchUser } from "../../utils/user";
+import auth0 from "../../utils/auth0";
 import Card from "../../components/molecules/card";
 
-export default function OrganizationPage({ projects, organizationName }) {
+
+export async function getServerSideProps(context) {
+  const {
+    params: { projectName },
+    req
+  } = context;
+  const { user } = await auth0.getSession(req);
+
+  // TODO: create graphql query to get the project based projectName
+
+  return {
+    props: { projectName },
+  };
+}
+
+export default function OrganizationPage({ projects, teamId }) {
   const { colorMode } = useColorMode();
   const orgProjects = projects.filter(
-    (project) => project.owner.login === organizationName
+    (project) => project.owner.login === teamId
   );
   return (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
         {orgProjects.map(({ owner: { login, avatarUrl }, name }, index) => (
-          <Link key={name} href={`/${organizationName}/${name}`}>
+          <Link key={name} href={`/${teamId}/${name}`}>
             <a>
               <Card key={index}>
                 <Stack spacing={4} isInline>
@@ -36,7 +51,7 @@ export default function OrganizationPage({ projects, organizationName }) {
                   />
                   <Stack spacing={2}>
                     <Text color={`mode.${colorMode}.text`} lineHeight="none">
-                      {organizationName}
+                      {teamId}
                     </Text>
                     <Heading
                       as="h3"

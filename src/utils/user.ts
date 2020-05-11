@@ -24,7 +24,11 @@ export const confirmOrCreateUser = async (query, auth0IdToken, email) => {
   // the cleaner way would be to have a more fine-grained exception or
   // an isAuth query we could run that did not raise an exception
   try {
-    const { user } = await _8baseUserClient.request(query);
+    const { user } = await _8baseUserClient.request(`query {
+      user {
+        ${query}
+      }
+    }`);
     return user;
   } catch {
     const _8baseAdminClient = new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
@@ -40,7 +44,7 @@ export const confirmOrCreateUser = async (query, auth0IdToken, email) => {
         user: $user,
         authProfileId: $authProfileId
       ) {
-        id
+        ${query}
       }
     }`, {
       user: {

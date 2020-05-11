@@ -9,28 +9,39 @@ import {
   useColorMode
 } from "@chakra-ui/core";
 // cards
+import auth0 from "../../../utils/auth0";
 import Settings from "../../../components/Dashboard/settings";
 import Production from "../../../components/Dashboard/production";
 import Branch from "../../../components/Dashboard/branch";
 import Chart from "../../../components/Dashboard/chart";
 
+import { GraphQLClient } from "graphql-request";
 import fetch from "isomorphic-unfetch";
 import hookNeedingFetch from "../../../utils/hookNeedingFetch";
 
 export async function getServerSideProps(context) {
   const {
-    params: { repositoryName },
+    params: { projectName },
+    req
   } = context;
+  const { user } = await auth0.getSession(req);
+
+  const _8baseGraphQLClient = new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
+    headers: {
+      authorization: `Bearer ${user.idToken}`,
+    },
+  });
+
 
   return {
-    props: { repositoryName },
+    props: { projectName },
   };
 }
 
-const Dashboard = ({ projects, repositoryName }) => {
+const Dashboard = ({ projects, projectName }) => {
 
   const authorizedRepos = projects.filter(
-    (project) => project.name === repositoryName
+    (project) => project.name === projectName
   );
 
   const canViewRepo = authorizedRepos.length > 0;
@@ -97,7 +108,7 @@ const Dashboard = ({ projects, repositoryName }) => {
       >
         <Settings
           // organizationName={organizationName}
-          repositoryName={repositoryName}
+          repositoryName={projectName}
         />
         <Production tests={productionTests} />
         <Branch tests={branchTests} />
