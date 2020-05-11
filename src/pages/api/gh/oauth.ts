@@ -1,5 +1,5 @@
 import auth0 from '../../../utils/auth0';
-import { oa } from '../../../utils/gh';
+import { authenticateAppWithGithub } from '../../../utils/gh';
 import {encrypt} from '../../../utils/sec';
 import { GraphQLClient } from 'graphql-request';
 import fetch from 'isomorphic-unfetch';
@@ -35,7 +35,7 @@ export default async function me(req, res) {
     params.append('redirect_uri', process.env.GH_OAUTH_REDIRECT_URI);
     params.append('state', state);
 
-    await oa(params);
+    await authenticateAppWithGithub(params, session.user.idToken);
 
     res.writeHead(301, {
       Location: '/'

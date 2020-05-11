@@ -1,5 +1,5 @@
 import auth0 from '../../utils/auth0';
-import { GraphQLClient } from 'graphql-request';
+import { getAllGhRepos } from '../../utils/gh';
 
 export default async function me(req, res) {
   try {
@@ -9,7 +9,8 @@ export default async function me(req, res) {
       res.send('Not logged in');
     }
     const { user } = session;
-    const allGhRepos = await getAllGhRepos(user.idToken);
+    const allGhRepos = await getAllGhRepos(user.idToken, user.email);
+    res.json(allGhRepos);
   } catch (error) {
     console.error(error);
     res.status(error.status || 500).end(error.message);

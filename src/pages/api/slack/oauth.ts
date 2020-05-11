@@ -1,5 +1,4 @@
 import auth0 from '../../../utils/auth0';
-import { exchangeSessionForUserId } from '../../../utils/user';
 import { GraphQLClient } from 'graphql-request';
 import fetch from 'isomorphic-unfetch';
 

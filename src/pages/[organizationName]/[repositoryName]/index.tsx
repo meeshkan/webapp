@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Grid } from "@chakra-ui/core";
-
+import {
+  Grid,
+  Button,
+  Skeleton,
+  Box,
+  Heading,
+  Flex,
+  useColorMode
+} from "@chakra-ui/core";
 // cards
 import Settings from "../../../components/Dashboard/settings";
 import Production from "../../../components/Dashboard/production";
@@ -8,7 +15,7 @@ import Branch from "../../../components/Dashboard/branch";
 import Chart from "../../../components/Dashboard/chart";
 
 import fetch from "isomorphic-unfetch";
-import { useFetchUser } from "../../../utils/user";
+import hookNeedingFetch from "../../../utils/hookNeedingFetch";
 
 export async function getServerSideProps(context) {
   const {
@@ -20,24 +27,25 @@ export async function getServerSideProps(context) {
   };
 }
 
-const Dashboard = ({ repositoryName }) => {
-  const [repo, setRepo] = useState({
-    tests: [],
-  });
+const Dashboard = ({ projects, repositoryName }) => {
 
-  const { user } = useFetchUser();
-  const repoId = user.projects.filter(
+  const authorizedRepos = projects.filter(
     (project) => project.name === repositoryName
   );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const res = await fetch(`/api/gh/repo/${repoId[0].id}`);
+  const canViewRepo = authorizedRepos.length > 0;
+
+  const fetchRepo = async () => {
+    if (authorizedRepos.length > 0) {
+      const res = await fetch(`/api/gh/repo/${authorizedRepos[0].id}`);
       const result = res.ok ? await res.json() : null;
-      setRepo(result);
-    };
-    fetchData();
-  }, []);
+      return result;  
+    } else {
+      return null;
+    }
+  };
+  
+  const [ repo, loadingRepo ] = hookNeedingFetch(fetchRepo);
 
   let branchTests = [];
   let productionTests = [];
@@ -50,9 +58,39 @@ const Dashboard = ({ repositoryName }) => {
     }
   });
 
+  const { colorMode } = useColorMode();
   return (
     <>
-      <Grid
+    {!canViewRepo &&
+        <Box as="section" my={12}>
+          <Heading
+            as="h2"
+            color={`mode.${colorMode}.title`}
+            textAlign="center"
+            mb={4}
+          >
+            Oops!
+          </Heading>
+          <Flex justify="center">
+            We asked GitHub (nicely), and it looks like you do not have permission to access build information for that repo. Fear not! You can install Meeshkan for {name} or, if it is already installed, contact your organization and make sure you have access to it.
+          </Flex>
+        </Box>}
+      {canViewRepo && !repo && <Skeleton isLoaded={!loadingRepo}>
+      <Box as="section" my={12}>
+          <Heading
+            as="h2"
+            color={`mode.${colorMode}.title`}
+            textAlign="center"
+            mb={4}
+          >
+            Oh no!
+          </Heading>
+          <Flex justify="center">
+            Well, this is embarassing. It looks like we could not laod your repo. It's a bug, our engineers are working to fix it, and it will be up and running soon!
+          </Flex>
+        </Box>
+        </Skeleton>}
+      {canViewRepo && repo && <Grid
         templateColumns="repeat(3, 1fr)"
         templateRows="repeat(2, minmax(204px, 45%))"
         gap={8}
@@ -64,7 +102,7 @@ const Dashboard = ({ repositoryName }) => {
         <Production tests={productionTests} />
         <Branch tests={branchTests} />
         <Chart />
-      </Grid>
+      </Grid>}
     </>
   );
 };

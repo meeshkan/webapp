@@ -1,5 +1,6 @@
 import React from "react";
 import fetch from "isomorphic-unfetch";
+import hookNeedingFetch from "./hookNeedingFetch";
 import { GraphQLClient } from "graphql-request";
 
 export const fetchUser = async () => {
@@ -8,24 +9,9 @@ export const fetchUser = async () => {
   return user;
 };
 
-export const useFetchUser = () => {
-  const [user, setUser] = React.useState({
-    user: null,
-    loadingUser: true,
-  });
+export const useFetchUser = () => hookNeedingFetch(fetchUser);
 
-  React.useEffect(() => {
-    const fetchData = async () => {
-      const user = await fetchUser();
-      setUser({ user, loadingUser: false });
-    };
-    fetchData();
-  }, []);
-
-  return user;
-};
-
-export const confirmOrCreateUser = (auth0IdToken, email) => {
+export const confirmOrCreateUser = async (query, auth0IdToken, email) => {
   const _8baseUserClient = new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
       headers: {
         authorization: `Bearer ${auth0IdToken}`,
@@ -38,14 +24,15 @@ export const confirmOrCreateUser = (auth0IdToken, email) => {
   // the cleaner way would be to have a more fine-grained exception or
   // an isAuth query we could run that did not raise an exception
   try {
-    await _8baseUserClient.request("{ user { id } }");
+    const { user } = await _8baseUserClient.request(query);
+    return user;
   } catch {
     const _8baseAdminClient = new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
         headers: {
           authorization: `Bearer ${process.env.EIGHT_BASE_CREATE_USER_TOKEN}`,
         },
     });
-    await _8baseAdminClient.request(`mutation (
+    const { userSignUpWithToken } = await _8baseAdminClient.request(`mutation (
       $user: UserCreateInput!,
       $authProfileId: ID!
     ) {
@@ -61,5 +48,6 @@ export const confirmOrCreateUser = (auth0IdToken, email) => {
       },
       authProfileId: process.env.EIGHT_BASE_AUTH_PROFILE_ID
     });
+    return userSignUpWithToken;
   }
 }

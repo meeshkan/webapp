@@ -11,12 +11,9 @@ import {
 import Project from "../molecules/project";
 import Link from "next/link";
 import { useFetchUser } from "../../utils/user";
-import { useRouter } from "next/router";
 
-const Navigation = () => {
+const Navigation = ({ user, loadingUser }) => {
   const { colorMode, toggleColorMode } = useColorMode();
-  const { user, loadingUser } = useFetchUser();
-  const router = useRouter();
 
   return (
     <>
@@ -55,7 +52,7 @@ const Navigation = () => {
                 />
               </Stack>
             )}
-            {user && <Project />}
+            {user && <Project user={user} />}
           </section>
         )}
       </Flex>

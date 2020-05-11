@@ -16,9 +16,8 @@ import Link from "next/link";
 import { useFetchUser } from "../../utils/user";
 import { repos } from "../../data/repoQuery";
 
-const ProjectSettings = () => {
+const ProjectSettings = ({ user }) => {
   const { colorMode, toggleColorMode } = useColorMode();
-  const { user } = useFetchUser();
 
   return (
     <>

@@ -15,9 +15,8 @@ import { useFetchUser } from "../utils/user";
 import { useFetchProjects } from "../utils/projects";
 
 
-export default function Home() {
+export default function Home({ projects }) {
   const { colorMode } = useColorMode();
-  const { projects, loadingProjects } = useFetchProjects();
   return (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
