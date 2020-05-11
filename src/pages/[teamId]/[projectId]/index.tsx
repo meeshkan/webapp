@@ -26,12 +26,7 @@ export async function getServerSideProps(context) {
   } = context;
   const { user } = await auth0.getSession(req);
 
-  const _8baseGraphQLClient = new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-    headers: {
-      authorization: `Bearer ${user.idToken}`,
-    },
-  });
-
+  // TODO: create graphql query to get the project based on teamName and projectName
 
   return {
     props: { projectName },
