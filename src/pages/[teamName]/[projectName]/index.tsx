@@ -162,6 +162,7 @@ const Dashboard = ({ teamName, projectName, project }: IProjectProps) => {
         gap={8}
       >
         <Settings
+          organizationName={teamName}
           repositoryName={projectName}
         />
         <Production
