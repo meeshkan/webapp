@@ -101,6 +101,7 @@ const uploadPhotoForTeam = async (idToken, userId, teamId, photoUrl) => {
     }
   );
 
+  console.log('making query for upload link')
   const {
     fileUploadInfo: { policy, signature, apiKey, path },
   } = await _8baseGraphQLClient.request(query);
@@ -109,8 +110,9 @@ const uploadPhotoForTeam = async (idToken, userId, teamId, photoUrl) => {
   // curl -X POST -d url="https://assets.filestackapi.com/watermark.png" "https://www.filestackapi.com/api/store/S3?key=MY_API_KEY"
   const params = new URLSearchParams();
   params.append("url", photoUrl);
+  const fsurl = `https://www.filestackapi.com/api/store/S3?key=${apiKey}&policy=${policy}&signature=${signature}&path=${path}`;
   const uploadToFilestack = await fetch(
-    `https://www.filestackapi.com/api/store/S3?key=${apiKey}&policy=${policy}&signature=${signature}&path=${path}`,
+    fsurl,
     {
       method: "post",
       body: params,
@@ -157,7 +159,7 @@ const uploadPhotoForTeam = async (idToken, userId, teamId, photoUrl) => {
     {
       teamId,
       userId,
-      fileId: responseFromFilestack.url.split("/").slice(-1),
+      fileId: responseFromFilestack.url.split("/").slice(-1)[0],
       filename: responseFromFilestack.filename,
     }
   );
@@ -171,8 +173,6 @@ export default async function defaultWorkspaceHook(req, res) {
       res.status(403);
       res.send("No active session");
     }
-
-    console.log("SESSION USER", session.user);
 
     const tp = t.type({ id: t.string });
     const confirmUser = await confirmOrCreateUser<t.TypeOf<typeof tp>>(
