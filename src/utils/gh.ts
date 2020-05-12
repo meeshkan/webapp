@@ -6,7 +6,7 @@ import { decrypt, encrypt } from './sec';
 import querystring from 'querystring';
 import { left, right, Either, isLeft } from "fp-ts/lib/Either";
 import fetch from 'isomorphic-unfetch';
-import t from "io-ts";
+import * as t from "io-ts";
 
 export interface IOwner {
     login: string;
@@ -138,7 +138,9 @@ export const fetchGithubAccessToken = async (auth0IdToken, email): Promise<Eithe
       refreshTokenSalt
       nodeId
     }`, auth0IdToken, email);
-  
+    if (githubUser === null) {
+      return left(NegativeGithubFetchOutcomes.NO_TOKEN_YET);
+    }
     if (githubUser.expiresAt - (new Date().getTime() / MS_IN_SEC) < TWENTY_SECONDS) {
         if (githubUser.refreshTokenExpiresAt - (new Date().getTime() / MS_IN_SEC) < TWENTY_SECONDS) {
             return left(NegativeGithubFetchOutcomes.NEEDS_REAUTH);

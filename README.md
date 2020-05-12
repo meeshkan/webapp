@@ -8,7 +8,7 @@ Optimize for user experience (clear URL structure) and only add an abstraction i
 
 ### Team name and project name
 
-There is currently no mechanism to dynamically generate a `teamName` that is not a GitHub owner name or `projectName` that is not a github repo name. That means that, if there is a conflict because the `teamName` or `projectName` is not unique, the app will `/404`. As this is a rare occurence, we do not have any code to cover that. Eventually, we can write code that automatically generates a new `teamName` or `projectName` if the current name is taken already.
+There is currently only a naive mechanism to dynamically generate a `teamName` that is not a GitHub owner name or `projectName` that is not a github repo name. That means that, in very rare cases, if there is a conflict because the `teamName` or `projectName` is not unique, the app will `/404`. As this is a rare occurence, we do not have any code to cover that. Eventually, we can write code that more-resiliently generates a new `teamName` or `projectName` if the current name is taken already.
 
 ### Slack webhooks
 
