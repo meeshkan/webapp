@@ -132,9 +132,11 @@ export const fetchGithubAccessToken = async (
   email
 ): Promise<Either<NegativeGithubFetchOutcomes, string>> => {
   const {
+    id,
     user: { githubInfo },
   } = await confirmOrCreateUser(
-    `githubInfo {
+    `id
+    githubInfo {
       githubSyncChecksum
       githubSyncNonce
     }`,
@@ -167,6 +169,7 @@ export const fetchGithubAccessToken = async (
       params.append("refresh_token", githubUser.refreshToken);
 
       const access_token = await authenticateAppWithGithub(
+        id,
         params,
         auth0IdToken
       );
