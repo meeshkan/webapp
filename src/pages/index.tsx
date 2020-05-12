@@ -25,7 +25,6 @@ import {
   Flex,
 } from "@chakra-ui/core";
 import Card from "../components/molecules/card";
-import { useFetchUser } from "../utils/user";
 import * as t from "io-ts";
 import { GraphQLClient } from "graphql-request";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
@@ -149,8 +148,6 @@ const teamsToProjects = (teams: ITeam[]): IProject[] =>
       projectName: item.name,
     }))
   );
-// import { useFetchUser } from "../utils/user";
-// import { useFetchProjects } from "../utils/projects";
 
 type ImportProps = {
   repoName: String;
@@ -178,6 +175,11 @@ const ImportProject = ({ repoName }: ImportProps) => {
 
 function createProject() {
   // This will execute the function that takes a repository and makes a project
+  return null;
+}
+
+async function authorizeGithub() {
+  // This is a placholder for the function that calls the GitHub API for what Meeshkan is installed on an returns an object currently represented by a variable called 'owners'. This includes the organizations with Meeshkan installed, and lists the specific repos below.
   return null;
 }
 
@@ -261,6 +263,7 @@ export default function Home(projectsProps: IProjectsProps) {
               fontWeight={900}
               color={`mode.${colorMode}.title`}
             >
+              {/* TODO make this team name dynamic */}
               Import a project to Makenna’s Team
             </ModalHeader>
             <ModalCloseButton
@@ -271,85 +274,94 @@ export default function Home(projectsProps: IProjectsProps) {
               color={`mode.${colorMode}.text`}
             />
             <ModalBody px={2}>
-              {githubAuthorized && (
+              {githubAuthorized === false ? (
                 <Flex h="100%" justify="center" align="center">
                   <Button
                     rounded="sm"
                     fontWeight={900}
                     px={4}
                     variantColor="red"
-                    h="100%"
-                    onClick={() => {}}
+                    onClick={() => {
+                      authorizeGithub();
+                      setGithubAuthorized(true);
+                    }}
                   >
                     <Icon name="github" mr={2} />
                     Import from GitHub
                   </Button>
                 </Flex>
-              )}
-              <Menu closeOnSelect={true}>
-                <MenuButton
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  minWidth="204px"
-                  rounded="sm"
-                  ml={2}
-                  mb={4}
-                  border="1px solid"
-                  backgroundColor={`mode.${colorMode}.background`}
-                  borderColor={`mode.${colorMode}.icon`}
-                >
-                  <Image
-                    src={owner.picture}
-                    size={8}
-                    roundedLeft="sm"
-                    borderColor={`mode.${colorMode}.background`}
-                  />
-                  <Text mr={8} color={`mode.${colorMode}.text`}>
-                    {owner.name}
-                  </Text>
-                  <Icon
-                    name="arrow-up-down"
-                    size="12px"
-                    color="gray.500"
-                    mr={2}
-                  />
-                </MenuButton>
-                <MenuList
-                  border="none"
-                  placement="bottom-start"
-                  backgroundColor={`mode.${colorMode}.card`}
-                  color={`mode.${colorMode}.text`}
-                >
-                  <MenuOptionGroup defaultValue={owner.name} type="radio">
-                    {owners.map((owner, index) => (
-                      <MenuItemOption
-                        key={index}
-                        value={owner.name}
-                        onClick={() => setOwner(owner)}
-                      >
+              ) : (
+                <>
+                  <Menu closeOnSelect={true}>
+                    <MenuButton
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      minWidth="204px"
+                      rounded="sm"
+                      ml={2}
+                      mb={4}
+                      border="1px solid"
+                      backgroundColor={`mode.${colorMode}.background`}
+                      borderColor={`mode.${colorMode}.icon`}
+                    >
+                      <Image
+                        src={owner.picture}
+                        size={8}
+                        roundedLeft="sm"
+                        borderColor={`mode.${colorMode}.background`}
+                      />
+                      <Text mr={8} color={`mode.${colorMode}.text`}>
                         {owner.name}
-                      </MenuItemOption>
+                      </Text>
+                      <Icon
+                        name="arrow-up-down"
+                        size="12px"
+                        color="gray.500"
+                        mr={2}
+                      />
+                    </MenuButton>
+                    <MenuList
+                      border="none"
+                      placement="bottom-start"
+                      backgroundColor={`mode.${colorMode}.card`}
+                      color={`mode.${colorMode}.text`}
+                    >
+                      <MenuOptionGroup defaultValue={owner.name} type="radio">
+                        {owners.map((owner, index) => (
+                          <MenuItemOption
+                            key={index}
+                            value={owner.name}
+                            onClick={() => setOwner(owner)}
+                          >
+                            {owner.name}
+                          </MenuItemOption>
+                        ))}
+                      </MenuOptionGroup>
+                    </MenuList>
+                  </Menu>
+                  <Stack>
+                    {owner.projects.map((project, index) => (
+                      <ImportProject key={index} repoName={project.repoName} />
                     ))}
-                  </MenuOptionGroup>
-                </MenuList>
-              </Menu>
-              <Stack>
-                {owner.projects.map((project, index) => (
-                  <ImportProject key={index} repoName={project.repoName} />
-                ))}
-              </Stack>
+                  </Stack>
+                </>
+              )}
             </ModalBody>
             <ModalFooter d="flex" justifyContent="center" fontSize="sm">
-              <Text mr={2} color={`mode.${colorMode}.text`}>
-                Not seeing the repository you want?
-              </Text>
-              <ChakraLink
-                href="https://github.com/apps/meeshkan/installations/new"
-                color={colorMode == "light" ? "red.500" : "red.200"}
-              >
-                Configure on GitHub.
-              </ChakraLink>
+              {githubAuthorized === false ? null : (
+                <>
+                  <Text mr={2} color={`mode.${colorMode}.text`}>
+                    Not seeing the repository you want?
+                  </Text>
+                  <ChakraLink
+                    href="https://github.com/apps/meeshkan/installations/new"
+                    color={colorMode == "light" ? "red.500" : "red.200"}
+                  >
+                    Configure on GitHub.
+                  </ChakraLink>
+                </>
+              )}
             </ModalFooter>
           </ModalContent>
         </Modal>
