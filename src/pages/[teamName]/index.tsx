@@ -15,6 +15,7 @@ import auth0 from "../../utils/auth0";
 import Card from "../../components/molecules/card";
 import { Either, left, right, isLeft } from "fp-ts/lib/Either";
 import * as t from "io-ts";
+import { confirmOrCreateUser } from "../../utils/user";
 
 enum NegativeTeamFetchOutcome {
   TEAM_DOES_NOT_EXIST,
@@ -106,9 +107,10 @@ export async function getServerSideProps(
     req,
   } = context;
   const {
-    user: { idToken },
+    user: { idToken, email },
   } = await auth0.getSession(req);
 
+  await confirmOrCreateUser("id", idToken, email);
   const team = await getTeam(idToken, teamName);
 
   return {

@@ -21,6 +21,7 @@ import * as t from "io-ts";
 import { GraphQLClient } from "graphql-request";
 import fetch from "isomorphic-unfetch";
 import hookNeedingFetch from "../../../utils/hookNeedingFetch";
+import { confirmOrCreateUser } from "../../../utils/user";
 
 enum NegativeProjectFetchOutcome {
   PROJECT_DOES_NOT_EXIST,
@@ -135,9 +136,10 @@ export async function getServerSideProps(
     req,
   } = context;
   const {
-    user: { idToken },
+    user: { idToken, email },
   } = await auth0.getSession(req);
 
+  await confirmOrCreateUser("id", idToken, email);
   const project = await getProject(idToken, teamName, projectName);
 
   return {
