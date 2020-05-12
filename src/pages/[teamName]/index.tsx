@@ -14,8 +14,8 @@ import { GraphQLClient } from "graphql-request";
 import auth0 from "../../utils/auth0";
 import Card from "../../components/molecules/card";
 import { Either, left, right, isLeft } from "fp-ts/lib/Either";
-import * as t from "io-ts";
 import { confirmOrCreateUser } from "../../utils/user";
+import * as t from "io-ts";
 
 enum NegativeTeamFetchOutcome {
   TEAM_DOES_NOT_EXIST,
@@ -109,8 +109,11 @@ export async function getServerSideProps(
   const {
     user: { idToken, email },
   } = await auth0.getSession(req);
-
-  await confirmOrCreateUser("id", idToken, email);
+  const tp = t.type({ id: t.string })
+  const c = await confirmOrCreateUser<t.TypeOf<typeof tp>>("id", idToken, email, tp.is);
+  if (isLeft(c)) {
+    console.error("type safety error in application");
+  }
   const team = await getTeam(idToken, teamName);
 
   return {

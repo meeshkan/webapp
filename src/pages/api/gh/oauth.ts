@@ -1,6 +1,8 @@
 import auth0 from '../../../utils/auth0';
 import { authenticateAppWithGithub } from '../../../utils/gh';
+import { confirmOrCreateUser } from '../../../utils/user';
 import { isLeft } from "fp-ts/lib/Either";
+import * as t from "io-ts";
 
 export default async function me(req, res) {
   try {
@@ -31,7 +33,16 @@ export default async function me(req, res) {
     params.append('redirect_uri', process.env.GH_OAUTH_REDIRECT_URI);
     params.append('state', state);
 
-    const authenticationResult = await authenticateAppWithGithub(params, session.user.idToken);
+    const tp = t.type({ id: t.string })
+    const confirmResult  = await confirmOrCreateUser<t.TypeOf<typeof tp>>("id", session.user.idToken, session.user.email, tp.is);
+    if (isLeft(confirmResult)) {
+      console.error("Type safety error in graphql query");
+      res.writeHead(404, {
+        Location: '/404'
+      });
+      return;
+    }
+    const authenticationResult = await authenticateAppWithGithub(confirmResult.right.id, params, session.user.idToken);
     if (isLeft(authenticationResult)) {
       res.writeHead(404, {
         Location: '/404'

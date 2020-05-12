@@ -2,6 +2,7 @@ import React from "react";
 import fetch from "isomorphic-unfetch";
 import hookNeedingFetch from "./hookNeedingFetch";
 import { GraphQLClient } from "graphql-request";
+import { Either, left, right } from "fp-ts/lib/Either";
 
 export const fetchUser = async () => {
   const res = await fetch("/api/me");
@@ -11,7 +12,11 @@ export const fetchUser = async () => {
 
 export const useFetchUser = () => hookNeedingFetch(fetchUser);
 
-export const confirmOrCreateUser = async (query, auth0IdToken, email) => {
+enum NegativeConfirmOrCreateUserOutcome {
+  INCORRECT_TYPE_SAFETY
+}
+
+export const confirmOrCreateUser = async <T>(query: string, auth0IdToken: string, email: string, typeSafe: (u: unknown) => u is T): Promise<Either<NegativeConfirmOrCreateUserOutcome, T>> => {
   const _8baseUserClient = new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
       headers: {
         authorization: `Bearer ${auth0IdToken}`,
@@ -29,7 +34,7 @@ export const confirmOrCreateUser = async (query, auth0IdToken, email) => {
         ${query}
       }
     }`);
-    return user;
+    return typeSafe(user) ? right(user) : left(NegativeConfirmOrCreateUserOutcome.INCORRECT_TYPE_SAFETY);
   } catch {
     const _8baseAdminClient = new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
         headers: {
@@ -52,6 +57,6 @@ export const confirmOrCreateUser = async (query, auth0IdToken, email) => {
       },
       authProfileId: process.env.EIGHT_BASE_AUTH_PROFILE_ID
     });
-    return userSignUpWithToken;
+    return typeSafe(userSignUpWithToken) ? right(userSignUpWithToken) : left(NegativeConfirmOrCreateUserOutcome.INCORRECT_TYPE_SAFETY);
   }
 }

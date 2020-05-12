@@ -122,6 +122,7 @@ enum NegativeGithubFetchOutcomes {
   NEEDS_REAUTH,
   NO_TOKEN_YET,
   LOGIC_ERROR,
+  TYPE_SAFETY_ERROR,
 }
 
 const TWENTY_SECONDS = 20;
@@ -131,18 +132,32 @@ export const fetchGithubAccessToken = async (
   auth0IdToken,
   email
 ): Promise<Either<NegativeGithubFetchOutcomes, string>> => {
-  const {
-    id,
-    user: { githubInfo },
-  } = await confirmOrCreateUser(
+  const tp = t.type({
+    id: t.string,
+    githubInfo: t.union([
+      t.null,
+      t.type({
+        githubSyncChecksum: t.string,
+        githubSyncNonce: t.string,
+      }),
+    ]),
+  });
+  const c = await confirmOrCreateUser<t.TypeOf<typeof tp>>(
     `id
     githubInfo {
       githubSyncChecksum
       githubSyncNonce
     }`,
     auth0IdToken,
-    email
+    email,
+    tp.is
   );
+
+  if (isLeft(c)) {
+    return left(NegativeGithubFetchOutcomes.LOGIC_ERROR);
+  }
+
+  const { id, githubInfo } = c.right;
   if (githubInfo === null) {
     return left(NegativeGithubFetchOutcomes.NO_TOKEN_YET);
   }
@@ -347,7 +362,8 @@ export const authenticateAppWithGithub = async (
   const vars = {};
   // we try to update the refresh token
   try {
-    await _8baseGraphQLClient.request(`mutation(
+    await _8baseGraphQLClient.request(
+      `mutation(
       $userId:ID!
       $githubSyncChecksum:String!
       $githubSyncNonce:String!
@@ -367,15 +383,18 @@ export const authenticateAppWithGithub = async (
       ) {
         id
       }
-    }`, {
-      userId,
-      githubSyncChecksum: salted_encrypted_data.encryptedData,
-      githubSyncNonce: salted_encrypted_data.iv,
-    });
+    }`,
+      {
+        userId,
+        githubSyncChecksum: salted_encrypted_data.encryptedData,
+        githubSyncNonce: salted_encrypted_data.iv,
+      }
+    );
   } catch (e) {
     console.error(e);
     // the user exists already, so we update instead
-    await _8baseGraphQLClient.request(`mutation(
+    await _8baseGraphQLClient.request(
+      `mutation(
       $userId:ID!
       $githubSyncChecksum:String!
       $githubSyncNonce:String!
@@ -395,11 +414,13 @@ export const authenticateAppWithGithub = async (
       ) {
         id
       }
-    }`, {
-      userId,
-      githubSyncChecksum: salted_encrypted_data.encryptedData,
-      githubSyncNonce: salted_encrypted_data.iv,
-    });
+    }`,
+      {
+        userId,
+        githubSyncChecksum: salted_encrypted_data.encryptedData,
+        githubSyncNonce: salted_encrypted_data.iv,
+      }
+    );
   }
   return right(t.string.is(access_token) ? access_token : access_token[0]);
 };
