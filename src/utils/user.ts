@@ -47,7 +47,7 @@ export const confirmOrCreateUser = async <T>(
       process.env.EIGHT_BASE_ENDPOINT,
       {
         headers: {
-          authorization: `Bearer ${process.env.EIGHT_BASE_CREATE_USER_TOKEN}`,
+          authorization: `Bearer ${session.idToken}`,
         },
       }
     );

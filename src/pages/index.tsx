@@ -41,9 +41,12 @@ enum NegativeProjectsFetchOutcome {
 }
 
 const Team = t.type({
-  image: t.union([t.null, t.type({
-    downloadUrl: t.string,
-  })]),
+  image: t.union([
+    t.null,
+    t.type({
+      downloadUrl: t.string,
+    }),
+  ]),
   name: t.string,
   project: t.type({
     items: t.array(
@@ -112,9 +115,7 @@ type IProjectsProps = Either<NegativeProjectsFetchOutcome, ITeam[]>;
 export async function getServerSideProps(
   context
 ): Promise<{ props: IProjectsProps }> {
-  const {
-    req
-  } = context;
+  const { req } = context;
   const session = await auth0.getSession(req);
   if (!session) {
     return { props: left(NegativeProjectsFetchOutcome.NOT_LOGGED_IN) };
@@ -142,7 +143,7 @@ interface IProject {
 }
 const teamsToProjects = (teams: ITeam[]): IProject[] =>
   teams.flatMap(({ name, image, project: { items } }) =>
-    items.map( item => ({
+    items.map((item) => ({
       teamName: name,
       teamImage: image ? image.downloadUrl : "https://picsum.photos/200",
       projectName: item.name,
@@ -175,6 +176,7 @@ const ImportProject = ({ repoName }: ImportProps) => {
 
 function createProject() {
   // This will execute the function that takes a repository and makes a project
+
   return null;
 }
 
@@ -182,37 +184,41 @@ export default function Home(projectsProps: IProjectsProps) {
   const { colorMode } = useColorMode();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [owner, setOwner] = useState(owners[0]);
-  return (isLeft(projectsProps) ? <div>bad</div> :
+  return isLeft(projectsProps) ? (
+    <div>bad</div>
+  ) : (
     <>
       {" "}
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
-        {teamsToProjects(projectsProps.right).map(({ teamName, teamImage, projectName }, index) => (
-          <Card key={index} link={`/${teamName}/${projectName}`}>
-            <Stack spacing={4} isInline>
-              <Image
-                size={10}
-                src={teamImage}
-                bg="gray.50"
-                border="1px solid"
-                borderColor={`mode.${colorMode}.icon`}
-                rounded="sm"
-              />
-              <Stack spacing={2}>
-                <Text color={`mode.${colorMode}.text`} lineHeight="none">
-                  {teamName}
-                </Text>
-                <Heading
-                  as="h3"
-                  lineHeight="none"
-                  fontSize="md"
-                  fontWeight={900}
-                >
-                  {name}
-                </Heading>
+        {teamsToProjects(projectsProps.right).map(
+          ({ teamName, teamImage, projectName }, index) => (
+            <Card key={index} link={`/${teamName}/${projectName}`}>
+              <Stack spacing={4} isInline>
+                <Image
+                  size={10}
+                  src={teamImage}
+                  bg="gray.50"
+                  border="1px solid"
+                  borderColor={`mode.${colorMode}.icon`}
+                  rounded="sm"
+                />
+                <Stack spacing={2}>
+                  <Text color={`mode.${colorMode}.text`} lineHeight="none">
+                    {teamName}
+                  </Text>
+                  <Heading
+                    as="h3"
+                    lineHeight="none"
+                    fontSize="md"
+                    fontWeight={900}
+                  >
+                    {name}
+                  </Heading>
+                </Stack>
               </Stack>
-            </Stack>
-          </Card>
-        ))}
+            </Card>
+          )
+        )}
 
         {/* Import a project | BUTTON */}
         <Button
