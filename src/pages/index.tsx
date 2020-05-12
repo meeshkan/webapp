@@ -157,6 +157,7 @@ type ImportProps = {
 };
 
 const ImportProject = ({ repoName }: ImportProps) => {
+  const { colorMode } = useColorMode();
   return (
     <Button
       w="full"
@@ -164,6 +165,7 @@ const ImportProject = ({ repoName }: ImportProps) => {
       rounded="sm"
       onClick={createProject}
       justifyContent="space-between"
+      color={`mode.${colorMode}.text`}
     >
       <Flex align="center">
         <Icon name="github" mr={2} />
@@ -176,7 +178,6 @@ const ImportProject = ({ repoName }: ImportProps) => {
 
 function createProject() {
   // This will execute the function that takes a repository and makes a project
-
   return null;
 }
 
@@ -184,11 +185,12 @@ export default function Home(projectsProps: IProjectsProps) {
   const { colorMode } = useColorMode();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [owner, setOwner] = useState(owners[0]);
+  const [githubAuthorized, setGithubAuthorized] = useState(false);
+
   return isLeft(projectsProps) ? (
     <div>bad</div>
   ) : (
     <>
-      {" "}
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
         {teamsToProjects(projectsProps.right).map(
           ({ teamName, teamImage, projectName }, index) => (
@@ -212,7 +214,7 @@ export default function Home(projectsProps: IProjectsProps) {
                     fontSize="md"
                     fontWeight={900}
                   >
-                    {name}
+                    {projectName}
                   </Heading>
                 </Stack>
               </Stack>
@@ -224,6 +226,8 @@ export default function Home(projectsProps: IProjectsProps) {
         <Button
           onClick={onOpen}
           p={4}
+          minH="100%"
+          justifyContent="start"
           rounded="sm"
           lineHeight="none"
           fontSize="md"
@@ -232,7 +236,7 @@ export default function Home(projectsProps: IProjectsProps) {
           color={`mode.${colorMode}.title`}
           _hover={{ color: `mode.${colorMode}.titleHover` }}
         >
-          <Icon h={10} w={10} name="add" stroke="2px" />
+          <Icon h={10} w={10} mr={2} name="add" stroke="2px" />
           Import a project
         </Button>
 
@@ -246,34 +250,64 @@ export default function Home(projectsProps: IProjectsProps) {
           size="lg"
         >
           <ModalOverlay />
-          <ModalContent rounded="sm">
+          <ModalContent rounded="sm" backgroundColor={`mode.${colorMode}.card`}>
             <ModalHeader
               borderBottom="1px solid"
-              borderColor="gray.100"
+              borderColor={`mode.${colorMode}.icon`}
               mx={4}
               px={0}
               pt={4}
               pb={2}
               fontWeight={900}
+              color={`mode.${colorMode}.title`}
             >
               Import a project to Makenna’s Team
             </ModalHeader>
-            <ModalCloseButton rounded="sm" size="sm" mt={2} mr={0} />
+            <ModalCloseButton
+              rounded="sm"
+              size="sm"
+              mt={2}
+              mr={0}
+              color={`mode.${colorMode}.text`}
+            />
             <ModalBody px={2}>
+              {githubAuthorized && (
+                <Flex h="100%" justify="center" align="center">
+                  <Button
+                    rounded="sm"
+                    fontWeight={900}
+                    px={4}
+                    variantColor="red"
+                    h="100%"
+                    onClick={() => {}}
+                  >
+                    <Icon name="github" mr={2} />
+                    Import from GitHub
+                  </Button>
+                </Flex>
+              )}
               <Menu closeOnSelect={true}>
                 <MenuButton
                   display="flex"
                   alignItems="center"
                   justifyContent="space-between"
                   minWidth="204px"
-                  border="1px solid"
-                  borderColor="gray.200"
-                  p={2}
                   rounded="sm"
                   ml={2}
                   mb={4}
+                  border="1px solid"
+                  backgroundColor={`mode.${colorMode}.background`}
+                  borderColor={`mode.${colorMode}.icon`}
                 >
-                  {owner.name}
+                  <Image
+                    src={owner.picture}
+                    size={8}
+                    roundedLeft="sm"
+                    borderColor={`mode.${colorMode}.background`}
+                  />
+                  <Text mr={8} color={`mode.${colorMode}.text`}>
+                    {owner.name}
+                  </Text>
                   <Icon
                     name="arrow-up-down"
                     size="12px"
@@ -281,7 +315,12 @@ export default function Home(projectsProps: IProjectsProps) {
                     mr={2}
                   />
                 </MenuButton>
-                <MenuList border="none" placement="bottom-start">
+                <MenuList
+                  border="none"
+                  placement="bottom-start"
+                  backgroundColor={`mode.${colorMode}.card`}
+                  color={`mode.${colorMode}.text`}
+                >
                   <MenuOptionGroup defaultValue={owner.name} type="radio">
                     {owners.map((owner, index) => (
                       <MenuItemOption
@@ -302,10 +341,12 @@ export default function Home(projectsProps: IProjectsProps) {
               </Stack>
             </ModalBody>
             <ModalFooter d="flex" justifyContent="center" fontSize="sm">
-              <Text mr={2}>Not seeing the repository you want?</Text>
+              <Text mr={2} color={`mode.${colorMode}.text`}>
+                Not seeing the repository you want?
+              </Text>
               <ChakraLink
                 href="https://github.com/apps/meeshkan/installations/new"
-                color="blue.500"
+                color={colorMode == "light" ? "red.500" : "red.200"}
               >
                 Configure on GitHub.
               </ChakraLink>
@@ -320,6 +361,7 @@ export default function Home(projectsProps: IProjectsProps) {
 // Replace this with the Github organizations the user has configured access to
 const owners = [
   {
+    picture: "https://media.graphcms.com/gRq2y5BsRNqNNrlPwTgX",
     name: "KenzoBenzo",
     projects: [
       {
@@ -361,6 +403,7 @@ const owners = [
     ],
   },
   {
+    picture: "https://media.graphcms.com/ZUjeEBiaT9iGYxhI5kzq",
     name: "Meeshkan",
     projects: [
       {
