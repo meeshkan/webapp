@@ -1,6 +1,6 @@
 import React from "react";
 
-export default (fetchFunction) => {
+export default <T>(fetchFunction: () => Promise<T>): [T, boolean] => {
   const [thingBeingFetched, setThingBeingFetched] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
 

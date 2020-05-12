@@ -29,16 +29,21 @@ const doesUserHaveTeams = async (idToken): Promise<boolean> => {
   return count > 0;
 };
 
-const createTeamFromUserName = async (idToken, teamName): Promise<number> => {
+const createTeamFromUserName = async (idToken, userId, teamName): Promise<number> => {
   const mutation = `mutation(
+    $userId:ID!
     $teamName:String!
   ) {
-    userUpdate(data:{
-      team: {
-        create: {
-          name: $teamName
-        }
+    userUpdate(
+      filter: {
+        id: $userId
       }
+      data:{
+        team: {
+          create: {
+            name: $teamName
+          }
+        }
     }) {
       team(filter: {
         name: {
@@ -67,11 +72,11 @@ const createTeamFromUserName = async (idToken, teamName): Promise<number> => {
         items: [{ id }],
       },
     },
-  } = await _8baseGraphQLClient.request(mutation, { teamName });
+  } = await _8baseGraphQLClient.request(mutation, { teamName, userId });
   return id;
 };
 
-const uploadPhotoForTeam = async (idToken, teamId, photoUrl) => {
+const uploadPhotoForTeam = async (idToken, userId, teamId, photoUrl) => {
   const query = `{
     fileUploadInfo {
       policy
@@ -114,31 +119,38 @@ const uploadPhotoForTeam = async (idToken, teamId, photoUrl) => {
   const responseFromFilestack = await uploadToFilestack.json();
 
   await _8baseGraphQLClient.request(`mutation(
+    $userId:ID!
     $teamId:ID!
     $fileId:String!
     $filename:String!
   ) {
-    userUpdate(data:{
-      team: {
-        update:{
-          filter:{
-            id:$teamId
-          }
-          data:{
-            image:{
-              create:{
-                fileId:$fileId
-                filename:$filename
+    userUpdate(
+      filter: {
+        id:$userId
+      }
+      data:{
+        team: {
+          update:{
+            filter:{
+              id:$teamId
+            }
+            data:{
+              image:{
+                create:{
+                  fileId:$fileId
+                  filename:$filename
+                }
               }
             }
           }
         }
       }
-    }) {
+    ) {
       id
     }
   }`, {
       teamId,
+      userId,
       fileId: responseFromFilestack.url.split('/').slice(-1),
       filename: responseFromFilestack.filename
   });
@@ -159,7 +171,7 @@ export default async function defaultWorkspaceHook(req, res) {
       user: { idToken, email, nickname, picture },
     } = session;
 
-    await confirmOrCreateUser("id", idToken, email);
+    const { id } = await confirmOrCreateUser("id", idToken, email);
     const userHasTeams = await doesUserHaveTeams(idToken);
     if (userHasTeams) {
       res.writeHead(301, {
@@ -171,9 +183,9 @@ export default async function defaultWorkspaceHook(req, res) {
     // if not, we try to create a new team on behalf of the user
     // with their username as the team name
     try {
-      const teamId = await createTeamFromUserName(idToken, nickname);
+      const teamId = await createTeamFromUserName(idToken, id, nickname);
       try {
-        await uploadPhotoForTeam(idToken, teamId, picture);
+        await uploadPhotoForTeam(idToken, id, teamId, picture);
       } catch (e) {
         // Assuming that this should be logged/fixed
         // but does not need any additional business logic,
