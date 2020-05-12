@@ -22,9 +22,8 @@ import { ItemLink, stringToUrl } from "../../../components/molecules/navLink";
 
 const items = ["Build settings", "Environment variables", "Slack integration"];
 
-const ConfigurationPage = () => {
+const ConfigurationPage = ({ user }) => {
   const { colorMode } = useColorMode();
-  const { user } = useFetchUser();
   const [notifications, setNotificaitons] = useState(false);
 
   const slackClick = (e) => {

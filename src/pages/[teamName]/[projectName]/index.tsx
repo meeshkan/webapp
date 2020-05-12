@@ -139,7 +139,12 @@ export async function getServerSideProps(
     user: { idToken, email },
   } = await auth0.getSession(req);
 
-  await confirmOrCreateUser("id", idToken, email);
+  const tp = t.type({ id: t.string })
+  const c = await confirmOrCreateUser<t.TypeOf<typeof tp>>("id", idToken, email, tp.is);
+  if (isLeft(c)) {
+    console.error("type safety error in application");
+  }
+
   const project = await getProject(idToken, teamName, projectName);
 
   return {
