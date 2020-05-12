@@ -16,13 +16,11 @@ import Navigation from "../components/organisms/navigation";
 import Head from "next/head";
 import Layout from "../components/layout";
 import { useFetchUser } from "../utils/user";
-import { useFetchProjects } from "../utils/projects";
 import { useRouter } from "next/router";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const { colorMode } = useColorMode();
   const [ user, loadingUser ] = useFetchUser();
-  const [ projects, loadingProjects ] = useFetchProjects();
   const router = useRouter();
 
   return (
@@ -37,7 +35,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           <Layout>
             <Navigation user={user} loadingUser={loadingUser} />
             {!user && (
-              <Skeleton isLoaded={!loadingUser && !loadingProjects}>
+              <Skeleton isLoaded={!loadingUser}>
                 <Box as="section" my={12}>
                   <Heading
                     as="h2"
@@ -69,7 +67,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                 </Box>
               </Skeleton>
             )}
-            {user && projects && <Component {...pageProps} />}
+            {user && <Component {...pageProps} />}
           </Layout>
         </ColorModeProvider>
       </ThemeProvider>

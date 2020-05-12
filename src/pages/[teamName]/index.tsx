@@ -16,8 +16,10 @@ import Card from "../../components/molecules/card";
 import { Either, left, right, isLeft } from "fp-ts/lib/Either";
 import { confirmOrCreateUser } from "../../utils/user";
 import * as t from "io-ts";
+import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 
 enum NegativeTeamFetchOutcome {
+  NOT_LOGGED_IN,
   TEAM_DOES_NOT_EXIST,
   INVALID_TOKEN_ERROR,
   UNDEFINED_ERROR,
@@ -40,14 +42,14 @@ const Team = t.type({
 type ITeam = t.TypeOf<typeof Team>;
 
 const getTeam = async (
-  idToken,
-  teamName
+  session: ISession,
+  teamName: string
 ): Promise<Either<NegativeTeamFetchOutcome, ITeam>> => {
   const _8baseGraphQLClient = new GraphQLClient(
     process.env.EIGHT_BASE_ENDPOINT,
     {
       headers: {
-        authorization: `Bearer ${idToken}`,
+        authorization: `Bearer ${session.idToken}`,
       },
     }
   );
@@ -94,10 +96,13 @@ const getTeam = async (
   }
 };
 
-interface ITeamProps {
-  teamName: string;
-  team: Either<NegativeTeamFetchOutcome, ITeam>;
-}
+type ITeamProps = Either<
+  NegativeTeamFetchOutcome,
+  {
+    teamName: string;
+    team: ITeam;
+  }
+>;
 
 export async function getServerSideProps(
   context
@@ -106,37 +111,43 @@ export async function getServerSideProps(
     params: { teamName },
     req,
   } = context;
-  const {
-    user: { idToken, email },
-  } = await auth0.getSession(req);
-  const tp = t.type({ id: t.string })
-  const c = await confirmOrCreateUser<t.TypeOf<typeof tp>>("id", idToken, email, tp.is);
+  const session = await auth0.getSession(req);
+  if (!session) {
+    return { props: left(NegativeTeamFetchOutcome.NOT_LOGGED_IN) };
+  }
+  const tp = t.type({ id: t.string });
+  const c = await confirmOrCreateUser<t.TypeOf<typeof tp>>(
+    "id",
+    session,
+    tp.is
+  );
   if (isLeft(c)) {
     console.error("type safety error in application");
   }
-  const team = await getTeam(idToken, teamName);
+  const team = await getTeam(session, teamName);
 
   return {
-    props: { teamName, team },
+    props: isLeft(team)
+      ? left(team.left)
+      : right({ teamName, team: team.right }),
   };
 }
 
 export default function OrganizationPage(projectProps: ITeamProps) {
-  const { teamName, team } = projectProps;
   const { colorMode } = useColorMode();
-  return isLeft(team) ? (
+  return isLeft(projectProps) ? (
     <div>Sorry, you can't be here.</div>
   ) : (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
-        {team.right.project.items.map(({ name }, index) => (
-          <Link key={name} href={`/${teamName}/${name}`}>
+        {projectProps.right.team.project.items.map(({ name }, index) => (
+          <Link key={name} href={`/${projectProps.right.teamName}/${name}`}>
             <a>
               <Card key={index}>
                 <Stack spacing={4} isInline>
                   <Image
                     size={10}
-                    src={team.right.image.downloadUrl}
+                    src={projectProps.right.team.image.downloadUrl}
                     bg="gray.50"
                     border="1px solid"
                     borderColor={`mode.${colorMode}.icon`}
@@ -144,7 +155,7 @@ export default function OrganizationPage(projectProps: ITeamProps) {
                   />
                   <Stack spacing={2}>
                     <Text color={`mode.${colorMode}.text`} lineHeight="none">
-                      {teamName}
+                      {projectProps.right.teamName}
                     </Text>
                     <Heading
                       as="h3"

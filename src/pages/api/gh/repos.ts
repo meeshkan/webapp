@@ -8,8 +8,7 @@ export default async function me(req, res) {
       res.status(400);
       res.send('Not logged in');
     }
-    const { user } = session;
-    const allGhRepos = await getAllGhRepos(user.idToken, user.email);
+    const allGhRepos = await getAllGhRepos(session);
     res.json(allGhRepos);
   } catch (error) {
     console.error(error);

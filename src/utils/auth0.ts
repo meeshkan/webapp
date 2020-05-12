@@ -4,7 +4,7 @@ export default initAuth0({
   domain: process.env.AUTH0_DOMAIN,
   clientId: process.env.AUTH0_CLIENT_ID,
   clientSecret: process.env.AUTH0_CLIENT_SECRET,
-  scope: "openid profile read:user user:email",
+  scope: "openid email picture profile",
   redirectUri: process.env.REDIRECT_URI,
   postLogoutRedirectUri: process.env.LOGOUT_REDIRECT_URL,
   session: {

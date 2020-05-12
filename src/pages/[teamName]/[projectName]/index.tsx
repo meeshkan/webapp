@@ -22,8 +22,10 @@ import { GraphQLClient } from "graphql-request";
 import fetch from "isomorphic-unfetch";
 import hookNeedingFetch from "../../../utils/hookNeedingFetch";
 import { confirmOrCreateUser } from "../../../utils/user";
+import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 
 enum NegativeProjectFetchOutcome {
+  NOT_LOGGED_IN,
   PROJECT_DOES_NOT_EXIST,
   INVALID_TOKEN_ERROR,
   UNDEFINED_ERROR,
@@ -37,7 +39,7 @@ const Project = t.type({
       t.type({
         location: t.union([t.literal("master"), t.literal("branch")]),
         status: t.string,
-        updatedAt: DateFromString
+        updatedAt: DateFromString,
       })
     ),
   }),
@@ -46,15 +48,15 @@ const Project = t.type({
 type IProject = t.TypeOf<typeof Project>;
 
 const getProject = async (
-  idToken,
-  teamName,
-  projectName
+  session: ISession,
+  teamName: string,
+  projectName: string
 ): Promise<Either<NegativeProjectFetchOutcome, IProject>> => {
   const _8baseGraphQLClient = new GraphQLClient(
     process.env.EIGHT_BASE_ENDPOINT,
     {
       headers: {
-        authorization: `Bearer ${idToken}`,
+        authorization: `Bearer ${session.idToken}`,
       },
     }
   );
@@ -122,44 +124,50 @@ const getProject = async (
   }
 };
 
-interface IProjectProps {
-  teamName: string;
-  projectName: string;
-  project: Either<NegativeProjectFetchOutcome, IProject>;
-}
+type IProjectProps = Either<
+  NegativeProjectFetchOutcome,
+  {
+    teamName: string;
+    projectName: string;
+    project: IProject;
+  }
+>;
 
 export async function getServerSideProps(
   context
 ): Promise<{ props: IProjectProps }> {
+  console.log("Running server side props for project name");
   const {
     params: { teamName, projectName },
     req,
+    res,
   } = context;
-  const {
-    user: { idToken, email },
-  } = await auth0.getSession(req);
+  const session = await auth0.getSession(req);
+  if (!session) {
+    return { props: left(NegativeProjectFetchOutcome.NOT_LOGGED_IN) };
+  }
 
-  const tp = t.type({ id: t.string })
-  const c = await confirmOrCreateUser<t.TypeOf<typeof tp>>("id", idToken, email, tp.is);
+  const tp = t.type({ id: t.string });
+  const c = await confirmOrCreateUser<t.TypeOf<typeof tp>>(
+    "id",
+    session,
+    tp.is
+  );
   if (isLeft(c)) {
     console.error("type safety error in application");
   }
 
-  const project = await getProject(idToken, teamName, projectName);
+  const project = await getProject(session, teamName, projectName);
 
   return {
-    props: { teamName, projectName, project },
+    props: isLeft(project)
+      ? left(project.left)
+      : right({ teamName, projectName, project: project.right }),
   };
 }
 
-interface IProjectProps {
-  teamName: string;
-  projectName: string;
-  project: Either<NegativeProjectFetchOutcome, IProject>;
-}
-
-const Dashboard = ({ teamName, projectName, project }: IProjectProps) => {
-  return isLeft(project) ? (
+const Dashboard = (projectProps: IProjectProps) => {
+  return isLeft(projectProps) ? (
     <div>No dice!</div>
   ) : (
     <>
@@ -168,17 +176,14 @@ const Dashboard = ({ teamName, projectName, project }: IProjectProps) => {
         templateRows="repeat(2, minmax(204px, 45%))"
         gap={8}
       >
-        <Settings
-          organizationName={teamName}
-          repositoryName={projectName}
-        />
+        <Settings organizationName={projectProps.right.teamName} repositoryName={projectProps.right.projectName} />
         <Production
-          tests={project.right.tests.items.filter(
+          tests={projectProps.right.project.tests.items.filter(
             (test) => test.location === "master"
           )}
         />
         <Branch
-          tests={project.right.tests.items.filter(
+          tests={projectProps.right.project.tests.items.filter(
             (test) => test.location === "branch"
           )}
         />

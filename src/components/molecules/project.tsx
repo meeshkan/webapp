@@ -72,7 +72,7 @@ const ProjectSettings = ({ user }) => {
             title="Project repo"
             color={`mode.${colorMode}.title`}
           >
-            {user.projects.map(
+            {/*user.projects*/[].map(
               ({ owner: { login, avatarUrl }, name }, index) => (
                 <Link href={`/${login}/${name}`} key={index}>
                   <MenuItem

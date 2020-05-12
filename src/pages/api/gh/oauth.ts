@@ -34,7 +34,7 @@ export default async function me(req, res) {
     params.append('state', state);
 
     const tp = t.type({ id: t.string })
-    const confirmResult  = await confirmOrCreateUser<t.TypeOf<typeof tp>>("id", session.user.idToken, session.user.email, tp.is);
+    const confirmResult  = await confirmOrCreateUser<t.TypeOf<typeof tp>>("id", session, tp.is);
     if (isLeft(confirmResult)) {
       console.error("Type safety error in graphql query");
       res.writeHead(404, {
@@ -42,7 +42,7 @@ export default async function me(req, res) {
       });
       return;
     }
-    const authenticationResult = await authenticateAppWithGithub(confirmResult.right.id, params, session.user.idToken);
+    const authenticationResult = await authenticateAppWithGithub(confirmResult.right.id, params, session);
     if (isLeft(authenticationResult)) {
       res.writeHead(404, {
         Location: '/404'

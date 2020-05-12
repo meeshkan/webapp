@@ -3,6 +3,7 @@ import fetch from "isomorphic-unfetch";
 import hookNeedingFetch from "./hookNeedingFetch";
 import { GraphQLClient } from "graphql-request";
 import { Either, left, right } from "fp-ts/lib/Either";
+import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 
 export const fetchUser = async () => {
   const res = await fetch("/api/me");
@@ -13,14 +14,18 @@ export const fetchUser = async () => {
 export const useFetchUser = () => hookNeedingFetch(fetchUser);
 
 enum NegativeConfirmOrCreateUserOutcome {
-  INCORRECT_TYPE_SAFETY
+  INCORRECT_TYPE_SAFETY,
 }
 
-export const confirmOrCreateUser = async <T>(query: string, auth0IdToken: string, email: string, typeSafe: (u: unknown) => u is T): Promise<Either<NegativeConfirmOrCreateUserOutcome, T>> => {
+export const confirmOrCreateUser = async <T>(
+  query: string,
+  session: ISession,
+  typeSafe: (u: unknown) => u is T
+): Promise<Either<NegativeConfirmOrCreateUserOutcome, T>> => {
   const _8baseUserClient = new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-      headers: {
-        authorization: `Bearer ${auth0IdToken}`,
-      },
+    headers: {
+      authorization: `Bearer ${session.idToken}`,
+    },
   });
   // this uses the flow described on
   // https://docs.8base.com/docs/8base-console/authentication#3-user-query
@@ -34,14 +39,21 @@ export const confirmOrCreateUser = async <T>(query: string, auth0IdToken: string
         ${query}
       }
     }`);
-    return typeSafe(user) ? right(user) : left(NegativeConfirmOrCreateUserOutcome.INCORRECT_TYPE_SAFETY);
+    return typeSafe(user)
+      ? right(user)
+      : left(NegativeConfirmOrCreateUserOutcome.INCORRECT_TYPE_SAFETY);
   } catch {
-    const _8baseAdminClient = new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
+    const _8baseAdminClient = new GraphQLClient(
+      process.env.EIGHT_BASE_ENDPOINT,
+      {
         headers: {
           authorization: `Bearer ${process.env.EIGHT_BASE_CREATE_USER_TOKEN}`,
         },
-    });
-    const { userSignUpWithToken } = await _8baseAdminClient.request(`mutation (
+      }
+    );
+    try {
+      const { userSignUpWithToken } = await _8baseAdminClient.request(
+        `mutation (
       $user: UserCreateInput!,
       $authProfileId: ID!
     ) {
@@ -51,12 +63,20 @@ export const confirmOrCreateUser = async <T>(query: string, auth0IdToken: string
       ) {
         ${query}
       }
-    }`, {
-      user: {
-        email
-      },
-      authProfileId: process.env.EIGHT_BASE_AUTH_PROFILE_ID
-    });
-    return typeSafe(userSignUpWithToken) ? right(userSignUpWithToken) : left(NegativeConfirmOrCreateUserOutcome.INCORRECT_TYPE_SAFETY);
+    }`,
+        {
+          user: {
+            email: session.user.email,
+          },
+          authProfileId: process.env.EIGHT_BASE_AUTH_PROFILE_ID,
+        }
+      );
+      return typeSafe(userSignUpWithToken)
+        ? right(userSignUpWithToken)
+        : left(NegativeConfirmOrCreateUserOutcome.INCORRECT_TYPE_SAFETY);
+    } catch (e) {
+      console.error("BAD", session, session.user);
+      throw e;
+    }
   }
-}
+};

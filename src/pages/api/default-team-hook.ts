@@ -31,7 +31,11 @@ const doesUserHaveTeams = async (idToken): Promise<boolean> => {
   return count > 0;
 };
 
-const createTeamFromUserName = async (idToken, userId, teamName): Promise<number> => {
+const createTeamFromUserName = async (
+  idToken: string,
+  userId: string,
+  teamName: string
+): Promise<number> => {
   const mutation = `mutation(
     $userId:ID!
     $teamName:String!
@@ -98,29 +102,28 @@ const uploadPhotoForTeam = async (idToken, userId, teamId, photoUrl) => {
   );
 
   const {
-    fileUploadInfo: {
-        policy,
-        signature,
-        apiKey,
-        path
-    }
+    fileUploadInfo: { policy, signature, apiKey, path },
   } = await _8baseGraphQLClient.request(query);
 
   // from https://www.filestack.com/docs/concepts/uploading/
   // curl -X POST -d url="https://assets.filestackapi.com/watermark.png" "https://www.filestackapi.com/api/store/S3?key=MY_API_KEY"
   const params = new URLSearchParams();
   params.append("url", photoUrl);
-  const uploadToFilestack = await fetch(`https://www.filestackapi.com/api/store/S3?key=${apiKey}&policy=${policy}&signature=${signature}&path=${path}`, {
-      method: 'post',
-      body: params
-  });
+  const uploadToFilestack = await fetch(
+    `https://www.filestackapi.com/api/store/S3?key=${apiKey}&policy=${policy}&signature=${signature}&path=${path}`,
+    {
+      method: "post",
+      body: params,
+    }
+  );
   if (!uploadToFilestack.ok) {
-      // well, we tried...
-      throw Error('Upload to Filestack failed');
+    // well, we tried...
+    throw Error("Upload to Filestack failed");
   }
   const responseFromFilestack = await uploadToFilestack.json();
 
-  await _8baseGraphQLClient.request(`mutation(
+  await _8baseGraphQLClient.request(
+    `mutation(
     $userId:ID!
     $teamId:ID!
     $fileId:String!
@@ -150,31 +153,33 @@ const uploadPhotoForTeam = async (idToken, userId, teamId, photoUrl) => {
     ) {
       id
     }
-  }`, {
+  }`,
+    {
       teamId,
       userId,
-      fileId: responseFromFilestack.url.split('/').slice(-1),
-      filename: responseFromFilestack.filename
-  });
-  
+      fileId: responseFromFilestack.url.split("/").slice(-1),
+      filename: responseFromFilestack.filename,
+    }
+  );
 };
 
 export default async function defaultWorkspaceHook(req, res) {
   try {
     const session = await auth0.getSession(req);
     if (!session) {
+      console.log("no session");
       res.status(403);
       res.send("No active session");
     }
 
-    // the code parameter is what we will exchange with github
-    // the state parameter is the user id
-    const {
-      user: { idToken, email, nickname, picture },
-    } = session;
+    console.log("SESSION USER", session.user);
 
-    const tp = t.type({ id: t.string })
-    const confirmUser = await confirmOrCreateUser<t.TypeOf<typeof tp>>("id", idToken, email, tp.is);
+    const tp = t.type({ id: t.string });
+    const confirmUser = await confirmOrCreateUser<t.TypeOf<typeof tp>>(
+      "id",
+      session,
+      tp.is
+    );
     if (isLeft(confirmUser)) {
       // there was a logic error with our confirmUser request
       console.error("Logic error with confirm user request");
@@ -183,7 +188,7 @@ export default async function defaultWorkspaceHook(req, res) {
       });
       return;
     }
-    const userHasTeams = await doesUserHaveTeams(idToken);
+    const userHasTeams = await doesUserHaveTeams(session.idToken);
     if (userHasTeams) {
       res.writeHead(301, {
         Location: "/",
@@ -194,9 +199,19 @@ export default async function defaultWorkspaceHook(req, res) {
     // if not, we try to create a new team on behalf of the user
     // with their username as the team name
     try {
-      const teamId = await createTeamFromUserName(idToken, confirmUser.right.id, nickname);
+      console.log("Creating default team");
+      const teamId = await createTeamFromUserName(
+        session.idToken,
+        confirmUser.right.id,
+        session.user.nickname
+      );
       try {
-        await uploadPhotoForTeam(idToken, confirmUser.right.id, teamId, picture);
+        await uploadPhotoForTeam(
+          session.idToken,
+          confirmUser.right.id,
+          teamId,
+          session.user.picture
+        );
       } catch (e) {
         // Assuming that this should be logged/fixed
         // but does not need any additional business logic,
@@ -204,11 +219,12 @@ export default async function defaultWorkspaceHook(req, res) {
         console.error(e);
       }
     } catch (e) {
+      console.error(e);
       // currently waiting on a spec for how to handle this
     }
 
     res.writeHead(301, {
-        Location: "/",
+      Location: "/",
     });
 
     res.end();

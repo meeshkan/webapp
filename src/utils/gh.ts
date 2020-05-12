@@ -6,6 +6,7 @@ import { decrypt, encrypt } from "./sec";
 import querystring from "querystring";
 import { left, right, Either, isLeft } from "fp-ts/lib/Either";
 import fetch from "isomorphic-unfetch";
+import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import * as t from "io-ts";
 
 export interface IOwner {
@@ -129,8 +130,7 @@ const TWENTY_SECONDS = 20;
 const MS_IN_SEC = 1000;
 
 export const fetchGithubAccessToken = async (
-  auth0IdToken,
-  email
+  session: ISession
 ): Promise<Either<NegativeGithubFetchOutcomes, string>> => {
   const tp = t.type({
     id: t.string,
@@ -148,8 +148,7 @@ export const fetchGithubAccessToken = async (
       githubSyncChecksum
       githubSyncNonce
     }`,
-    auth0IdToken,
-    email,
+    session,
     tp.is
   );
 
@@ -186,7 +185,7 @@ export const fetchGithubAccessToken = async (
       const access_token = await authenticateAppWithGithub(
         id,
         params,
-        auth0IdToken
+        session
       );
       return access_token;
     }
@@ -195,10 +194,9 @@ export const fetchGithubAccessToken = async (
 };
 
 export const getAllGhRepos = async (
-  auth0IdToken,
-  email
+  session: ISession
 ): Promise<Either<NegativeGithubFetchOutcomes, IRepository[]>> => {
-  const access_token = await fetchGithubAccessToken(auth0IdToken, email);
+  const access_token = await fetchGithubAccessToken(session);
   if (
     isLeft(access_token) &&
     access_token.left === NegativeGithubFetchOutcomes.NEEDS_REAUTH
@@ -294,7 +292,7 @@ export const getAllGhRepos = async (
 export const authenticateAppWithGithub = async (
   userId: string,
   params: URLSearchParams,
-  idToken: string
+  session: ISession
 ): Promise<Either<NegativeGithubFetchOutcomes, string>> => {
   console.log("calling " + process.env.GH_OAUTH_ACCESS_TOKEN_URL);
   const resFromGh = await fetch(process.env.GH_OAUTH_ACCESS_TOKEN_URL, {
@@ -331,7 +329,7 @@ export const authenticateAppWithGithub = async (
     process.env.EIGHT_BASE_ENDPOINT,
     {
       headers: {
-        authorization: `Bearer ${idToken}`,
+        authorization: `Bearer ${session.idToken}`,
       },
     }
   );
