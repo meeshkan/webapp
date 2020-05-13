@@ -39,7 +39,6 @@ import {
 import { confirmOrCreateUser } from "../utils/user";
 import { hookNeedingFetch } from "../utils/hookNeedingFetch";
 import { IRepository } from "../utils/gh";
-import { repos } from "../data/repoQuery";
 
 type ImportProps = {
   repoName: String;
