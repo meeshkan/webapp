@@ -66,7 +66,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                     </Button>
                   </Flex>
                 </Box>
-                : <Component session={session} {...pageProps} />}
+                : <Component {...pageProps} />}
               </Skeleton>
           </Layout>
         </ColorModeProvider>

@@ -101,9 +101,7 @@ const getTeam = async (
   }
 };
 
-type ITeamProps = {
-  team: Either<NegativeTeamFetchOutcome, ITeam>;
-};
+type ITeamProps = Either<NegativeTeamFetchOutcome, { team: ITeam, session: ISession}>;
 
 export async function getServerSideProps(
   context
@@ -114,7 +112,7 @@ export async function getServerSideProps(
   } = context;
   const session = await auth0.getSession(req);
   if (!session) {
-    return { props: { team: left(NegativeTeamFetchOutcome.NOT_LOGGED_IN) }};
+    return { props: left(NegativeTeamFetchOutcome.NOT_LOGGED_IN) };
   }
   const tp = t.type({ id: t.string });
   const c = await confirmOrCreateUser<t.TypeOf<typeof tp>>(
@@ -128,17 +126,17 @@ export async function getServerSideProps(
   const team = await getTeam(session, teamName);
 
   return {
-    props: { team: isLeft(team) ? left(team.left) : right(team.right) },
+    props: isLeft(team) ? left(team.left) : right({ session, team: team.right }),
   };
 }
 
-export default function OrganizationPage(teamProps: ITeamProps & { session: ISession }) {
-  if (isLeft(teamProps.team)) {
+export default function OrganizationPage(teamProps: ITeamProps) {
+  if (isLeft(teamProps)) {
     //useRouter().push("/404");
     return <></>;
   }
   const { colorMode } = useColorMode();
-  const team = teamProps.team.right;
+  const team = teamProps.right.team;
   return (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
@@ -174,7 +172,7 @@ export default function OrganizationPage(teamProps: ITeamProps & { session: ISes
           </Link>
         ))}
         <ChakraLink
-          href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${teamProps.session.user.sub}"}`}
+          href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${teamProps.right.session.user.sub}"}`}
           bg={`mode.${colorMode}.card`}
           p={4}
           rounded="sm"
