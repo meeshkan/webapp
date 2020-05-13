@@ -4,6 +4,37 @@
 
 Optimize for user experience (clear URL structure) and only add an abstraction if absolutely necessary. The repercussion of this is we will have some reserved paths such as `settings`, `user`, and more. We percieve this to have minimal impact and aren't actively solving for these edge cases.
 
+## Loading / Error / Result pattern using Either
+
+A lot of the code uses the following type pattern for asynchronous communication with a server:
+
+```typescript
+type MyType = Either<Loading, Either<Error, Result>>
+const myAsyncFunc = (): MyType => { /** some stuff */ };
+const res = await myAsyncFunc();
+isLeft(res) // it is loading
+isRight(res) && isLeft(res.right) // it produced an error
+isRight(res) && isRight(res.right) // it produced a successful outcome
+```
+
+This pattern enforces type safety in the following way. Let's say we want to use a result. We can only do that using the following pattern:
+
+```typescript
+isRight(res) && isRight(res.right) && doSomethingWithResult(res.right.right)
+```
+
+If we leave out the second `isRight`, it will not compile and will raise a type error:
+
+```typescript
+isRight(res) && doSomethingWithResult(res.right.right)
+```
+
+That is how the `Either` pattern guarantees type safety of results - `isLeft` and `isRight` act as [predicate](https://www.typescriptlang.org/docs/handbook/advanced-types.html#using-type-predicates) that give typesafety to whatever follows. 
+
+## Typesafe graphql using `io-ts`
+
+Ideally, we will use a typesafe schema for all of our queries, but until then, we are using `io-ts` for typesafe graphql IO. `io-ts` allows you to construct types that act both as runtime guards and compile-time types. For example, look at the function `confirmOrCreateUser` in `src/utils/user.ts` and its usages to see how this is done.
+
 ## Known issues
 
 ### Team name and project name

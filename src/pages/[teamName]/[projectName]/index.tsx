@@ -17,12 +17,10 @@ import Branch from "../../../components/Dashboard/branch";
 import Chart from "../../../components/Dashboard/chart";
 import { left, right, isLeft, Either } from "fp-ts/lib/Either";
 import * as t from "io-ts";
-
 import { GraphQLClient } from "graphql-request";
-import fetch from "isomorphic-unfetch";
-import {hookNeedingFetch} from "../../../utils/hookNeedingFetch";
 import { confirmOrCreateUser } from "../../../utils/user";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
+import { useRouter } from "next/router";
 
 enum NegativeProjectFetchOutcome {
   NOT_LOGGED_IN,
@@ -167,9 +165,11 @@ export async function getServerSideProps(
 }
 
 const Dashboard = (projectProps: IProjectProps) => {
-  return isLeft(projectProps) ? (
-    <div>No dice!</div>
-  ) : (
+  if (isLeft(projectProps)) {
+    useRouter().push("/404");
+    return <></>;
+  }
+  return (
     <>
       <Grid
         templateColumns="repeat(3, 1fr)"

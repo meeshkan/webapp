@@ -13,6 +13,7 @@ import {
 import { GraphQLClient } from "graphql-request";
 import auth0 from "../../utils/auth0";
 import Card from "../../components/molecules/card";
+import { useRouter } from "next/router";
 import { Either, left, right, isLeft } from "fp-ts/lib/Either";
 import { confirmOrCreateUser } from "../../utils/user";
 import * as t from "io-ts";
@@ -30,6 +31,7 @@ const Team = t.type({
   image: t.type({
     downloadUrl: t.string,
   }),
+  name: t.string,
   project: t.type({
     items: t.array(
       t.type({
@@ -62,6 +64,7 @@ const getTeam = async (
         }
       }) {
         items{
+          name
           image {
             downloadUrl
           }
@@ -96,13 +99,9 @@ const getTeam = async (
   }
 };
 
-type ITeamProps = Either<
-  NegativeTeamFetchOutcome,
-  {
-    teamName: string;
-    team: ITeam;
-  }
->;
+type ITeamProps = {
+  team: Either<NegativeTeamFetchOutcome, ITeam>;
+};
 
 export async function getServerSideProps(
   context
@@ -113,7 +112,7 @@ export async function getServerSideProps(
   } = context;
   const session = await auth0.getSession(req);
   if (!session) {
-    return { props: left(NegativeTeamFetchOutcome.NOT_LOGGED_IN) };
+    return { props: { team: left(NegativeTeamFetchOutcome.NOT_LOGGED_IN) }};
   }
   const tp = t.type({ id: t.string });
   const c = await confirmOrCreateUser<t.TypeOf<typeof tp>>(
@@ -127,27 +126,28 @@ export async function getServerSideProps(
   const team = await getTeam(session, teamName);
 
   return {
-    props: isLeft(team)
-      ? left(team.left)
-      : right({ teamName, team: team.right }),
+    props: { team: isLeft(team) ? left(team.left) : right(team.right) },
   };
 }
 
-export default function OrganizationPage(teamProps: ITeamProps) {
+export default function OrganizationPage(teamProps: ITeamProps & { session: ISession }) {
+  if (isLeft(teamProps.team)) {
+    useRouter().push("/404");
+    return <></>;
+  }
   const { colorMode } = useColorMode();
-  return isLeft(teamProps) ? (
-    <div>Sorry, you can't be here.</div>
-  ) : (
+  const team = teamProps.team.right;
+  return (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
-        {teamProps.right.team.project.items.map(({ name }, index) => (
-          <Link key={name} href={`/${teamProps.right.teamName}/${name}`}>
+        {team.project.items.map(({ name }, index) => (
+          <Link key={name} href={`/${team.name}/${name}`}>
             <a>
               <Card key={index}>
                 <Stack spacing={4} isInline>
                   <Image
                     size={10}
-                    src={teamProps.right.team.image.downloadUrl}
+                    src={team.image.downloadUrl}
                     bg="gray.50"
                     border="1px solid"
                     borderColor={`mode.${colorMode}.icon`}
@@ -155,7 +155,7 @@ export default function OrganizationPage(teamProps: ITeamProps) {
                   />
                   <Stack spacing={2}>
                     <Text color={`mode.${colorMode}.text`} lineHeight="none">
-                      {teamProps.right.teamName}
+                      {team.name}
                     </Text>
                     <Heading
                       as="h3"
@@ -172,7 +172,7 @@ export default function OrganizationPage(teamProps: ITeamProps) {
           </Link>
         ))}
         <ChakraLink
-          href="https://github.com/apps/meeshkan/installations/new"
+          href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${teamProps.session.user.sub}"}`}
           bg={`mode.${colorMode}.card`}
           p={4}
           rounded="sm"

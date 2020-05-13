@@ -125,6 +125,11 @@ export default function Home(ssrProps: IProjectsProps) {
   const { colorMode } = useColorMode();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const newProps = useProjects(ssrProps.right.session);
+  const session =
+    isRight(newProps) && isRight(newProps.right)
+      ? newProps.right.right.session
+      : ssrProps.right.session;
+
   const projectsProps =
     isRight(newProps) && isRight(newProps.right)
       ? newProps.right.right
@@ -306,7 +311,7 @@ export default function Home(ssrProps: IProjectsProps) {
                     Not seeing the repository you want?
                   </Text>
                   <ChakraLink
-                    href="https://github.com/apps/meeshkan/installations/new"
+                    href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`}
                     color={colorMode == "light" ? "red.500" : "red.200"}
                   >
                     Configure on GitHub.

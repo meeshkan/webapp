@@ -107,7 +107,7 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
           <MenuItem color={`mode.${colorMode}.text`}>
             <ChakraLink
               isExternal
-              href="https://github.com/apps/meeshkan/installations/new"
+              href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`}
               color={`mode.${colorMode}.text`}
               _hover={{ textDecor: "none" }}
             >
