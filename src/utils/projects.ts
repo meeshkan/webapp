@@ -85,7 +85,7 @@ export const getProjects = async (
       console.error("Invalid token", e);
       return left(NegativeProjectsFetchOutcome.INVALID_TOKEN_ERROR);
     }
-    console.error("Error from 8base", e.response.errors);
+    console.error("Error from 8base", e);
     return left(NegativeProjectsFetchOutcome.UNDEFINED_ERROR);
   }
 };
