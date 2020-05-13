@@ -136,13 +136,13 @@ export default function Home(ssrProps: IProjectsProps) {
 
   const repoList = hookNeedingFetch<Either<NegativeGithubFetchOutcome, IRepository[]>>(async () => {
     const res = await fetch("/api/gh/repos");
-    const repos = res.ok ? right(await res.json()) : left(NegativeGithubFetchOutcome.COULD_NOT_GET_REPOS_FROM_GITHUB);
+    const repos = res.ok ? await res.json() : left(NegativeGithubFetchOutcome.COULD_NOT_GET_REPOS_FROM_GITHUB);
     return repos;
   });
 
   const ownerRecord = isRight(repoList) && isRight(repoList.right) ? groupReposByOwner(repoList.right.right) : {};
   const [owner, setOwner] = useState(Object.keys(ownerRecord)[0]);
-  const githubAuthorized = isRight(repoList) && isRight(repoList.right);
+  const githubAuthorized = isRight(repoList) && isRight(repoList.right) && repoList.right.right.length > 0;
   return (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>

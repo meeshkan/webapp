@@ -79,7 +79,7 @@ export const getProjects = async (
       : (() => {console.error(`Could not perform a typesafe cast of ${teams}`); return left(NegativeProjectsFetchOutcome.QUERY_ERROR)})();
   } catch (e) {
     if (
-      e.response.errors.filter((error) => error.code === "InvalidTokenError")
+      e.response && e.response.errors && e.response.errors.filter((error) => error.code === "InvalidTokenError")
         .length > 0
     ) {
       console.error("Invalid token", e);

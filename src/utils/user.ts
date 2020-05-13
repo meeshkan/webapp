@@ -10,7 +10,6 @@ export const NotAuthorized: NotAuthorized  = "NotAuthorized";
 
 
 export const fetchSession = async (): Promise<Either<NotAuthorized,ISession>> => {
-  console.log("fetching session");
   const res = await fetch("/api/session");
   const session = res.ok ? await res.json() : null;
   return session ? right(session) : left(NotAuthorized);

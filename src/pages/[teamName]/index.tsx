@@ -91,7 +91,7 @@ const getTeam = async (
       : (() => {console.error(`Could not perform a typesafe cast of ${team}`); return left(NegativeTeamFetchOutcome.QUERY_ERROR)})();
     } catch (e) {
     if (
-      e.response.errors.filter((error) => error.code === "InvalidTokenError")
+      e.response && e.response.errors && e.response.errors.filter((error) => error.code === "InvalidTokenError")
         .length > 0
     ) {
       return left(NegativeTeamFetchOutcome.INVALID_TOKEN_ERROR);
