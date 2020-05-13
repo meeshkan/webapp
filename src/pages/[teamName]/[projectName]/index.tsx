@@ -145,13 +145,13 @@ export async function getServerSideProps(
     return { props: left(NegativeProjectFetchOutcome.NOT_LOGGED_IN) };
   }
 
-  const tp = t.type({ id: t.string });
-  const c = await confirmOrCreateUser<t.TypeOf<typeof tp>>(
+  const userType = t.type({ id: t.string });
+  const user = await confirmOrCreateUser<t.TypeOf<typeof userType>>(
     "id",
     session,
-    tp.is
+    userType.is
   );
-  if (isLeft(c)) {
+  if (isLeft(user)) {
     console.error("type safety error in application");
   }
 
