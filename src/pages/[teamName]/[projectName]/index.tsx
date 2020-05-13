@@ -166,7 +166,7 @@ export async function getServerSideProps(
 
 const Dashboard = (projectProps: IProjectProps) => {
   if (isLeft(projectProps)) {
-    useRouter().push("/404");
+    //useRouter().push("/404");
     return <></>;
   }
   return (

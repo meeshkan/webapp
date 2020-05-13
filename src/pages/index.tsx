@@ -118,7 +118,7 @@ async function authorizeGithub() {
 
 export default function Home(ssrProps: IProjectsProps) {
   if (isLeft(ssrProps)) {
-    useRouter().push("/404");
+    //useRouter().push("/404");
     return <></>;
   }
   const { colorMode } = useColorMode();

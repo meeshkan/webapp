@@ -36,7 +36,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           <Layout>
             <Navigation session={session} />
             <Skeleton isLoaded={isRight(session)}>
-                (isLeft(session) ? <></> : isLeft(session.right)
+                {isLeft(session) ? <></> : isLeft(session.right) ?
                 <Box as="section" my={12}>
                   <Heading
                     as="h2"
@@ -66,7 +66,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                     </Button>
                   </Flex>
                 </Box>
-                : <Component session={session} {...pageProps} />)
+                : <Component session={session} {...pageProps} />}
               </Skeleton>
           </Layout>
         </ColorModeProvider>

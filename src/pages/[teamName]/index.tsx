@@ -134,7 +134,7 @@ export async function getServerSideProps(
 
 export default function OrganizationPage(teamProps: ITeamProps & { session: ISession }) {
   if (isLeft(teamProps.team)) {
-    useRouter().push("/404");
+    //useRouter().push("/404");
     return <></>;
   }
   const { colorMode } = useColorMode();
