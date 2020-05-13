@@ -1,6 +1,7 @@
 // because github does not allow for multiple oauth
 // redirect urls, we have to create a triage where
 export default (req, res) => {
+  try {
     const {
       query: { state, code },
     } = req
@@ -11,4 +12,11 @@ export default (req, res) => {
         Location
     });
     res.end();
+  } catch(error) {
+    console.error(error);
+    res.writeHead(301, {
+        Location: '/'
+    });
+    res.end();
+  }
 }

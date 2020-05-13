@@ -22,6 +22,7 @@ export default async function me(req, res) {
     } = req;
 
     if (session.user.sub !== JSON.parse(state).id) {
+      console.error('Installation not coming from github')
       res.status(403);
       res.send('Forbidden');
     }

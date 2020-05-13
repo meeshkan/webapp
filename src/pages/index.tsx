@@ -81,7 +81,7 @@ interface IProject {
 }
 
 enum NegativeGithubFetchOutcome {
-  COULD_NOT_GET_REPOS_FROM_GITHUB
+  COULD_NOT_GET_REPOS_FROM_GITHUB,
 }
 
 const ImportProject = ({ repoName }: ImportProps) => {
@@ -107,7 +107,7 @@ const ImportProject = ({ repoName }: ImportProps) => {
 const groupReposByOwner = (repos: IRepository[]): IOwnerToRepositories =>
   Array.from(new Set(repos.map((repo) => repo.owner.login)))
     .map((owner) => ({
-      owner: repos.filter((repo) => repo.owner.login === owner),
+      [owner]: repos.filter((repo) => repo.owner.login === owner),
     }))
     .reduce((a, b) => ({ ...a, ...b }), {});
 
@@ -134,15 +134,34 @@ export default function Home(ssrProps: IProjectsProps) {
       ? newProps.right.right
       : ssrProps.right;
 
-  const repoList = hookNeedingFetch<Either<NegativeGithubFetchOutcome, IRepository[]>>(async () => {
+  const [owner, setOwner] = useState(null);
+
+  const repoList = hookNeedingFetch<
+    Either<NegativeGithubFetchOutcome, Record<string, IRepository[]>>
+  >(async () => {
     const res = await fetch("/api/gh/repos");
-    const repos = res.ok ? await res.json() : left(NegativeGithubFetchOutcome.COULD_NOT_GET_REPOS_FROM_GITHUB);
+    const repos = res.ok
+      ? ((await res.json()) as Either<
+          NegativeGithubFetchOutcome,
+          IRepository[]
+        >)
+      : left(NegativeGithubFetchOutcome.COULD_NOT_GET_REPOS_FROM_GITHUB);
+    if (isRight(repos)) {
+      const groupedRepos = groupReposByOwner(repos.right);
+      if (!owner) {
+        setOwner(Object.keys(groupedRepos)[0]);
+      }
+      return right(groupedRepos);
+    }
     return repos;
   });
 
-  const ownerRecord = isRight(repoList) && isRight(repoList.right) ? groupReposByOwner(repoList.right.right) : {};
-  const [owner, setOwner] = useState(Object.keys(ownerRecord)[0]);
-  const githubAuthorized = isRight(repoList) && isRight(repoList.right) && repoList.right.right.length > 0;
+  const ownerRecord =
+    isRight(repoList) && isRight(repoList.right) ? repoList.right.right : {};
+  const githubAuthorized =
+    isRight(repoList) &&
+    isRight(repoList.right) &&
+    Object.keys(repoList.right.right).length > 0;
   return (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
@@ -233,7 +252,7 @@ export default function Home(ssrProps: IProjectsProps) {
                     fontWeight={900}
                     px={4}
                     variantColor="red"
-                    onClick={e => {
+                    onClick={(e) => {
                       e.preventDefault();
                       authorizeGithub();
                     }}
@@ -304,7 +323,7 @@ export default function Home(ssrProps: IProjectsProps) {
               )}
             </ModalBody>
             <ModalFooter d="flex" justifyContent="center" fontSize="sm">
-              {!githubAuthorized  ? null : (
+              {!githubAuthorized ? null : (
                 <>
                   <Text mr={2} color={`mode.${colorMode}.text`}>
                     Not seeing the repository you want?

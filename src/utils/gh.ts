@@ -185,11 +185,7 @@ export const fetchGithubAccessToken = async (
       params.append("grant_type", "refresh_token");
       params.append("refresh_token", githubUser.refreshToken);
 
-      const access_token = await authenticateAppWithGithub(
-        id,
-        params,
-        session
-      );
+      const access_token = await authenticateAppWithGithub(id, params, session);
       return access_token;
     }
   }
@@ -213,6 +209,12 @@ export const getAllGhRepos = async (
   ) {
     console.log("There is no github token yet.");
     return right([]);
+  }
+  if (
+    isLeft(access_token)
+  ) {
+    console.log("The app failed for reasons we don't quite understand.");
+    return left(NegativeGithubFetchOutcomes.LOGIC_ERROR);
   }
   // The code below this comment is problematic and should be replaced
   // by something more slick eventually.
@@ -242,30 +244,38 @@ export const getAllGhRepos = async (
   // which is rare.
 
   // First, we get installation ids
-  const installationIds = [];
+  let installationIds = [];
   let installationsUrl = "https://api.github.com/user/installations";
   while (true) {
     const idResFromGh = await fetch(installationsUrl, {
       headers: {
         Accept: "application/vnd.github.machine-man-preview+json",
-        Authorization: `token ${access_token}`,
+        Authorization: `token ${access_token.right}`,
       },
     });
     const idDataFromGh = idResFromGh.ok ? await idResFromGh.json() : null;
     const idHeadersFromGh = idResFromGh.ok
       ? parseLinkHeader(idResFromGh.headers.get("Link"))
       : null;
-    if (!idHeadersFromGh.next || !idHeadersFromGh.next.url) {
-      break;
+    if (!idHeadersFromGh) {
+      console.error(
+        "Strange Link header from github: " +
+          idResFromGh.headers.get("Link")
+      );
     }
-    for (var i = 0; i < idDataFromGh.installations.length; i++) {
-      installationIds.push(idDataFromGh.installations[i].id);
+    installationIds = installationIds.concat(idDataFromGh.installations.map(i => i.id));
+    if (
+      !idHeadersFromGh ||
+      !idHeadersFromGh.next ||
+      !idHeadersFromGh.next.url
+    ) {
+      break;
     }
     installationsUrl = idHeadersFromGh.next.url;
   }
 
   // Then, for each installation ID, we get the associated repositories
-  const repositories: IRepository[] = [];
+  let repositories: IRepository[] = [];
   for (var j = 0; j < installationIds.length; j++) {
     const installationId = installationIds[j];
     let repositoriesUrl = `https://api.github.com/user/installations/${installationId}/repositories`;
@@ -273,7 +283,7 @@ export const getAllGhRepos = async (
       const repoResFromGh = await fetch(repositoriesUrl, {
         headers: {
           Accept: "application/vnd.github.machine-man-preview+json",
-          Authorization: `token ${access_token}`,
+          Authorization: `token ${access_token.right}`,
         },
       });
       const repoHeadersFromGh = repoResFromGh.ok
@@ -282,11 +292,19 @@ export const getAllGhRepos = async (
       const repoDataFromGh = repoResFromGh.ok
         ? await repoResFromGh.json()
         : null;
-      if (!repoHeadersFromGh.next || !repoHeadersFromGh.next.url) {
-        break;
+      if (!repoHeadersFromGh) {
+        console.error(
+          "Strange Link header from github: " +
+            repoResFromGh.headers.get("Link")
+        );
       }
-      for (var i = 0; i < repoDataFromGh.repositories.length; i++) {
-        repositories.push(repoDataFromGh.repositories[i]);
+      repositories = repositories.concat(repoDataFromGh.repositories);
+      if (
+        !repoHeadersFromGh ||
+        !repoHeadersFromGh.next ||
+        !repoHeadersFromGh.next.url
+      ) {
+        break;
       }
       repositoriesUrl = repoHeadersFromGh.next.url;
     }
@@ -299,16 +317,15 @@ export const authenticateAppWithGithub = async (
   params: URLSearchParams,
   session: ISession
 ): Promise<Either<NegativeGithubFetchOutcomes, string>> => {
-  console.log("calling " + process.env.GH_OAUTH_ACCESS_TOKEN_URL);
   const resFromGh = await fetch(process.env.GH_OAUTH_ACCESS_TOKEN_URL, {
     method: "post",
     body: params,
   });
   if (!resFromGh.ok) {
     console.error("Call to github did not work", params);
-    return left(NegativeGithubFetchOutcomes.OAUTH_FLOW_ERROR)
+    return left(NegativeGithubFetchOutcomes.OAUTH_FLOW_ERROR);
   }
-  const _dataFromGh =await resFromGh.text();
+  const _dataFromGh = await resFromGh.text();
   const dataFromGh = querystring.parse(_dataFromGh);
   if (!dataFromGh.access_token) {
     console.error("Call to github did not yield an access token", dataFromGh);
@@ -399,7 +416,6 @@ export const authenticateAppWithGithub = async (
       }
     );
   } catch (e) {
-    console.error(e);
     // the gh info already, so we update instead
     await _8baseGraphQLClient.request(
       `mutation(
