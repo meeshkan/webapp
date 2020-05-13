@@ -195,23 +195,23 @@ export const fetchGithubAccessToken = async (
 export const getAllGhRepos = async (
   session: ISession
 ): Promise<Either<NegativeGithubFetchOutcomes, IRepository[]>> => {
-  const access_token = await fetchGithubAccessToken(session);
+  const accessTokenEither = await fetchGithubAccessToken(session);
   if (
-    isLeft(access_token) &&
-    access_token.left === NegativeGithubFetchOutcomes.NEEDS_REAUTH
+    isLeft(accessTokenEither) &&
+    accessTokenEither.left === NegativeGithubFetchOutcomes.NEEDS_REAUTH
   ) {
     console.log("Our github auth token is about to expire, we need reauth.");
     return left(NegativeGithubFetchOutcomes.NEEDS_REAUTH);
   }
   if (
-    isLeft(access_token) &&
-    access_token.left === NegativeGithubFetchOutcomes.NO_TOKEN_YET
+    isLeft(accessTokenEither) &&
+    accessTokenEither.left === NegativeGithubFetchOutcomes.NO_TOKEN_YET
   ) {
     console.log("There is no github token yet.");
     return right([]);
   }
   if (
-    isLeft(access_token)
+    isLeft(accessTokenEither)
   ) {
     console.log("The app failed for reasons we don't quite understand.");
     return left(NegativeGithubFetchOutcomes.LOGIC_ERROR);
@@ -250,7 +250,7 @@ export const getAllGhRepos = async (
     const idResFromGh = await fetch(installationsUrl, {
       headers: {
         Accept: "application/vnd.github.machine-man-preview+json",
-        Authorization: `token ${access_token.right}`,
+        Authorization: `token ${accessTokenEither.right}`,
       },
     });
     const idDataFromGh = idResFromGh.ok ? await idResFromGh.json() : null;
@@ -283,7 +283,7 @@ export const getAllGhRepos = async (
       const repoResFromGh = await fetch(repositoriesUrl, {
         headers: {
           Accept: "application/vnd.github.machine-man-preview+json",
-          Authorization: `token ${access_token.right}`,
+          Authorization: `token ${accessTokenEither.right}`,
         },
       });
       const repoHeadersFromGh = repoResFromGh.ok
