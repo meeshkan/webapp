@@ -12,9 +12,7 @@ export const hookNeedingFetch = <T>(fetchFunction: () => Promise<T>): Either<Loa
     // anonymous function because the function passed to
     // `useEffect` cannot return a promise
     (async () => {
-      const asset = await fetchFunction();
-      const a = right(asset);
-      __(a);
+      __(right(await fetchFunction()));
     })();
   }, [_]);
 
