@@ -122,6 +122,7 @@ export interface IRepository {
 enum NegativeGithubFetchOutcomes {
   NEEDS_REAUTH,
   NO_TOKEN_YET,
+  OAUTH_FLOW_ERROR,
   LOGIC_ERROR,
   TYPE_SAFETY_ERROR,
 }
@@ -153,11 +154,13 @@ export const fetchGithubAccessToken = async (
   );
 
   if (isLeft(c)) {
+    console.error("Bad type scheme, check your types", c);
     return left(NegativeGithubFetchOutcomes.LOGIC_ERROR);
   }
 
   const { id, githubInfo } = c.right;
   if (githubInfo === null) {
+    console.log("No github token exists yet");
     return left(NegativeGithubFetchOutcomes.NO_TOKEN_YET);
   }
   const githubUser = JSON.parse(
@@ -201,12 +204,14 @@ export const getAllGhRepos = async (
     isLeft(access_token) &&
     access_token.left === NegativeGithubFetchOutcomes.NEEDS_REAUTH
   ) {
+    console.log("Our github auth token is about to expire, we need reauth.");
     return left(NegativeGithubFetchOutcomes.NEEDS_REAUTH);
   }
   if (
     isLeft(access_token) &&
     access_token.left === NegativeGithubFetchOutcomes.NO_TOKEN_YET
   ) {
+    console.log("There is no github token yet.");
     return right([]);
   }
   // The code below this comment is problematic and should be replaced
@@ -299,9 +304,14 @@ export const authenticateAppWithGithub = async (
     method: "post",
     body: params,
   });
-  const _dataFromGh = resFromGh.ok ? await resFromGh.text() : null;
+  if (!resFromGh.ok) {
+    console.error("Call to github did not work", params);
+    return left(NegativeGithubFetchOutcomes.OAUTH_FLOW_ERROR)
+  }
+  const _dataFromGh =await resFromGh.text();
   const dataFromGh = querystring.parse(_dataFromGh);
-  if (!dataFromGh || !dataFromGh.access_token) {
+  if (!dataFromGh.access_token) {
+    console.error("Call to github did not yield an access token", dataFromGh);
     return left(NegativeGithubFetchOutcomes.LOGIC_ERROR);
   }
 
