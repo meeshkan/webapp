@@ -133,21 +133,21 @@ export async function getServerSideProps(
   };
 }
 
-export default function OrganizationPage(projectProps: ITeamProps) {
+export default function OrganizationPage(teamProps: ITeamProps) {
   const { colorMode } = useColorMode();
-  return isLeft(projectProps) ? (
+  return isLeft(teamProps) ? (
     <div>Sorry, you can't be here.</div>
   ) : (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
-        {projectProps.right.team.project.items.map(({ name }, index) => (
-          <Link key={name} href={`/${projectProps.right.teamName}/${name}`}>
+        {teamProps.right.team.project.items.map(({ name }, index) => (
+          <Link key={name} href={`/${teamProps.right.teamName}/${name}`}>
             <a>
               <Card key={index}>
                 <Stack spacing={4} isInline>
                   <Image
                     size={10}
-                    src={projectProps.right.team.image.downloadUrl}
+                    src={teamProps.right.team.image.downloadUrl}
                     bg="gray.50"
                     border="1px solid"
                     borderColor={`mode.${colorMode}.icon`}
@@ -155,7 +155,7 @@ export default function OrganizationPage(projectProps: ITeamProps) {
                   />
                   <Stack spacing={2}>
                     <Text color={`mode.${colorMode}.text`} lineHeight="none">
-                      {projectProps.right.teamName}
+                      {teamProps.right.teamName}
                     </Text>
                     <Heading
                       as="h3"

@@ -20,7 +20,7 @@ import * as t from "io-ts";
 
 import { GraphQLClient } from "graphql-request";
 import fetch from "isomorphic-unfetch";
-import hookNeedingFetch from "../../../utils/hookNeedingFetch";
+import {hookNeedingFetch} from "../../../utils/hookNeedingFetch";
 import { confirmOrCreateUser } from "../../../utils/user";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 

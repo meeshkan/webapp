@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useFetchUser } from "../../../utils/user";
 import {
   Box,
   useColorMode,

@@ -13,11 +13,30 @@ import {
   Icon,
 } from "@chakra-ui/core";
 import Link from "next/link";
-import { useFetchUser } from "../../utils/user";
+import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
+import { useProjects } from "../../utils/projects";
+import { isLeft } from "fp-ts/lib/Either";
 
-const ProjectSettings = ({ user }) => {
+interface IProjectSettingsProps {
+  session: ISession;
+}
+
+const ProjectSettings = ({ session }: IProjectSettingsProps) => {
   const { colorMode, toggleColorMode } = useColorMode();
-
+  const fetchedProjects = useProjects(session);
+  const projects = isLeft(fetchedProjects)
+    ? // we are loading
+      []
+    : isLeft(fetchedProjects.right)
+    ? // there was an error with the fetch
+      []
+    : fetchedProjects.right.right.teams.flatMap((team) =>
+        team.project.items.map((project) => ({
+          ...project,
+          teamImage: team.image,
+          teamName: team.name,
+        }))
+      );
   return (
     <>
       <Menu closeOnSelect={false}>
@@ -27,13 +46,13 @@ const ProjectSettings = ({ user }) => {
           backgroundColor={`mode.${colorMode}.background`}
         >
           <Image
-            src={user.picture}
+            src={session.user.picture}
             size={10}
             roundedLeft="sm"
             borderColor={`mode.${colorMode}.background`}
           />
           <Text ml={2} mr={8} color={`mode.${colorMode}.text`}>
-            {user.nickname}
+            {session.user.nickname}
           </Text>
           <Icon name="chevron-down" mr={2} color={`mode.${colorMode}.text`} />
         </MenuButton>
@@ -56,7 +75,7 @@ const ProjectSettings = ({ user }) => {
             </MenuItem>
             <MenuItem color={`mode.${colorMode}.text`}>
               <ChakraLink
-                href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_OAUTH_APP_CLIENT_ID}&scope=incoming-webhook&state=${user.node_id}&redirect_uri=${process.env.SLACK_OAUTH_REDIRECT_URI}`}
+                href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_OAUTH_APP_CLIENT_ID}&scope=incoming-webhook&state=${session.user.sub}&redirect_uri=${process.env.SLACK_OAUTH_REDIRECT_URI}`}
                 isExternal
                 color={`mode.${colorMode}.text`}
                 _hover={{ textDecor: "none" }}
@@ -72,20 +91,18 @@ const ProjectSettings = ({ user }) => {
             title="Project repo"
             color={`mode.${colorMode}.title`}
           >
-            {/*user.projects*/[].map(
-              ({ owner: { login, avatarUrl }, name }, index) => (
-                <Link href={`/${login}/${name}`} key={index}>
-                  <MenuItem
-                    color={`mode.${colorMode}.text`}
-                    d="flex"
-                    alignContent="center"
-                  >
-                    <Image src={avatarUrl} h={4} w={4} mr={2} />
-                    {name}
-                  </MenuItem>
-                </Link>
-              )
-            )}
+            {projects.map(({ teamImage: { downloadUrl }, teamName, name }, index) => (
+              <Link href={`/${teamName}/${name}`} key={index}>
+                <MenuItem
+                  color={`mode.${colorMode}.text`}
+                  d="flex"
+                  alignContent="center"
+                >
+                  <Image src={downloadUrl} h={4} w={4} mr={2} />
+                  {name}
+                </MenuItem>
+              </Link>
+            ))}
           </MenuGroup>
           <MenuItem color={`mode.${colorMode}.text`}>
             <ChakraLink

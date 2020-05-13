@@ -15,12 +15,13 @@ import customTheme from "../theme";
 import Navigation from "../components/organisms/navigation";
 import Head from "next/head";
 import Layout from "../components/layout";
-import { useFetchUser } from "../utils/user";
+import { useFetchSession } from "../utils/user";
 import { useRouter } from "next/router";
+import { isLeft, isRight } from "fp-ts/lib/Either";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const { colorMode } = useColorMode();
-  const [ user, loadingUser ] = useFetchUser();
+  const session = useFetchSession();
   const router = useRouter();
 
   return (
@@ -33,9 +34,9 @@ function MyApp({ Component, pageProps }: AppProps) {
         <CSSReset />
         <ColorModeProvider>
           <Layout>
-            <Navigation user={user} loadingUser={loadingUser} />
-            {!user && (
-              <Skeleton isLoaded={!loadingUser}>
+            <Navigation session={session} />
+            <Skeleton isLoaded={isRight(session)}>
+                (isLeft(session) ? <></> : isLeft(session.right)
                 <Box as="section" my={12}>
                   <Heading
                     as="h2"
@@ -65,9 +66,8 @@ function MyApp({ Component, pageProps }: AppProps) {
                     </Button>
                   </Flex>
                 </Box>
+                : <Component session={session} {...pageProps} />)
               </Skeleton>
-            )}
-            {user && <Component {...pageProps} />}
           </Layout>
         </ColorModeProvider>
       </ThemeProvider>

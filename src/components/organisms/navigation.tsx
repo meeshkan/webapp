@@ -10,9 +10,17 @@ import {
 } from "@chakra-ui/core";
 import Project from "../molecules/project";
 import Link from "next/link";
-import { useFetchUser } from "../../utils/user";
+import { Either, isLeft, isRight } from "fp-ts/lib/Either";
+import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
+import { Loading } from "../../utils/hookNeedingFetch";
+import { NotAuthorized } from "../../utils/user";
 
-const Navigation = ({ user, loadingUser }) => {
+
+interface INavigationProps {
+  session: Either<Loading, Either<NotAuthorized, ISession>>
+}
+
+const Navigation = ({ session }: INavigationProps) => {
   const { colorMode, toggleColorMode } = useColorMode();
 
   return (
@@ -36,9 +44,9 @@ const Navigation = ({ user, loadingUser }) => {
             cursor="pointer"
           />
         </Link>
-        {!loadingUser && (
+        {!isLeft(session) && (
           <section>
-            {!user && (
+            {isLeft(session.right) ? (
               <Stack isInline spacing={4}>
                 <IconButton
                   aria-label={`Switch to ${
@@ -51,8 +59,7 @@ const Navigation = ({ user, loadingUser }) => {
                   mr={2}
                 />
               </Stack>
-            )}
-            {user && <Project user={user} />}
+            ) : <Project session={session.right.right} />}
           </section>
         )}
       </Flex>

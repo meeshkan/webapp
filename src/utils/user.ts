@@ -1,17 +1,21 @@
 import React from "react";
 import fetch from "isomorphic-unfetch";
-import hookNeedingFetch from "./hookNeedingFetch";
+import { hookNeedingFetch } from "./hookNeedingFetch";
 import { GraphQLClient } from "graphql-request";
 import { Either, left, right } from "fp-ts/lib/Either";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 
-export const fetchUser = async () => {
-  const res = await fetch("/api/me");
-  const user = res.ok ? await res.json() : null;
-  return user;
+export type NotAuthorized = "NotAuthorized";
+export const NotAuthorized: NotAuthorized  = "NotAuthorized";
+
+
+export const fetchSession = async (): Promise<Either<NotAuthorized,ISession>> => {
+  const res = await fetch("/api/session");
+  const session = res.ok ? await res.json() : null;
+  return session ? right(session) : left(NotAuthorized);
 };
 
-export const useFetchUser = () => hookNeedingFetch(fetchUser);
+export const useFetchSession = () => hookNeedingFetch(fetchSession);
 
 enum NegativeConfirmOrCreateUserOutcome {
   INCORRECT_TYPE_SAFETY,
@@ -43,27 +47,19 @@ export const confirmOrCreateUser = async <T>(
       ? right(user)
       : left(NegativeConfirmOrCreateUserOutcome.INCORRECT_TYPE_SAFETY);
   } catch {
-    const _8baseAdminClient = new GraphQLClient(
-      process.env.EIGHT_BASE_ENDPOINT,
-      {
-        headers: {
-          authorization: `Bearer ${process.env.EIGHT_BASE_CREATE_USER_TOKEN}`,
-        },
-      }
-    );
     try {
-      const { userSignUpWithToken } = await _8baseAdminClient.request(
+      const { userSignUpWithToken } = await _8baseUserClient.request(
         `mutation (
-      $user: UserCreateInput!,
-      $authProfileId: ID!
-    ) {
-      userSignUpWithToken(
-        user: $user,
-        authProfileId: $authProfileId
-      ) {
-        ${query}
-      }
-    }`,
+          $user: UserCreateInput!,
+          $authProfileId: ID!
+        ) {
+          userSignUpWithToken(
+            user: $user,
+            authProfileId: $authProfileId
+          ) {
+            ${query}
+          }
+        }`,
         {
           user: {
             email: session.user.email,
