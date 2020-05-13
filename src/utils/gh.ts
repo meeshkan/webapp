@@ -390,7 +390,7 @@ export const authenticateAppWithGithub = async (
     );
   } catch (e) {
     console.error(e);
-    // the user exists already, so we update instead
+    // the gh info already, so we update instead
     await _8baseGraphQLClient.request(
       `mutation(
       $userId:ID!
