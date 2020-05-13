@@ -81,20 +81,22 @@ const getTeam = async (
   try {
     const result = await _8baseGraphQLClient.request(query, { teamName });
     if (!result.user.team || result.user.team.items.length === 0) {
+      console.error("Attempt to access a non-existant team");
       return left(NegativeTeamFetchOutcome.TEAM_DOES_NOT_EXIST);
     }
     const team = result.user.team.items[0];
 
     return Team.is(team)
       ? right(team)
-      : left(NegativeTeamFetchOutcome.QUERY_ERROR);
-  } catch (e) {
+      : (() => {console.error(`Could not perform a typesafe cast of ${team}`); return left(NegativeTeamFetchOutcome.QUERY_ERROR)})();
+    } catch (e) {
     if (
       e.response.errors.filter((error) => error.code === "InvalidTokenError")
         .length > 0
     ) {
       return left(NegativeTeamFetchOutcome.INVALID_TOKEN_ERROR);
     }
+    console.error("Undefined 8base error", e.response.errors)
     return left(NegativeTeamFetchOutcome.UNDEFINED_ERROR);
   }
 };

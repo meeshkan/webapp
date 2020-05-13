@@ -45,7 +45,7 @@ export const confirmOrCreateUser = async <T>(
     }`);
     return typeSafe(user)
       ? right(user)
-      : left(NegativeConfirmOrCreateUserOutcome.INCORRECT_TYPE_SAFETY);
+      : (() => {console.error(`Could not perform a typesafe cast of ${user}`); return left(NegativeConfirmOrCreateUserOutcome.INCORRECT_TYPE_SAFETY)})();
   } catch {
     try {
       const { userSignUpWithToken } = await _8baseUserClient.request(
@@ -69,9 +69,9 @@ export const confirmOrCreateUser = async <T>(
       );
       return typeSafe(userSignUpWithToken)
         ? right(userSignUpWithToken)
-        : left(NegativeConfirmOrCreateUserOutcome.INCORRECT_TYPE_SAFETY);
-    } catch (e) {
-      console.error("BAD", session, session.user);
+        : (() => {console.error(`Could not perform a typesafe cast of ${userSignUpWithToken}`); return left(NegativeConfirmOrCreateUserOutcome.INCORRECT_TYPE_SAFETY)})();
+      } catch (e) {
+      console.error("Could not register user with the following session", session, e.response.errors);
       throw e;
     }
   }

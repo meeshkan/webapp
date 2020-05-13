@@ -74,19 +74,18 @@ export const getProjects = async (
     const result = await _8baseGraphQLClient.request(query);
     const teams = result.user.team ? result.user.team.items : [];
 
-    console.log(teams);
     return t.array(Team).is(teams)
       ? right({ session, teams })
-      : left(NegativeProjectsFetchOutcome.QUERY_ERROR);
+      : (() => {console.error(`Could not perform a typesafe cast of ${teams}`); return left(NegativeProjectsFetchOutcome.QUERY_ERROR)})();
   } catch (e) {
     if (
       e.response.errors.filter((error) => error.code === "InvalidTokenError")
         .length > 0
     ) {
-      console.log(e);
+      console.error("Invalid token", e);
       return left(NegativeProjectsFetchOutcome.INVALID_TOKEN_ERROR);
     }
-    console.log(e);
+    console.error("Error from 8base", e.response.errors);
     return left(NegativeProjectsFetchOutcome.UNDEFINED_ERROR);
   }
 };
