@@ -30,6 +30,8 @@ import { useRouter } from "next/router";
 import Card from "../components/molecules/card";
 import { isLeft, isRight, left, Either, right } from "fp-ts/lib/Either";
 import { Option, some, none, isSome } from "fp-ts/lib/Option";
+import { groupSort, NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
+import { Ord, ordString } from "fp-ts/lib/Ord";
 import * as t from "io-ts";
 import {
   IProjectsProps,
@@ -41,6 +43,7 @@ import {
 import { confirmOrCreateUser } from "../utils/user";
 import { hookNeedingFetch, Loading } from "../utils/hookNeedingFetch";
 import { IRepository, IOwner } from "../utils/gh";
+import { head } from "fp-ts/lib/ReadonlyNonEmptyArray";
 
 type ImportProps = {
   repoName: String;
@@ -75,7 +78,7 @@ export async function getServerSideProps(
   };
 }
 
-type IOwnerToRepositories = Record<string, IRepository[]>;
+type IRepositoriesGroupedByOwner = NonEmptyArray<IRepository>[];
 interface IProject {
   teamName: string;
   teamImage: string;
@@ -106,12 +109,16 @@ const ImportProject = ({ repoName }: ImportProps) => {
   );
 };
 
-const groupReposByOwner = (repos: IRepository[]): IOwnerToRepositories =>
-  Array.from(new Set(repos.map((repo) => repo.owner.login)))
-    .map((owner) => ({
-      [owner]: repos.filter((repo) => repo.owner.login === owner),
-    }))
-    .reduce((a, b) => ({ ...a, ...b }), {});
+const ordRepositoryByOwner: Ord<IRepository> = {
+  compare: (repo0, repo1) =>
+    ordString.compare(repo0.owner.login, repo1.owner.login),
+  equals: (repo0, repo1) =>
+    repo0.owner.login === repo1.owner.login,
+};
+
+const groupReposByOwner = (repos: IRepository[]): IRepositoriesGroupedByOwner =>
+  groupSort(ordRepositoryByOwner)(repos);
+
 
 async function authorizeGithub() {
   // This is a placholder for the function that calls the GitHub API for what Meeshkan is installed on an returns an object currently represented by a variable called 'owners'. This includes the organizations with Meeshkan installed, and lists the specific repos below.
@@ -144,8 +151,15 @@ export default function Home(ssrProps: IProjectsProps) {
     >
   );
 
+  const [ownerRepos, setOwnerRepos] = useState(
+    left(Loading) as Either<
+      Loading,
+      Either<NegativeGithubFetchOutcome, Option<NonEmptyArray<IRepository>>>
+    >
+  );
+
   const repoList = hookNeedingFetch<
-    Either<NegativeGithubFetchOutcome, Record<string, IRepository[]>>
+    Either<NegativeGithubFetchOutcome, NonEmptyArray<IRepository>[]>
   >(async () => {
     const res = await fetch("/api/gh/repos");
     const repos = res.ok
@@ -157,13 +171,14 @@ export default function Home(ssrProps: IProjectsProps) {
     if (isRight(repos)) {
       const groupedRepos = groupReposByOwner(repos.right);
       if (isLeft(owner) || isLeft(owner.right)) {
-        const owners = Object.keys(groupedRepos);
+        const owners = groupedRepos.map((a) => head(a).owner);
         setOwner(
           right(
-            right(
-              owners.length > 0 ? some(groupedRepos[owners[0]][0].owner) : none
-            )
+            right(owners.length > 0 ? some(head(groupedRepos[0]).owner) : none)
           )
+        );
+        setOwnerRepos(
+          right(right(groupedRepos.length > 0 ? some(groupedRepos[0]) : none))
         );
       }
       return right(groupedRepos);
@@ -320,18 +335,23 @@ export default function Home(ssrProps: IProjectsProps) {
                             defaultValue={owner.right.right.value.login}
                             type="radio"
                           >
-                            {Object.entries(repoList.right.right).map(
-                              ([ownerKey, ownerValue], index) => (
+                            {repoList.right.right.map(
+                              (reposForOwner, index) => (
                                 <MenuItemOption
                                   key={index}
-                                  value={ownerKey}
-                                  onClick={() =>
+                                  value={head(reposForOwner).owner.login}
+                                  onClick={() => {
                                     setOwner(
-                                      right(right(some(ownerValue[0].owner)))
-                                    )
-                                  }
+                                      right(
+                                        right(some(head(reposForOwner).owner))
+                                      )
+                                    );
+                                    setOwnerRepos(
+                                      right(right(some(reposForOwner)))
+                                    );
+                                  }}
                                 >
-                                  {ownerKey}
+                                  {head(reposForOwner).owner.login}
                                 </MenuItemOption>
                               )
                             )}
@@ -339,11 +359,15 @@ export default function Home(ssrProps: IProjectsProps) {
                         </MenuList>
                       </Menu>
                       <Stack>
-                        {repoList.right.right[
-                          owner.right.right.value.login
-                        ].map((project, index) => (
-                          <ImportProject key={index} repoName={project.name} />
-                        ))}
+                        {isRight(ownerRepos) &&
+                          isRight(ownerRepos.right) &&
+                          isSome(ownerRepos.right.right) &&
+                          ownerRepos.right.right.value.map((project, index) => (
+                            <ImportProject
+                              key={index}
+                              repoName={project.name}
+                            />
+                          ))}
                       </Stack>
                     </>
                   )
