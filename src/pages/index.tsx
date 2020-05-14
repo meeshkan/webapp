@@ -126,6 +126,7 @@ export default function Home(ssrProps: IProjectsProps) {
   const { colorMode } = useColorMode();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const newProps = useProjects(ssrProps.right.session);
+
   const session =
     isRight(newProps) && isRight(newProps.right)
       ? newProps.right.right.session
@@ -195,7 +196,7 @@ export default function Home(ssrProps: IProjectsProps) {
                     fontSize="md"
                     fontWeight={900}
                   >
-                    {name}
+                    {projectName}
                   </Heading>
                 </Stack>
               </Stack>
