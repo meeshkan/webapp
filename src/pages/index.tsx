@@ -26,7 +26,7 @@ import {
   Skeleton,
 } from "@chakra-ui/core";
 import auth0 from "../utils/auth0";
-import { useRouter } from "next/router";
+// import { useRouter } from "next/router";
 import Card from "../components/molecules/card";
 import { isLeft, isRight, left, Either, right } from "fp-ts/lib/Either";
 import { Option, some, none, isSome } from "fp-ts/lib/Option";
@@ -173,7 +173,16 @@ export default function Home(ssrProps: IProjectsProps) {
 
   return (
     <>
-      <Grid templateColumns="repeat(4, 1fr)" gap={6}>
+      <Grid
+        templateColumns={[
+          "repeat(2, 1fr)",
+          "repeat(2, 1fr)",
+          "repeat(3, 1fr)",
+          "repeat(3, 1fr)",
+          "repeat(4, 1fr)",
+        ]}
+        gap={6}
+      >
         {teamsToProjects(projectsProps.teams).map(
           ({ teamName, teamImage, projectName }, index) => (
             <Card key={index} link={`/${teamName}/${projectName}`}>
