@@ -33,17 +33,17 @@ const VerifyLoginPage = () => {
         after this step.
       </Text>
       <Button
+        as="a"
+        // @ts-ignore
+        href=""
         rounded="sm"
         fontWeight={900}
         px={4}
         mt={10}
         variantColor="red"
-        onClick={() => {
-          /*verifyLoginFunction()*/
-        }}
       >
         <Icon name="github" mr={2} />
-        Import from GitHub
+        Sign in to GitHub
       </Button>
     </Stack>
   );

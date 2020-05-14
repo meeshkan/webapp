@@ -167,7 +167,7 @@ export async function getServerSideProps(
 const Dashboard = (projectProps: IProjectProps) => {
   if (isLeft(projectProps)) {
     //useRouter().push("/404");
-    return <></>;
+    return <>404</>;
   }
   return (
     <>
@@ -176,7 +176,10 @@ const Dashboard = (projectProps: IProjectProps) => {
         templateRows="repeat(2, minmax(204px, 45%))"
         gap={8}
       >
-        <Settings organizationName={projectProps.right.teamName} repositoryName={projectProps.right.projectName} />
+        <Settings
+          organizationName={projectProps.right.teamName}
+          repositoryName={projectProps.right.projectName}
+        />
         <Production
           tests={projectProps.right.project.tests.items.filter(
             (test) => test.location === "master"
