@@ -23,11 +23,13 @@ import {
   MenuOptionGroup,
   MenuItemOption,
   Flex,
+  Skeleton,
 } from "@chakra-ui/core";
 import auth0 from "../utils/auth0";
 import { useRouter } from "next/router";
 import Card from "../components/molecules/card";
 import { isLeft, isRight, left, Either, right } from "fp-ts/lib/Either";
+import { Option, some, none, isSome } from "fp-ts/lib/Option";
 import * as t from "io-ts";
 import {
   IProjectsProps,
@@ -37,8 +39,8 @@ import {
   teamsToProjects,
 } from "../utils/projects";
 import { confirmOrCreateUser } from "../utils/user";
-import { hookNeedingFetch } from "../utils/hookNeedingFetch";
-import { IRepository } from "../utils/gh";
+import { hookNeedingFetch, Loading } from "../utils/hookNeedingFetch";
+import { IRepository, IOwner } from "../utils/gh";
 
 type ImportProps = {
   repoName: String;
@@ -134,7 +136,12 @@ export default function Home(ssrProps: IProjectsProps) {
       ? newProps.right.right
       : ssrProps.right;
 
-  const [owner, setOwner] = useState(null);
+  const [owner, setOwner] = useState(
+    left(Loading) as Either<
+      Loading,
+      Either<NegativeGithubFetchOutcome, Option<IOwner>>
+    >
+  );
 
   const repoList = hookNeedingFetch<
     Either<NegativeGithubFetchOutcome, Record<string, IRepository[]>>
@@ -148,20 +155,21 @@ export default function Home(ssrProps: IProjectsProps) {
       : left(NegativeGithubFetchOutcome.COULD_NOT_GET_REPOS_FROM_GITHUB);
     if (isRight(repos)) {
       const groupedRepos = groupReposByOwner(repos.right);
-      if (!owner) {
-        setOwner(Object.keys(groupedRepos)[0]);
+      if (isLeft(owner) || isLeft(owner.right)) {
+        const owners = Object.keys(groupedRepos);
+        setOwner(
+          right(
+            right(
+              owners.length > 0 ? some(groupedRepos[owners[0]][0].owner) : none
+            )
+          )
+        );
       }
       return right(groupedRepos);
     }
     return repos;
   });
 
-  const ownerRecord =
-    isRight(repoList) && isRight(repoList.right) ? repoList.right.right : {};
-  const githubAuthorized =
-    isRight(repoList) &&
-    isRight(repoList.right) &&
-    Object.keys(repoList.right.right).length > 0;
   return (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
@@ -222,122 +230,144 @@ export default function Home(ssrProps: IProjectsProps) {
           closeOnOverlayClick={true}
           size="lg"
         >
-          <ModalOverlay />
-          <ModalContent rounded="sm" backgroundColor={`mode.${colorMode}.card`}>
-            <ModalHeader
-              borderBottom="1px solid"
-              borderColor={`mode.${colorMode}.icon`}
-              mx={4}
-              px={0}
-              pt={4}
-              pb={2}
-              fontWeight={900}
-              color={`mode.${colorMode}.title`}
-            >
-              {/* TODO make this team name dynamic */}
-              Import a project to Makenna’s Team
-            </ModalHeader>
-            <ModalCloseButton
+          <Skeleton isLoaded={!isLeft(repoList)}>
+            <ModalOverlay />
+            <ModalContent
               rounded="sm"
-              size="sm"
-              mt={2}
-              mr={0}
-              color={`mode.${colorMode}.text`}
-            />
-            <ModalBody px={2}>
-              {!githubAuthorized ? (
-                <Flex h="100%" justify="center" align="center">
-                  <Button
-                    rounded="sm"
-                    fontWeight={900}
-                    px={4}
-                    variantColor="red"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      authorizeGithub();
-                    }}
-                  >
-                    <Icon name="github" mr={2} />
-                    Import from GitHub
-                  </Button>
-                </Flex>
-              ) : (
-                <>
-                  <Menu closeOnSelect={true}>
-                    <MenuButton
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="space-between"
-                      minWidth="204px"
+              backgroundColor={`mode.${colorMode}.card`}
+            >
+              <ModalHeader
+                borderBottom="1px solid"
+                borderColor={`mode.${colorMode}.icon`}
+                mx={4}
+                px={0}
+                pt={4}
+                pb={2}
+                fontWeight={900}
+                color={`mode.${colorMode}.title`}
+              >
+                {/* TODO make this team name dynamic */}
+                Import a project to Makenna’s Team
+              </ModalHeader>
+              <ModalCloseButton
+                rounded="sm"
+                size="sm"
+                mt={2}
+                mr={0}
+                color={`mode.${colorMode}.text`}
+              />
+              <ModalBody px={2}>
+                {isRight(repoList) && isLeft(repoList.right) ? (
+                  <Flex h="100%" justify="center" align="center">
+                    <Button
                       rounded="sm"
-                      ml={2}
-                      mb={4}
-                      border="1px solid"
-                      backgroundColor={`mode.${colorMode}.background`}
-                      borderColor={`mode.${colorMode}.icon`}
+                      fontWeight={900}
+                      px={4}
+                      variantColor="red"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        authorizeGithub();
+                      }}
                     >
-                      <Image
-                        // getting [0] is a safe operation
-                        // beacuse the sorting algorithm guarantees
-                        // that all lists have non-0 length
-                        src={ownerRecord[owner][0].owner.avatar_url}
-                        size={8}
-                        roundedLeft="sm"
-                        borderColor={`mode.${colorMode}.background`}
-                      />
-                      <Text mr={8} color={`mode.${colorMode}.text`}>
-                        {owner}
-                      </Text>
-                      <Icon
-                        name="arrow-up-down"
-                        size="12px"
-                        color="gray.500"
-                        mr={2}
-                      />
-                    </MenuButton>
-                    <MenuList
-                      border="none"
-                      placement="bottom-start"
-                      backgroundColor={`mode.${colorMode}.card`}
-                      color={`mode.${colorMode}.text`}
-                    >
-                      <MenuOptionGroup defaultValue={owner} type="radio">
-                        {Object.keys(ownerRecord).map((newOwner, index) => (
-                          <MenuItemOption
-                            key={index}
-                            value={newOwner}
-                            onClick={() => setOwner(newOwner)}
+                      <Icon name="github" mr={2} />
+                      Import from GitHub
+                    </Button>
+                  </Flex>
+                ) : (
+                  isRight(repoList) &&
+                  isRight(repoList.right) &&
+                  isRight(owner) &&
+                  isRight(owner.right) &&
+                  isSome(owner.right.right) && (
+                    <>
+                      <Menu closeOnSelect={true}>
+                        <MenuButton
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="space-between"
+                          minWidth="204px"
+                          rounded="sm"
+                          ml={2}
+                          mb={4}
+                          border="1px solid"
+                          backgroundColor={`mode.${colorMode}.background`}
+                          borderColor={`mode.${colorMode}.icon`}
+                        >
+                          <Image
+                            // getting [0] is a safe operation
+                            // beacuse the sorting algorithm guarantees
+                            // that all lists have non-0 length
+                            src={owner.right.right.value.avatar_url}
+                            size={8}
+                            roundedLeft="sm"
+                            borderColor={`mode.${colorMode}.background`}
+                          />
+                          <Text mr={8} color={`mode.${colorMode}.text`}>
+                            {owner.right.right.value.login}
+                          </Text>
+                          <Icon
+                            name="arrow-up-down"
+                            size="12px"
+                            color="gray.500"
+                            mr={2}
+                          />
+                        </MenuButton>
+                        <MenuList
+                          border="none"
+                          placement="bottom-start"
+                          backgroundColor={`mode.${colorMode}.card`}
+                          color={`mode.${colorMode}.text`}
+                        >
+                          <MenuOptionGroup
+                            defaultValue={owner.right.right.value.login}
+                            type="radio"
                           >
-                            {newOwner}
-                          </MenuItemOption>
+                            {Object.entries(repoList.right.right).map(
+                              ([ownerKey, ownerValue], index) => (
+                                <MenuItemOption
+                                  key={index}
+                                  value={ownerKey}
+                                  onClick={() =>
+                                    setOwner(
+                                      right(right(some(ownerValue[0].owner)))
+                                    )
+                                  }
+                                >
+                                  {ownerKey}
+                                </MenuItemOption>
+                              )
+                            )}
+                          </MenuOptionGroup>
+                        </MenuList>
+                      </Menu>
+                      <Stack>
+                        {repoList.right.right[
+                          owner.right.right.value.login
+                        ].map((project, index) => (
+                          <ImportProject key={index} repoName={project.name} />
                         ))}
-                      </MenuOptionGroup>
-                    </MenuList>
-                  </Menu>
-                  <Stack>
-                    {ownerRecord[owner].map((project, index) => (
-                      <ImportProject key={index} repoName={project.name} />
-                    ))}
-                  </Stack>
-                </>
-              )}
-            </ModalBody>
-            <ModalFooter d="flex" justifyContent="center" fontSize="sm">
-              {!githubAuthorized ? null : (
-                <>
-                  <Text mr={2} color={`mode.${colorMode}.text`}>
-                    Not seeing the repository you want?
-                  </Text>
-                  <ChakraLink
-                    href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`}
-                    color={colorMode == "light" ? "red.500" : "red.200"}
-                  >
-                    Configure on GitHub.
-                  </ChakraLink>
-                </>
-              )}
-            </ModalFooter>
-          </ModalContent>
+                      </Stack>
+                    </>
+                  )
+                )}
+              </ModalBody>
+              <ModalFooter d="flex" justifyContent="center" fontSize="sm">
+                {(isLeft(repoList) || isLeft(repoList.right)) && (
+                  <>
+                    <Text mr={2} color={`mode.${colorMode}.text`}>
+                      Not seeing the repository you want?
+                    </Text>
+                    <ChakraLink
+                      href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`}
+                      color={colorMode == "light" ? "red.500" : "red.200"}
+                    >
+                      Configure on GitHub.
+                    </ChakraLink>
+                  </>
+                )}
+              </ModalFooter>
+            </ModalContent>
+          </Skeleton>
         </Modal>
       </Grid>
     </>

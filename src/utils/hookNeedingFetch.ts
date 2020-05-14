@@ -1,5 +1,5 @@
 import React from "react";
-import { Either, left, right } from "fp-ts/lib/Either";
+import { Either, left, right, isLeft } from "fp-ts/lib/Either";
 
 export type Loading = "Loading";
 export const Loading: Loading  = "Loading";
@@ -14,7 +14,7 @@ export const hookNeedingFetch = <T>(fetchFunction: () => Promise<T>): Either<Loa
     (async () => {
       __(right(await fetchFunction()));
     })();
-  }, [JSON.stringify(_)]);
+  }, [isLeft(_)]);
 
   return _;
 };
