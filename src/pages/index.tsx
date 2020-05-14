@@ -28,10 +28,12 @@ import {
 import auth0 from "../utils/auth0";
 // import { useRouter } from "next/router";
 import Card from "../components/molecules/card";
+import VerifyLogin from "../components/Dashboard/verify-login";
 import { isLeft, isRight, left, Either, right } from "fp-ts/lib/Either";
 import { Option, some, none, isSome, chain } from "fp-ts/lib/Option";
 import { groupSort, NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import { Ord, ordString } from "fp-ts/lib/Ord";
+import { NegativeGithubFetchOutcome } from "../utils/gh";
 import * as t from "io-ts";
 import {
   IProjectsProps,
@@ -87,10 +89,6 @@ interface IProject {
   projectName: string;
 }
 
-enum NegativeGithubFetchOutcome {
-  COULD_NOT_GET_REPOS_FROM_GITHUB,
-}
-
 const ImportProject = ({ repoName }: ImportProps) => {
   const { colorMode } = useColorMode();
   return (
@@ -138,6 +136,7 @@ export default function Home(ssrProps: IProjectsProps) {
     isRight(newProps) && isRight(newProps.right)
       ? newProps.right.right.session
       : ssrProps.right.session;
+  const stateForLogin = `{"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`;
 
   const projectsProps =
     isRight(newProps) && isRight(newProps.right)
@@ -167,11 +166,10 @@ export default function Home(ssrProps: IProjectsProps) {
           NegativeGithubFetchOutcome,
           IRepository[]
         >)
-      : left(NegativeGithubFetchOutcome.COULD_NOT_GET_REPOS_FROM_GITHUB);
+      : left(NegativeGithubFetchOutcome.INTERNAL_REST_ENDPOINT_ERROR);
     if (isRight(repos)) {
       const groupedRepos = groupReposByOwner(repos.right);
       if (isLeft(owner) || isLeft(owner.right)) {
-        const owners = groupedRepos.map((a) => head(a).owner);
         setOwner(
           right(
             right(
@@ -182,18 +180,29 @@ export default function Home(ssrProps: IProjectsProps) {
             )
           )
         );
-        setOwnerRepos(
-          right(
-            right(
-              _head(groupedRepos)
-            )
-          )
-        );
+        setOwnerRepos(right(right(_head(groupedRepos))));
       }
       return right(groupedRepos);
     }
     return repos;
   });
+
+  // TODO: if there is an internal rest endpoint error,
+  // that's bad and it doesn't necessarily mean they
+  // need reauth - it means that our code is buggy.
+  // Same with the oauth flow error - that means that their
+  // token is corrupted, which may mean there's a bug in the code.
+  // We should find a way to elevate these issues.
+  if (
+    isRight(repoList) &&
+    isLeft(repoList.right) &&
+    (repoList.right.left ===
+      NegativeGithubFetchOutcome.INTERNAL_REST_ENDPOINT_ERROR ||
+      repoList.right.left === NegativeGithubFetchOutcome.NEEDS_REAUTH ||
+      repoList.right.left === NegativeGithubFetchOutcome.OAUTH_FLOW_ERROR)
+  ) {
+    return <VerifyLogin link={`https://github.com/login/oauth/authorize?client_id=${process.env.GH_OAUTH_APP_CLIENT_ID}&redirect_uri=https://app.meeshkan.com/api/gh/oauth-triage&state=${stateForLogin}`} />;
+  }
 
   return (
     <>
@@ -398,7 +407,7 @@ export default function Home(ssrProps: IProjectsProps) {
                       Not seeing the repository you want?
                     </Text>
                     <ChakraLink
-                      href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`}
+                      href={`https://github.com/apps/meeshkan/installations/new?state=${stateForLogin}`}
                       color={colorMode == "light" ? "red.500" : "red.200"}
                     >
                       Configure on GitHub.
