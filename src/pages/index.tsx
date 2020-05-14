@@ -29,7 +29,7 @@ import auth0 from "../utils/auth0";
 // import { useRouter } from "next/router";
 import Card from "../components/molecules/card";
 import { isLeft, isRight, left, Either, right } from "fp-ts/lib/Either";
-import { Option, some, none, isSome } from "fp-ts/lib/Option";
+import { Option, some, none, isSome, chain } from "fp-ts/lib/Option";
 import { groupSort, NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import { Ord, ordString } from "fp-ts/lib/Ord";
 import * as t from "io-ts";
@@ -44,6 +44,8 @@ import { confirmOrCreateUser } from "../utils/user";
 import { hookNeedingFetch, Loading } from "../utils/hookNeedingFetch";
 import { IRepository, IOwner } from "../utils/gh";
 import { head } from "fp-ts/lib/ReadonlyNonEmptyArray";
+import { head as _head } from "fp-ts/lib/Array";
+import { pipe } from "fp-ts/lib/pipeable";
 
 type ImportProps = {
   repoName: String;
@@ -112,13 +114,11 @@ const ImportProject = ({ repoName }: ImportProps) => {
 const ordRepositoryByOwner: Ord<IRepository> = {
   compare: (repo0, repo1) =>
     ordString.compare(repo0.owner.login, repo1.owner.login),
-  equals: (repo0, repo1) =>
-    repo0.owner.login === repo1.owner.login,
+  equals: (repo0, repo1) => repo0.owner.login === repo1.owner.login,
 };
 
 const groupReposByOwner = (repos: IRepository[]): IRepositoriesGroupedByOwner =>
   groupSort(ordRepositoryByOwner)(repos);
-
 
 async function authorizeGithub() {
   // This is a placholder for the function that calls the GitHub API for what Meeshkan is installed on an returns an object currently represented by a variable called 'owners'. This includes the organizations with Meeshkan installed, and lists the specific repos below.
@@ -174,11 +174,20 @@ export default function Home(ssrProps: IProjectsProps) {
         const owners = groupedRepos.map((a) => head(a).owner);
         setOwner(
           right(
-            right(owners.length > 0 ? some(head(groupedRepos[0]).owner) : none)
+            right(
+              pipe(
+                _head(groupedRepos),
+                chain((repoList) => some(head(repoList).owner))
+              )
+            )
           )
         );
         setOwnerRepos(
-          right(right(groupedRepos.length > 0 ? some(groupedRepos[0]) : none))
+          right(
+            right(
+              _head(groupedRepos)
+            )
+          )
         );
       }
       return right(groupedRepos);
