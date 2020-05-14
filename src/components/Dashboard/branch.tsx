@@ -2,10 +2,20 @@ import React from "react";
 import Card from "../molecules/card";
 import { Test } from "../molecules/test";
 import { Text, useColorMode } from "@chakra-ui/core";
+import * as t from "io-ts";
+import { DateFromString } from "../../utils/customTypes";
+
+const TTest = t.type({
+  status: t.string,
+  updatedAt: DateFromString
+});
+
+type ITTest = t.TypeOf<typeof TTest>
 
 type BranchProps = {
-  tests: Array<any>;
+  tests: ITTest[];
 };
+
 
 const Branch = ({ tests }: BranchProps) => {
   const { colorMode } = useColorMode();
@@ -19,9 +29,9 @@ const Branch = ({ tests }: BranchProps) => {
         tests.map((test, index) => (
           <Test
             key={index}
-            branchName={test.branchName}
-            date={test.testDate}
-            status={test.testStatus}
+            branchName={"branch"}
+            date={test.updatedAt}
+            status={test.status}
           />
         ))
       )}

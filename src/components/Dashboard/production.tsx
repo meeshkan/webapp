@@ -1,10 +1,19 @@
 import React from "react";
 import Card from "../molecules/card";
 import { Test } from "../molecules/test";
+import { DateFromString } from "../../utils/customTypes";
 import { Text, useColorMode } from "@chakra-ui/core";
+import * as t from "io-ts";
+
+const TTest = t.type({
+  status: t.string,
+  updatedAt: DateFromString
+});
+
+type ITTest = t.TypeOf<typeof TTest>
 
 type ProductionProps = {
-  tests: Array<any>;
+  tests: ITTest[];
 };
 
 const Production = ({ tests }: ProductionProps) => {
@@ -19,9 +28,9 @@ const Production = ({ tests }: ProductionProps) => {
         tests.map((test, index) => (
           <Test
             key={index}
-            branchName={test.branchName}
-            date={test.testDate}
-            status={test.testStatus}
+            branchName={"master"}
+            date={test.updatedAt}
+            status={test.status}
           />
         ))
       )}
