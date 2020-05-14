@@ -294,9 +294,6 @@ export default function Home(ssrProps: IProjectsProps) {
                           borderColor={`mode.${colorMode}.icon`}
                         >
                           <Image
-                            // getting [0] is a safe operation
-                            // beacuse the sorting algorithm guarantees
-                            // that all lists have non-0 length
                             src={owner.right.right.value.avatar_url}
                             size={8}
                             roundedLeft="sm"
