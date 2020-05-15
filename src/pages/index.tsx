@@ -62,15 +62,15 @@ export async function getServerSideProps(
   context
 ): Promise<{ props: IProjectsProps }> {
   const { req } = context;
-  const session = await auth0.getSession(req);
+  const session = await auth0().getSession(req);
   if (!session) {
     return { props: left(NegativeProjectsFetchOutcome.NOT_LOGGED_IN) };
   }
   const tp = t.type({ id: t.string });
-  const c = await confirmOrCreateUser<t.TypeOf<typeof tp>>(
+  const c = await confirmOrCreateUser<t.TypeOf<typeof tp>, t.TypeOf<typeof tp>, unknown>(
     "id",
     session,
-    tp.is
+    tp
   );
   if (isLeft(c)) {
     console.error("type safety error in application");

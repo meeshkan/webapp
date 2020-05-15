@@ -4,7 +4,7 @@ import fetch from 'isomorphic-unfetch';
 
 export default async function me(req, res) {
   try {
-    const session = await auth0.getSession(req);
+    const session = await auth0().getSession(req);
     if (!session) {
         res.status(403);
         res.send();
@@ -78,12 +78,6 @@ export default async function me(req, res) {
         }) {
           id
         }
-    }`);
-  
-    await gcmsGraphQLClient.request(`mutation {
-      publishSlackIncomingWebhook(where: {id: "${gcmsResponse.createSlackIncomingWebhook.id}" }) {
-        id
-      }
     }`);
 
     res.writeHead(301, {

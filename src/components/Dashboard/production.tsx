@@ -1,13 +1,13 @@
 import React from "react";
 import Card from "../molecules/card";
 import { Test } from "../molecules/test";
-import { DateFromString } from "../../utils/customTypes";
+//import { DateFromString } from "../../utils/customTypes";
 import { Text, useColorMode } from "@chakra-ui/core";
 import * as t from "io-ts";
 
 const TTest = t.type({
   status: t.string,
-  updatedAt: DateFromString
+  updatedAt: t.string//DateFromString
 });
 
 type ITTest = t.TypeOf<typeof TTest>

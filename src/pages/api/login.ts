@@ -12,7 +12,7 @@ export default async function login(req, res) {
       return;
     }
     console.log("handling login");
-    await auth0.handleLogin(req, res);
+    await auth0().handleLogin(req, res);
   } catch (error) {
     console.error(error);
     res.status(error.status || 400).end(error.message);

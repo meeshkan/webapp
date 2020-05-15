@@ -3,7 +3,7 @@ import { Stack, Text, Badge, Box, useColorMode } from "@chakra-ui/core";
 
 type TestProps = {
   branchName: string;
-  date: Date;
+  date: string;
   status: string;
 };
 
@@ -46,7 +46,7 @@ export const Test = ({ branchName, date, status }: TestProps) => {
         lineHeight="normal"
         mb={4}
       >
-        {date.toString()}
+        {date}
       </Text>
     </Box>
   );

@@ -167,7 +167,7 @@ const uploadPhotoForTeam = async (idToken, userId, teamId, photoUrl) => {
 
 export default async function defaultWorkspaceHook(req, res) {
   try {
-    const session = await auth0.getSession(req);
+    const session = await auth0().getSession(req);
     if (!session) {
       console.log("no session");
       res.status(403);
@@ -175,10 +175,10 @@ export default async function defaultWorkspaceHook(req, res) {
     }
 
     const tp = t.type({ id: t.string });
-    const confirmUser = await confirmOrCreateUser<t.TypeOf<typeof tp>>(
+    const confirmUser = await confirmOrCreateUser<t.TypeOf<typeof tp>, t.TypeOf<typeof tp>, unknown>(
       "id",
       session,
-      tp.is
+      tp
     );
     if (isLeft(confirmUser)) {
       // there was a logic error with our confirmUser request

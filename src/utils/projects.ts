@@ -2,9 +2,8 @@ import * as t from "io-ts";
 import { GraphQLClient } from "graphql-request";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import { Either, left, right, isLeft } from "fp-ts/lib/Either";
-import auth0 from "../utils/auth0";
-import { confirmOrCreateUser } from "../utils/user";
 import { hookNeedingFetch } from "./hookNeedingFetch";
+import { fold } from "fp-ts/lib/Either";
 
 export enum NegativeProjectsFetchOutcome {
   NOT_LOGGED_IN,
@@ -34,6 +33,16 @@ export const Team = t.type({
 });
 
 export type ITeam = t.TypeOf<typeof Team>;
+
+const queryTp = t.type({
+  user: t.type({
+    team: t.type({
+      items: t.array(Team),
+    }),
+  }),
+});
+
+type QueryTp = t.TypeOf<typeof queryTp>;
 
 export const getProjects = async (
   session: ISession
@@ -71,12 +80,10 @@ export const getProjects = async (
     }`;
 
   try {
-    const result = await _8baseGraphQLClient.request(query);
-    const teams = result.user.team ? result.user.team.items : [];
-
-    return t.array(Team).is(teams)
-      ? right({ session, teams })
-      : (() => {console.error(`Could not perform a typesafe cast of ${teams}`); return left(NegativeProjectsFetchOutcome.QUERY_ERROR)})();
+    return fold(
+      () => left(NegativeProjectsFetchOutcome.QUERY_ERROR),
+      (query: QueryTp) => right({ session, teams: query.user.team.items})
+    )(queryTp.decode(await _8baseGraphQLClient.request(query)))
   } catch (e) {
     if (
       e.response && e.response.errors && e.response.errors.filter((error) => error.code === "InvalidTokenError")

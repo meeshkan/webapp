@@ -2,8 +2,9 @@ import React from "react";
 import fetch from "isomorphic-unfetch";
 import { hookNeedingFetch } from "./hookNeedingFetch";
 import { GraphQLClient } from "graphql-request";
-import { Either, left, right } from "fp-ts/lib/Either";
+import { Either, left, right, isRight } from "fp-ts/lib/Either";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
+import * as t from "io-ts";
 
 export type NotAuthorized = "NotAuthorized";
 export const NotAuthorized: NotAuthorized  = "NotAuthorized";
@@ -21,11 +22,11 @@ enum NegativeConfirmOrCreateUserOutcome {
   INCORRECT_TYPE_SAFETY,
 }
 
-export const confirmOrCreateUser = async <T>(
+export const confirmOrCreateUser = async <A, O, I>(
   query: string,
   session: ISession,
-  typeSafe: (u: unknown) => u is T
-): Promise<Either<NegativeConfirmOrCreateUserOutcome, T>> => {
+  tp: t.Type<A, O, I>
+): Promise<Either<NegativeConfirmOrCreateUserOutcome, A>> => {
   const _8baseUserClient = new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
     headers: {
       authorization: `Bearer ${session.idToken}`,
@@ -43,8 +44,9 @@ export const confirmOrCreateUser = async <T>(
         ${query}
       }
     }`);
-    return typeSafe(user)
-      ? right(user)
+    const decoded = tp.decode(user);
+    return isRight(decoded)
+      ? right(decoded.right)
       : (() => {console.error(`Could not perform a typesafe cast of ${user}`); return left(NegativeConfirmOrCreateUserOutcome.INCORRECT_TYPE_SAFETY)})();
   } catch {
     try {
@@ -67,8 +69,9 @@ export const confirmOrCreateUser = async <T>(
           authProfileId: process.env.EIGHT_BASE_AUTH_PROFILE_ID,
         }
       );
-      return typeSafe(userSignUpWithToken)
-        ? right(userSignUpWithToken)
+      const decoded = tp.decode(userSignUpWithToken);
+      return isRight(decoded)
+        ? right(userSignUpWithToken.right)
         : (() => {console.error(`Could not perform a typesafe cast of ${userSignUpWithToken}`); return left(NegativeConfirmOrCreateUserOutcome.INCORRECT_TYPE_SAFETY)})();
       } catch (e) {
       console.error("Could not register user with the following session", session, e.response.errors);

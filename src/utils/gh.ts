@@ -144,14 +144,14 @@ export const fetchGithubAccessToken = async (
       }),
     ]),
   });
-  const c = await confirmOrCreateUser<t.TypeOf<typeof tp>>(
+  const c = await confirmOrCreateUser<t.TypeOf<typeof tp>, t.TypeOf<typeof tp>, unknown>(
     `id
     githubInfo {
       githubSyncChecksum
       githubSyncNonce
     }`,
     session,
-    tp.is
+    tp
   );
 
   if (isLeft(c)) {

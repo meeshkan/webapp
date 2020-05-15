@@ -10,17 +10,20 @@ import {
 } from "@chakra-ui/core";
 // cards
 import auth0 from "../../utils/auth0";
-import { DateFromString, IDateFromString } from "../../utils/customTypes";
+// import { DateFromString, IDateFromString } from "../../utils/customTypes";
 import Settings from "../../components/Dashboard/settings";
 import Production from "../../components/Dashboard/production";
 import Branch from "../../components/Dashboard/branch";
 import Chart from "../../components/Dashboard/chart";
-import { left, right, isLeft, Either } from "fp-ts/lib/Either";
+import { left, right, isLeft, Either, isRight } from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { GraphQLClient } from "graphql-request";
 import { confirmOrCreateUser } from "../../utils/user";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
-import { useRouter } from "next/router";
+import { fold as oFold, chain } from "fp-ts/lib/Option";
+import { fold as eFold } from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/pipeable";
+import { head } from "fp-ts/lib/Array";
 
 enum NegativeProjectFetchOutcome {
   NOT_LOGGED_IN,
@@ -37,13 +40,32 @@ const Project = t.type({
       t.type({
         location: t.union([t.literal("master"), t.literal("branch")]),
         status: t.string,
-        updatedAt: DateFromString,
+        updatedAt: t.string//DateFromString,
       })
     ),
   }),
 });
 
 type IProject = t.TypeOf<typeof Project>;
+
+const Team = t.type({
+  image: t.type({
+    downloadUrl: t.string,
+  }),
+  project: t.type({
+    items: t.array(Project),
+  }),
+});
+
+const queryTp = t.type({
+  user: t.type({
+    team: t.type({
+      items: t.array(Team),
+    }),
+  }),
+});
+
+type QueryTp = t.TypeOf<typeof queryTp>;
 
 const getProject = async (
   session: ISession,
@@ -84,6 +106,8 @@ const getProject = async (
               tests {
                 items {
                   location
+                  status
+                  updatedAt
                 }
               }
             }
@@ -94,23 +118,25 @@ const getProject = async (
   }`;
 
   try {
-    const result = await _8baseGraphQLClient.request(query, {
-      teamName,
-      projectName,
-    });
-    if (
-      !result.user.team ||
-      result.user.team.items.length === 0 ||
-      !result.user.team.items[0].project ||
-      result.user.team.items[0].project.items.length === 0
-    ) {
-      return left(NegativeProjectFetchOutcome.PROJECT_DOES_NOT_EXIST);
-    }
-    const project = result.user.team.items[0].project.items[0];
-
-    return Project.is(project)
-      ? right(project)
-      : left(NegativeProjectFetchOutcome.QUERY_ERROR);
+    return eFold(
+      () => left(NegativeProjectFetchOutcome.QUERY_ERROR),
+      (query: QueryTp) =>
+        pipe(
+          head(query.user.team.items),
+          chain((team) => head(team.project.items)),
+          oFold(
+            () => left(NegativeProjectFetchOutcome.PROJECT_DOES_NOT_EXIST),
+            (a: IProject) => right(a)
+          )
+        )
+    )(
+      queryTp.decode(
+        await _8baseGraphQLClient.request(query, {
+          teamName,
+          projectName,
+        })
+      )
+    );
   } catch (e) {
     if (
       e.response.errors.filter((error) => error.code === "InvalidTokenError")
@@ -138,19 +164,18 @@ export async function getServerSideProps(
   const {
     params: { teamName, projectName },
     req,
-    res,
   } = context;
-  const session = await auth0.getSession(req);
+  const session = await auth0().getSession(req);
   if (!session) {
     return { props: left(NegativeProjectFetchOutcome.NOT_LOGGED_IN) };
   }
 
   const userType = t.type({ id: t.string });
-  const user = await confirmOrCreateUser<t.TypeOf<typeof userType>>(
-    "id",
-    session,
-    userType.is
-  );
+  const user = await confirmOrCreateUser<
+    t.TypeOf<typeof userType>,
+    t.TypeOf<typeof userType>,
+    unknown
+  >("id", session, userType);
   if (isLeft(user)) {
     console.error("type safety error in application");
   }

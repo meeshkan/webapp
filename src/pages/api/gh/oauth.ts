@@ -6,7 +6,7 @@ import * as t from "io-ts";
 
 export default async function me(req, res) {
   try {
-    const session = await auth0.getSession(req);
+    const session = await auth0().getSession(req);
     if (!session) {
         res.status(403);
         res.send('No active session');
@@ -35,7 +35,7 @@ export default async function me(req, res) {
     params.append('state', state);
 
     const tp = t.type({ id: t.string })
-    const confirmResult  = await confirmOrCreateUser<t.TypeOf<typeof tp>>("id", session, tp.is);
+    const confirmResult  = await confirmOrCreateUser<t.TypeOf<typeof tp>, t.TypeOf<typeof tp>, unknown>("id", session, tp);
     if (isLeft(confirmResult)) {
       console.error("Type safety error in graphql query");
       res.writeHead(404, {

@@ -3,10 +3,12 @@ import { getAllGhRepos } from '../../../utils/gh';
 
 export default async function me(req, res) {
   try {
-    const session = await auth0.getSession(req);
-    if (!session || !session.user) {
-      res.status(400);
+    console.log("checking session");
+    const session = await auth0().getSession(req);
+    if (!session) {
+      res.status(403);
       res.send('Not logged in');
+      return;
     }
     const allGhRepos = await getAllGhRepos(session);
     res.json(allGhRepos);
