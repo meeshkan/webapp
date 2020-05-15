@@ -33,11 +33,17 @@ import { isLeft, isRight, left, Either, right } from "fp-ts/lib/Either";
 import { Option, some, none, isSome, chain } from "fp-ts/lib/Option";
 import { groupSort, NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import { Ord, ordString } from "fp-ts/lib/Ord";
-import { NegativeGithubFetchOutcome } from "../utils/gh";
+import {
+  INTERNAL_REST_ENDPOINT_ERROR,
+  NEEDS_REAUTH,
+  OAUTH_FLOW_ERROR,
+  NegativeGithubFetchOutcome,
+  eqNegativeGithubFetchOutcome,
+} from "../utils/gh";
 import * as t from "io-ts";
 import {
   IProjectsProps,
-  NegativeProjectsFetchOutcome,
+  NOT_LOGGED_IN,
   getProjects,
   useProjects,
   teamsToProjects,
@@ -46,7 +52,7 @@ import { confirmOrCreateUser } from "../utils/user";
 import { hookNeedingFetch, Loading } from "../utils/hookNeedingFetch";
 import { IRepository, IOwner } from "../utils/gh";
 import { head } from "fp-ts/lib/ReadonlyNonEmptyArray";
-import { head as _head } from "fp-ts/lib/Array";
+import { head as _head, reduce } from "fp-ts/lib/Array";
 import { pipe } from "fp-ts/lib/pipeable";
 
 type ImportProps = {
@@ -64,14 +70,9 @@ export async function getServerSideProps(
   const { req } = context;
   const session = await auth0().getSession(req);
   if (!session) {
-    return { props: left(NegativeProjectsFetchOutcome.NOT_LOGGED_IN) };
+    return { props: left(NOT_LOGGED_IN()) };
   }
-  const tp = t.type({ id: t.string });
-  const c = await confirmOrCreateUser<t.TypeOf<typeof tp>, t.TypeOf<typeof tp>, unknown>(
-    "id",
-    session,
-    tp
-  );
+  const c = await confirmOrCreateUser("id", session, t.type({ id: t.string }));
   if (isLeft(c)) {
     console.error("type safety error in application");
   }
@@ -166,7 +167,7 @@ export default function Home(ssrProps: IProjectsProps) {
           NegativeGithubFetchOutcome,
           IRepository[]
         >)
-      : left(NegativeGithubFetchOutcome.INTERNAL_REST_ENDPOINT_ERROR);
+      : left(INTERNAL_REST_ENDPOINT_ERROR());
     if (isRight(repos)) {
       const groupedRepos = groupReposByOwner(repos.right);
       if (isLeft(owner) || isLeft(owner.right)) {
@@ -193,18 +194,22 @@ export default function Home(ssrProps: IProjectsProps) {
   // Same with the oauth flow error - that means that their
   // token is corrupted, which may mean there's a bug in the code.
   // We should find a way to elevate these issues.
-  if (
-    isRight(repoList) &&
+  return isRight(repoList) &&
     isLeft(repoList.right) &&
-    (repoList.right.left ===
-      NegativeGithubFetchOutcome.INTERNAL_REST_ENDPOINT_ERROR ||
-      repoList.right.left === NegativeGithubFetchOutcome.NEEDS_REAUTH ||
-      repoList.right.left === NegativeGithubFetchOutcome.OAUTH_FLOW_ERROR)
-  ) {
-    return <VerifyLogin link={`https://github.com/login/oauth/authorize?client_id=${process.env.GH_OAUTH_APP_CLIENT_ID}&redirect_uri=https://app.meeshkan.com/api/gh/oauth-triage&state=${stateForLogin}`} />;
-  }
-
-  return (
+    pipe(repoList.right.left, (err) =>
+      [
+        INTERNAL_REST_ENDPOINT_ERROR(),
+        NEEDS_REAUTH(),
+        OAUTH_FLOW_ERROR(),
+      ].reduce(
+        (a, b) => a || eqNegativeGithubFetchOutcome.equals(err, b),
+        false
+      )
+    ) ? (
+    <VerifyLogin
+      link={`https://github.com/login/oauth/authorize?client_id=${process.env.GH_OAUTH_APP_CLIENT_ID}&redirect_uri=https://app.meeshkan.com/api/gh/oauth-triage&state=${stateForLogin}`}
+    />
+  ) : (
     <>
       <Grid
         templateColumns={[

@@ -18,14 +18,21 @@ export const fetchSession = async (): Promise<Either<NotAuthorized,ISession>> =>
 
 export const useFetchSession = () => hookNeedingFetch(fetchSession);
 
-enum NegativeConfirmOrCreateUserOutcome {
-  INCORRECT_TYPE_SAFETY,
+interface INCORRECT_TYPE_SAFETY {
+  type: "INCORRECT_TYPE_SAFETY";
 }
 
-export const confirmOrCreateUser = async <A, O, I>(
+export type NegativeConfirmOrCreateUserOutcome = INCORRECT_TYPE_SAFETY;
+
+const INCORRECT_TYPE_SAFETY = (): NegativeConfirmOrCreateUserOutcome => ({
+  type: "INCORRECT_TYPE_SAFETY",
+});
+
+
+export const confirmOrCreateUser = async <A>(
   query: string,
   session: ISession,
-  tp: t.Type<A, O, I>
+  tp: t.Type<A, A, unknown>
 ): Promise<Either<NegativeConfirmOrCreateUserOutcome, A>> => {
   const _8baseUserClient = new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
     headers: {
@@ -47,7 +54,7 @@ export const confirmOrCreateUser = async <A, O, I>(
     const decoded = tp.decode(user);
     return isRight(decoded)
       ? right(decoded.right)
-      : (() => {console.error(`Could not perform a typesafe cast of ${user}`); return left(NegativeConfirmOrCreateUserOutcome.INCORRECT_TYPE_SAFETY)})();
+      : (() => {console.error(`Could not perform a typesafe cast of ${user}`); return left(INCORRECT_TYPE_SAFETY())})();
   } catch {
     try {
       const { userSignUpWithToken } = await _8baseUserClient.request(
@@ -72,7 +79,7 @@ export const confirmOrCreateUser = async <A, O, I>(
       const decoded = tp.decode(userSignUpWithToken);
       return isRight(decoded)
         ? right(userSignUpWithToken.right)
-        : (() => {console.error(`Could not perform a typesafe cast of ${userSignUpWithToken}`); return left(NegativeConfirmOrCreateUserOutcome.INCORRECT_TYPE_SAFETY)})();
+        : (() => {console.error(`Could not perform a typesafe cast of ${userSignUpWithToken}`); return left(INCORRECT_TYPE_SAFETY())})();
       } catch (e) {
       console.error("Could not register user with the following session", session, e.response.errors);
       throw e;

@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Grid,
-  Button,
-  Skeleton,
-  Box,
-  Heading,
-  Flex,
-  useColorMode,
-} from "@chakra-ui/core";
+import { Grid } from "@chakra-ui/core";
 // cards
 import auth0 from "../../utils/auth0";
 // import { DateFromString, IDateFromString } from "../../utils/customTypes";
@@ -25,13 +17,44 @@ import { fold as eFold } from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/pipeable";
 import { head } from "fp-ts/lib/Array";
 
-enum NegativeProjectFetchOutcome {
-  NOT_LOGGED_IN,
-  PROJECT_DOES_NOT_EXIST,
-  INVALID_TOKEN_ERROR,
-  UNDEFINED_ERROR,
-  QUERY_ERROR, // the query we made does not conform to the type we expect
+interface NOT_LOGGED_IN {
+  type: "NOT_LOGGED_IN";
 }
+interface PROJECT_DOES_NOT_EXIST {
+  type: "PROJECT_DOES_NOT_EXIST";
+}
+interface INVALID_TOKEN_ERROR {
+  type: "INVALID_TOKEN_ERROR";
+}
+interface UNDEFINED_ERROR {
+  type: "UNDEFINED_ERROR";
+}
+interface QUERY_ERROR {
+  type: "QUERY_ERROR";
+}
+
+type NegativeProjectFetchOutcome =
+  | NOT_LOGGED_IN
+  | PROJECT_DOES_NOT_EXIST
+  | INVALID_TOKEN_ERROR
+  | UNDEFINED_ERROR
+  | QUERY_ERROR;
+  
+const NOT_LOGGED_IN = (): NegativeProjectFetchOutcome => ({
+  type: "NOT_LOGGED_IN",
+});
+const PROJECT_DOES_NOT_EXIST = (): NegativeProjectFetchOutcome => ({
+  type: "PROJECT_DOES_NOT_EXIST",
+});
+const INVALID_TOKEN_ERROR = (): NegativeProjectFetchOutcome => ({
+  type: "INVALID_TOKEN_ERROR",
+});
+const UNDEFINED_ERROR = (): NegativeProjectFetchOutcome => ({
+  type: "UNDEFINED_ERROR",
+});
+const QUERY_ERROR = (): NegativeProjectFetchOutcome => ({
+  type: "QUERY_ERROR",
+});
 
 const Project = t.type({
   name: t.string,
@@ -40,7 +63,7 @@ const Project = t.type({
       t.type({
         location: t.union([t.literal("master"), t.literal("branch")]),
         status: t.string,
-        updatedAt: t.string//DateFromString,
+        updatedAt: t.string, //DateFromString,
       })
     ),
   }),
@@ -118,23 +141,24 @@ const getProject = async (
   }`;
 
   try {
-    return eFold(
-      () => left(NegativeProjectFetchOutcome.QUERY_ERROR),
-      (query: QueryTp) =>
-        pipe(
-          head(query.user.team.items),
-          chain((team) => head(team.project.items)),
-          oFold(
-            () => left(NegativeProjectFetchOutcome.PROJECT_DOES_NOT_EXIST),
-            (a: IProject) => right(a)
-          )
-        )
-    )(
+    return pipe(
       queryTp.decode(
         await _8baseGraphQLClient.request(query, {
           teamName,
           projectName,
         })
+      ),
+      eFold(
+        () => left(QUERY_ERROR()),
+        (query: QueryTp) =>
+          pipe(
+            head(query.user.team.items),
+            chain((team) => head(team.project.items)),
+            oFold(
+              () => left(PROJECT_DOES_NOT_EXIST()),
+              (a: IProject) => right(a)
+            )
+          )
       )
     );
   } catch (e) {
@@ -142,9 +166,9 @@ const getProject = async (
       e.response.errors.filter((error) => error.code === "InvalidTokenError")
         .length > 0
     ) {
-      return left(NegativeProjectFetchOutcome.INVALID_TOKEN_ERROR);
+      return left(INVALID_TOKEN_ERROR());
     }
-    return left(NegativeProjectFetchOutcome.UNDEFINED_ERROR);
+    return left(UNDEFINED_ERROR());
   }
 };
 
@@ -167,15 +191,14 @@ export async function getServerSideProps(
   } = context;
   const session = await auth0().getSession(req);
   if (!session) {
-    return { props: left(NegativeProjectFetchOutcome.NOT_LOGGED_IN) };
+    return { props: left(NOT_LOGGED_IN()) };
   }
 
-  const userType = t.type({ id: t.string });
-  const user = await confirmOrCreateUser<
-    t.TypeOf<typeof userType>,
-    t.TypeOf<typeof userType>,
-    unknown
-  >("id", session, userType);
+  const user = await confirmOrCreateUser(
+    "id",
+    session,
+    t.type({ id: t.string })
+  );
   if (isLeft(user)) {
     console.error("type safety error in application");
   }

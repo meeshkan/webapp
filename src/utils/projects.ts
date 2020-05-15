@@ -5,12 +5,35 @@ import { Either, left, right, isLeft } from "fp-ts/lib/Either";
 import { hookNeedingFetch } from "./hookNeedingFetch";
 import { fold } from "fp-ts/lib/Either";
 
-export enum NegativeProjectsFetchOutcome {
-  NOT_LOGGED_IN,
-  INVALID_TOKEN_ERROR,
-  UNDEFINED_ERROR,
-  QUERY_ERROR, // the query we made does not conform to the type we expect
+interface NOT_LOGGED_IN {
+  type: "NOT_LOGGED_IN";
 }
+interface INVALID_TOKEN_ERROR {
+  type: "INVALID_TOKEN_ERROR";
+}
+interface UNDEFINED_ERROR {
+  type: "UNDEFINED_ERROR";
+}
+interface QUERY_ERROR {
+  type: "QUERY_ERROR";
+}
+
+export type NegativeProjectsFetchOutcome =
+  | NOT_LOGGED_IN
+  | INVALID_TOKEN_ERROR
+  | UNDEFINED_ERROR
+  | QUERY_ERROR;
+
+export const NOT_LOGGED_IN = (): NegativeProjectsFetchOutcome => ({
+  type: "NOT_LOGGED_IN",
+});
+export const INVALID_TOKEN_ERROR = (): NegativeProjectsFetchOutcome => ({
+  type: "INVALID_TOKEN_ERROR",
+});
+export const UNDEFINED_ERROR = (): NegativeProjectsFetchOutcome => ({
+  type: "UNDEFINED_ERROR",
+});
+export const QUERY_ERROR = (): NegativeProjectsFetchOutcome => ({ type: "QUERY_ERROR" });
 
 export const Team = t.type({
   image: t.union([
@@ -81,7 +104,7 @@ export const getProjects = async (
 
   try {
     return fold(
-      () => left(NegativeProjectsFetchOutcome.QUERY_ERROR),
+      () => left(QUERY_ERROR()),
       (query: QueryTp) => right({ session, teams: query.user.team.items})
     )(queryTp.decode(await _8baseGraphQLClient.request(query)))
   } catch (e) {
@@ -90,10 +113,10 @@ export const getProjects = async (
         .length > 0
     ) {
       console.error("Invalid token", e);
-      return left(NegativeProjectsFetchOutcome.INVALID_TOKEN_ERROR);
+      return left(INVALID_TOKEN_ERROR());
     }
     console.error("Error from 8base", e);
-    return left(NegativeProjectsFetchOutcome.UNDEFINED_ERROR);
+    return left(UNDEFINED_ERROR());
   }
 };
 
