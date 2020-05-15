@@ -186,6 +186,7 @@ export default async function defaultWorkspaceHook(req, res) {
       res.writeHead(404, {
         Location: "/404",
       });
+      res.end();
       return;
     }
     const userHasTeams = await doesUserHaveTeams(session.idToken);
@@ -193,6 +194,7 @@ export default async function defaultWorkspaceHook(req, res) {
       res.writeHead(301, {
         Location: "/",
       });
+      res.end();
       return;
     }
 
@@ -226,8 +228,8 @@ export default async function defaultWorkspaceHook(req, res) {
     res.writeHead(301, {
       Location: "/",
     });
-
     res.end();
+    return;
   } catch (error) {
     console.error(error);
     res.status(error.status || 500).end(error.message);

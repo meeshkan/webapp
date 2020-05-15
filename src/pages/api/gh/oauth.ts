@@ -41,20 +41,23 @@ export default async function me(req, res) {
       res.writeHead(404, {
         Location: '/404'
       });
+      res.end();
       return;
     }
     const authenticationResult = await authenticateAppWithGithub(confirmResult.right.id, params, session);
     if (isLeft(authenticationResult)) {
       res.writeHead(404, {
         Location: '/404'
-      });  
+      });
+      res.end();
+      return;
     } else {
       res.writeHead(301, {
         Location: '/'
-      });        
+      });
+      res.end(); 
+      return;     
     }
-
-    res.end();
   } catch (error) {
     console.error(error);
     res.status(error.status || 500).end(error.message);
