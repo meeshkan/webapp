@@ -84,7 +84,8 @@ const Project = t.type({
       t.type({
         location: t.union([t.literal("master"), t.literal("branch")]),
         status: t.string,
-        updatedAt: t.string, //DateFromString,
+        createdAt: t.string, //DateFromString,
+        commitHash: t.string,
       })
     ),
   }),
@@ -156,7 +157,8 @@ const getProject = (teamName: string, projectName: string) => async (
                         items {
                           location
                           status
-                          updatedAt
+                          createdAt
+                          commitHash
                         }
                       }
                     }
@@ -222,7 +224,7 @@ export default (projectProps: IProjectWithTeamName) => (
     >
       <Settings
         organizationName={projectProps.teamName}
-        repositoryName={projectProps.name}
+        repositoryName={projectProps.projectName}
       />
       <Production
         tests={projectProps.tests.items.filter(

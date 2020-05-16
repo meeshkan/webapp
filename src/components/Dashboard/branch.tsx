@@ -7,15 +7,15 @@ import * as t from "io-ts";
 
 const TTest = t.type({
   status: t.string,
-  updatedAt: t.string//DateFromString
+  createdAt: t.string, //DateFromString
+  commitHash: t.string,
 });
 
-type ITTest = t.TypeOf<typeof TTest>
+type ITTest = t.TypeOf<typeof TTest>;
 
 type BranchProps = {
   tests: ITTest[];
 };
-
 
 const Branch = ({ tests }: BranchProps) => {
   const { colorMode } = useColorMode();
@@ -30,7 +30,8 @@ const Branch = ({ tests }: BranchProps) => {
           <Test
             key={index}
             branchName={"branch"}
-            date={test.updatedAt}
+            commitHash={test.commitHash}
+            date={test.createdAt}
             status={test.status}
           />
         ))

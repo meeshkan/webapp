@@ -1,13 +1,15 @@
 import React from "react";
 import { Stack, Text, Badge, Box, useColorMode } from "@chakra-ui/core";
+import dayjs from "dayjs";
 
 type TestProps = {
   branchName: string;
   date: string;
   status: string;
+  commitHash: string;
 };
 
-export const Test = ({ branchName, date, status }: TestProps) => {
+export const Test = ({ commitHash, branchName, date, status }: TestProps) => {
   const { colorMode } = useColorMode();
   return (
     <Box my={3} borderBottom="1px solid" borderColor={`mode.${colorMode}.icon`}>
@@ -17,15 +19,15 @@ export const Test = ({ branchName, date, status }: TestProps) => {
           lineHeight="normal"
           color={`mode.${colorMode}.title`}
         >
-          {branchName}
+          {`${branchName}@${commitHash}`}
         </Text>
         <Badge
           variantColor={
-            status === "inProgress"
+            status === "In progress"
               ? "yellow"
-              : status === "success"
+              : status === "Success"
               ? "cyan"
-              : status === "failed"
+              : status === "Failed"
               ? "red"
               : null
           }
@@ -46,7 +48,7 @@ export const Test = ({ branchName, date, status }: TestProps) => {
         lineHeight="normal"
         mb={4}
       >
-        {date}
+        {dayjs(date).format("MMM D hh:mma")}
       </Text>
     </Box>
   );

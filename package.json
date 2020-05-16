@@ -16,6 +16,7 @@
     "@emotion/styled": "^10.0.27",
     "axios": "^0.19.2",
     "crypto-random-string": "^3.2.0",
+    "dayjs": "^1.8.27",
     "emotion-theming": "^10.0.27",
     "fp-ts": "^2.6.0",
     "graphql-request": "^1.8.2",
