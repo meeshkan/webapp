@@ -13,7 +13,7 @@ import {
 import { GraphQLClient } from "graphql-request";
 import auth0 from "../utils/auth0";
 import Card from "../components/molecules/card";
-import { Either, left, right, isLeft } from "fp-ts/lib/Either";
+import { Either, left, right, isLeft, chain } from "fp-ts/lib/Either";
 import { confirmOrCreateUser } from "../utils/user";
 import * as t from "io-ts";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
@@ -21,14 +21,48 @@ import { head } from "fp-ts/lib/Array";
 import { fold as oFold } from "fp-ts/lib/Option";
 import { fold as eFold } from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/pipeable";
+import { Eq } from "fp-ts/lib/Eq";
 
-enum NegativeTeamFetchOutcome {
-  NOT_LOGGED_IN,
-  TEAM_DOES_NOT_EXIST,
-  INVALID_TOKEN_ERROR,
-  UNDEFINED_ERROR,
-  QUERY_ERROR, // the query we made does not conform to the type we expect
+interface NOT_LOGGED_IN {
+  type: "NOT_LOGGED_IN";
 }
+interface TEAM_DOES_NOT_EXIST {
+  type: "TEAM_DOES_NOT_EXIST";
+}
+interface INVALID_TOKEN_ERROR {
+  type: "INVALID_TOKEN_ERROR";
+}
+interface UNDEFINED_ERROR {
+  type: "UNDEFINED_ERROR";
+}
+interface QUERY_ERROR {
+  type: "QUERY_ERROR";
+}
+
+type NegativeTeamFetchOutcome =
+  | NOT_LOGGED_IN
+  | TEAM_DOES_NOT_EXIST
+  | INVALID_TOKEN_ERROR
+  | UNDEFINED_ERROR
+  | QUERY_ERROR;
+
+const eqNegativeTeamFetchOutcome: Eq<NegativeTeamFetchOutcome> = {
+  equals: (x: NegativeTeamFetchOutcome, y: NegativeTeamFetchOutcome) => x.type === y.type
+}
+
+const NOT_LOGGED_IN = (): NegativeTeamFetchOutcome => ({
+  type: "NOT_LOGGED_IN",
+});
+const TEAM_DOES_NOT_EXIST = (): NegativeTeamFetchOutcome => ({
+  type: "TEAM_DOES_NOT_EXIST",
+});
+const INVALID_TOKEN_ERROR = (): NegativeTeamFetchOutcome => ({
+  type: "INVALID_TOKEN_ERROR",
+});
+const UNDEFINED_ERROR = (): NegativeTeamFetchOutcome => ({
+  type: "UNDEFINED_ERROR",
+});
+const QUERY_ERROR = (): NegativeTeamFetchOutcome => ({ type: "QUERY_ERROR" });
 
 const Team = t.type({
   image: t.type({
@@ -53,7 +87,7 @@ const queryTp = t.type({
   }),
 });
 
-type QueryTp = t.TypeOf<typeof queryTp>
+type QueryTp = t.TypeOf<typeof queryTp>;
 
 const getTeam = async (
   session: ISession,
@@ -91,19 +125,20 @@ const getTeam = async (
   }`;
 
   try {
-    return eFold(
-      () => left(NegativeTeamFetchOutcome.QUERY_ERROR),
-      (query: QueryTp) =>
-        pipe(
-          head(query.user.team.items),
-          oFold(
-            () => left(NegativeTeamFetchOutcome.TEAM_DOES_NOT_EXIST),
-            (a: ITeam) => right(a)
+    return pipe(
+      queryTp.decode(await _8baseGraphQLClient.request(query, { teamName })),
+      eFold(
+        () => left(QUERY_ERROR()),
+        (query: QueryTp) =>
+          pipe(
+            head(query.user.team.items),
+            oFold(
+              () => left(TEAM_DOES_NOT_EXIST()),
+              (a: ITeam) => right(a)
+            )
           )
-        )
-    )(queryTp.decode(
-      await _8baseGraphQLClient.request(query, { teamName })
-    ));
+      )
+    );
   } catch (e) {
     if (
       e.response &&
@@ -111,48 +146,42 @@ const getTeam = async (
       e.response.errors.filter((error) => error.code === "InvalidTokenError")
         .length > 0
     ) {
-      return left(NegativeTeamFetchOutcome.INVALID_TOKEN_ERROR);
+      return left(INVALID_TOKEN_ERROR());
     }
     console.error("Undefined 8base error", e.response.errors);
-    return left(NegativeTeamFetchOutcome.UNDEFINED_ERROR);
+    return left(UNDEFINED_ERROR());
   }
 };
 
-type ITeamProps = Either<
-  NegativeTeamFetchOutcome,
-  { team: ITeam; session: ISession }
->;
+type ITeamProps = { team: ITeam; session: ISession };
 
 export async function getServerSideProps(
   context
-): Promise<{ props: ITeamProps }> {
+): Promise<{ props: Either<NegativeTeamFetchOutcome, ITeamProps> }> {
   const {
     params: { teamName },
     req,
   } = context;
   const session = await auth0().getSession(req);
   if (!session) {
-    return { props: left(NegativeTeamFetchOutcome.NOT_LOGGED_IN) };
+    return { props: left(NOT_LOGGED_IN()) };
   }
-  const tp = t.type({ id: t.string });
-  const c = await confirmOrCreateUser<
-    t.TypeOf<typeof tp>,
-    t.TypeOf<typeof tp>,
-    unknown
-  >("id", session, tp);
-  if (isLeft(c)) {
+  const createdUser = await confirmOrCreateUser(
+    "id",
+    session,
+    t.type({ id: t.string })
+  );
+
+  if (isLeft(createdUser)) {
     console.error("type safety error in application");
   }
-  const team = await getTeam(session, teamName);
-
+  const trans = team => right<NegativeTeamFetchOutcome, ITeamProps>({session, team });
   return {
-    props: isLeft(team)
-      ? left(team.left)
-      : right({ session, team: team.right }),
-  };
+    props: chain(trans)(await getTeam(session, teamName))
+  }
 }
 
-export default function OrganizationPage(teamProps: ITeamProps) {
+export default function OrganizationPage(teamProps: Either<NegativeTeamFetchOutcome, ITeamProps>) {
   if (isLeft(teamProps)) {
     //useRouter().push("/404");
     return <></>;

@@ -174,12 +174,12 @@ export default async function defaultWorkspaceHook(req, res) {
       res.send("No active session");
     }
 
-    const tp = t.type({ id: t.string });
-    const confirmUser = await confirmOrCreateUser<t.TypeOf<typeof tp>, t.TypeOf<typeof tp>, unknown>(
+    const confirmUser = await confirmOrCreateUser(
       "id",
       session,
-      tp
+      t.type({ id: t.string })
     );
+
     if (isLeft(confirmUser)) {
       // there was a logic error with our confirmUser request
       console.error("Logic error with confirm user request");
