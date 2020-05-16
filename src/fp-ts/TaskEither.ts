@@ -16,6 +16,6 @@ export function tryToEitherCatch<E, A>(
   return () => f().catch((reason) => left(onRejected(reason)));
 }
 
-export const fromNully = <E, A>(l: E) => (
+export const fromNullable = <E, A>(l: E) => (
   a: A | null | undefined
 ): TaskEither<E, A> => (a ? teRight(a) : teLeft(l));

@@ -22,7 +22,7 @@ import Production from "../../components/Dashboard/production";
 import Settings from "../../components/Dashboard/settings";
 import { eitherAsPromise } from "../../fp-ts/Either";
 import { tryToEitherCatch, voidChain } from "../../fp-ts/ReaderTaskEither";
-import { fromNully } from "../../fp-ts/TaskEither";
+import { fromNullable } from "../../fp-ts/TaskEither";
 // cards
 import auth0 from "../../utils/auth0";
 import { gqlRequestError } from "../../utils/graphql";
@@ -203,7 +203,7 @@ export const getServerSideProps = ({
 }): Promise<{ props: IProjectWithTeamName }> =>
   pipe(
     tryCatch(() => auth0().getSession(req), NOT_LOGGED_IN),
-    chainTE(fromNully(NOT_LOGGED_IN())),
+    chainTE(fromNullable(NOT_LOGGED_IN())),
     chainTE(
       pipe(
         tryToEitherCatch(confirmOrCreateUser("id", userType), UNDEFINED_ERROR),
@@ -224,7 +224,7 @@ export default (projectProps: IProjectWithTeamName) => (
     >
       <Settings
         organizationName={projectProps.teamName}
-        repositoryName={projectProps.projectName}
+        repositoryName={projectProps.name}
       />
       <Production
         tests={projectProps.tests.items.filter(

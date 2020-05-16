@@ -3,7 +3,6 @@ import { getAllGhRepos } from '../../../utils/gh';
 
 export default async function me(req, res) {
   try {
-    console.log("checking session");
     const session = await auth0().getSession(req);
     if (!session) {
       res.status(403);

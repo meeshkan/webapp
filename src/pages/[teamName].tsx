@@ -14,7 +14,7 @@ import React from "react";
 import Card from "../components/molecules/card";
 import { eitherAsPromise } from "../fp-ts/Either";
 import { chainEitherKWithAsk, tryToEitherCatch, voidChain } from "../fp-ts/ReaderTaskEither";
-import { fromNully } from "../fp-ts/TaskEither";
+import { fromNullable } from "../fp-ts/TaskEither";
 import auth0 from "../utils/auth0";
 import { gqlRequestError } from "../utils/graphql";
 import { confirmOrCreateUser, INCORRECT_TYPE_SAFETY } from "../utils/user";
@@ -149,7 +149,7 @@ export const getServerSideProps = ({
 }): Promise<{ props: ITeamProps }> =>
   pipe(
     tryCatch(() => auth0().getSession(req), NOT_LOGGED_IN),
-    chainTE(fromNully(NOT_LOGGED_IN())),
+    chainTE(fromNullable(NOT_LOGGED_IN())),
     chainTE(
       pipe(
         tryToEitherCatch(confirmOrCreateUser("id", userType), UNDEFINED_ERROR),
