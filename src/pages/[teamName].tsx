@@ -1,38 +1,23 @@
-import React from "react";
-import Link from "next/link";
-import {
-  Stack,
-  Text,
-  Grid,
-  Image,
-  useColorMode,
-  Heading,
-  Icon,
-  Link as ChakraLink,
-} from "@chakra-ui/core";
-import { Lens } from "monocle-ts";
-import { GraphQLClient } from "graphql-request";
-import auth0 from "../utils/auth0";
-import Card from "../components/molecules/card";
-import { Either, left, right, fromOption } from "fp-ts/lib/Either";
-import { array } from "fp-ts/lib/Array";
-import { confirmOrCreateUser, INCORRECT_TYPE_SAFETY } from "../utils/user";
-import * as t from "io-ts";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
+import { Grid, Heading, Icon, Image, Link as ChakraLink, Stack, Text, useColorMode } from "@chakra-ui/core";
 import { head } from "fp-ts/lib/Array";
-import { fold as foldOption } from "fp-ts/lib/Option";
+import { Either, fromOption, right } from "fp-ts/lib/Either";
+import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
 import { mapLeft } from "fp-ts/lib/ReaderEither";
-import {
-  voidChain,
-  tryToEitherCatch,
-  chainEitherWithAsk,
-} from "../fp-ts/ReaderTaskEither";
-import { fromNully } from "../fp-ts/TaskEither";
+import { chain as chainTE, chainEitherK, tryCatch } from "fp-ts/lib/TaskEither";
+import { GraphQLClient } from "graphql-request";
+import * as t from "io-ts";
+import { Lens } from "monocle-ts";
+import Link from "next/link";
+import React from "react";
+import Card from "../components/molecules/card";
 import { eitherAsPromise } from "../fp-ts/Either";
-import { tryCatch, chain as chainTE, chainEitherK } from "fp-ts/lib/TaskEither";
+import { chainEitherKWithAsk, tryToEitherCatch, voidChain } from "../fp-ts/ReaderTaskEither";
+import { fromNully } from "../fp-ts/TaskEither";
+import auth0 from "../utils/auth0";
 import { gqlRequestError } from "../utils/graphql";
-import { flow } from "fp-ts/lib/function";
+import { confirmOrCreateUser, INCORRECT_TYPE_SAFETY } from "../utils/user";
 
 interface NOT_LOGGED_IN {
   type: "NOT_LOGGED_IN";
@@ -169,7 +154,7 @@ export const getServerSideProps = ({
       pipe(
         tryToEitherCatch(confirmOrCreateUser("id", userType), UNDEFINED_ERROR),
         voidChain(tryToEitherCatch(getTeam(teamName), UNDEFINED_ERROR)),
-        chainEitherWithAsk((team) => (session) =>
+        chainEitherKWithAsk((team) => (session) =>
           right({ props: { session, team } })
         )
       )

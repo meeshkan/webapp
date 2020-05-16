@@ -28,7 +28,7 @@ export const voidChain = <R, E, A, B>(
   v: ReaderTaskEither<R, E, B>
 ): (ma: ReaderTaskEither<R, E, A>) => ReaderTaskEither<R, E, B> => chain(() => v)
 
-export const chainEitherWithAsk = <R, E, A, B>(
+export const chainEitherKWithAsk = <R, E, A, B>(
   f: (a: A) => (r: R) => Either<E, B>
 ) => (ma: ReaderTaskEither<R, E, A>): ReaderTaskEither<R, E, B> => (
   r: R
