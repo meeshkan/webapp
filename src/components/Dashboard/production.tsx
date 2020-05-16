@@ -7,10 +7,11 @@ import * as t from "io-ts";
 
 const TTest = t.type({
   status: t.string,
-  updatedAt: t.string//DateFromString
+  createdAt: t.string, //DateFromString
+  commitHash: t.string,
 });
 
-type ITTest = t.TypeOf<typeof TTest>
+type ITTest = t.TypeOf<typeof TTest>;
 
 type ProductionProps = {
   tests: ITTest[];
@@ -29,7 +30,8 @@ const Production = ({ tests }: ProductionProps) => {
           <Test
             key={index}
             branchName={"master"}
-            date={test.updatedAt}
+            commitHash={test.commitHash}
+            date={test.createdAt}
             status={test.status}
           />
         ))
