@@ -5,6 +5,8 @@ import { eitherAsPromiseWithReject } from "../fp-ts/Either";
 import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
 
+export const _400ErrorHandler = <E>(_req: NextApiRequest, _res: NextApiResponse) => (_: E) => {_res.status(400)}
+
 export default <E>(
   f: (_req: NextApiRequest, _res: NextApiResponse) => TaskEither<E, void>,
   fe: (_req: NextApiRequest, _res: NextApiResponse) => (e: E) => void
