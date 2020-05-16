@@ -33,9 +33,8 @@ export default async function me(req, res) {
 
     const confirmResult = await confirmOrCreateUser(
       "id",
-      session,
       t.type({ id: t.string })
-    );
+    )(session);
     if (isLeft(confirmResult)) {
       console.error("Type safety error in graphql query");
       res.writeHead(404, {

@@ -179,7 +179,6 @@ export const fetchGithubAccessToken = async (
       githubSyncChecksum
       githubSyncNonce
     }`,
-    session,
     t.type({
       id: t.string,
       githubInfo: t.union([
@@ -190,7 +189,7 @@ export const fetchGithubAccessToken = async (
         }),
       ]),
     })
-  );
+  )(session);
 
   if (isLeft(c)) {
     console.error("Bad type scheme, check your types", c);

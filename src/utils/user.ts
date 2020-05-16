@@ -18,7 +18,7 @@ export const fetchSession = async (): Promise<Either<NotAuthorized,ISession>> =>
 
 export const useFetchSession = () => hookNeedingFetch(fetchSession);
 
-interface INCORRECT_TYPE_SAFETY {
+export interface INCORRECT_TYPE_SAFETY {
   type: "INCORRECT_TYPE_SAFETY";
 }
 
@@ -29,11 +29,10 @@ const INCORRECT_TYPE_SAFETY = (): NegativeConfirmOrCreateUserOutcome => ({
 });
 
 
-export const confirmOrCreateUser = async <A>(
+export const confirmOrCreateUser = <A>(
   query: string,
-  session: ISession,
   tp: t.Type<A, A, unknown>
-): Promise<Either<NegativeConfirmOrCreateUserOutcome, A>> => {
+) => async (session: ISession): Promise<Either<NegativeConfirmOrCreateUserOutcome, A>> => {
   const _8baseUserClient = new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
     headers: {
       authorization: `Bearer ${session.idToken}`,

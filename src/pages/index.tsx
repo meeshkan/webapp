@@ -72,7 +72,7 @@ export async function getServerSideProps(
   if (!session) {
     return { props: left(NOT_LOGGED_IN()) };
   }
-  const c = await confirmOrCreateUser("id", session, t.type({ id: t.string }));
+  const c = await confirmOrCreateUser("id", t.type({ id: t.string }))(session);
   if (isLeft(c)) {
     console.error("type safety error in application");
   }

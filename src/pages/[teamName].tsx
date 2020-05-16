@@ -1,27 +1,23 @@
-import React from "react";
-import Link from "next/link";
-import {
-  Stack,
-  Text,
-  Grid,
-  Image,
-  useColorMode,
-  Heading,
-  Icon,
-  Link as ChakraLink,
-} from "@chakra-ui/core";
-import { GraphQLClient } from "graphql-request";
-import auth0 from "../utils/auth0";
-import Card from "../components/molecules/card";
-import { Either, left, right, isLeft, chain } from "fp-ts/lib/Either";
-import { confirmOrCreateUser } from "../utils/user";
-import * as t from "io-ts";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
+import { Grid, Heading, Icon, Image, Link as ChakraLink, Stack, Text, useColorMode } from "@chakra-ui/core";
 import { head } from "fp-ts/lib/Array";
-import { fold as oFold } from "fp-ts/lib/Option";
-import { fold as eFold } from "fp-ts/lib/Either";
+import { Either, fromOption, right } from "fp-ts/lib/Either";
+import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
-import { Eq } from "fp-ts/lib/Eq";
+import { mapLeft } from "fp-ts/lib/ReaderEither";
+import { chain as chainTE, chainEitherK, tryCatch } from "fp-ts/lib/TaskEither";
+import { GraphQLClient } from "graphql-request";
+import * as t from "io-ts";
+import { Lens } from "monocle-ts";
+import Link from "next/link";
+import React from "react";
+import Card from "../components/molecules/card";
+import { eitherAsPromise } from "../fp-ts/Either";
+import { chainEitherKWithAsk, tryToEitherCatch, voidChain } from "../fp-ts/ReaderTaskEither";
+import { fromNully } from "../fp-ts/TaskEither";
+import auth0 from "../utils/auth0";
+import { gqlRequestError } from "../utils/graphql";
+import { confirmOrCreateUser, INCORRECT_TYPE_SAFETY } from "../utils/user";
 
 interface NOT_LOGGED_IN {
   type: "NOT_LOGGED_IN";
@@ -34,9 +30,11 @@ interface INVALID_TOKEN_ERROR {
 }
 interface UNDEFINED_ERROR {
   type: "UNDEFINED_ERROR";
+  error: Error;
 }
 interface QUERY_ERROR {
   type: "QUERY_ERROR";
+  errors: t.Errors;
 }
 
 type NegativeTeamFetchOutcome =
@@ -44,11 +42,8 @@ type NegativeTeamFetchOutcome =
   | TEAM_DOES_NOT_EXIST
   | INVALID_TOKEN_ERROR
   | UNDEFINED_ERROR
-  | QUERY_ERROR;
-
-const eqNegativeTeamFetchOutcome: Eq<NegativeTeamFetchOutcome> = {
-  equals: (x: NegativeTeamFetchOutcome, y: NegativeTeamFetchOutcome) => x.type === y.type
-}
+  | QUERY_ERROR
+  | INCORRECT_TYPE_SAFETY;
 
 const NOT_LOGGED_IN = (): NegativeTeamFetchOutcome => ({
   type: "NOT_LOGGED_IN",
@@ -59,10 +54,14 @@ const TEAM_DOES_NOT_EXIST = (): NegativeTeamFetchOutcome => ({
 const INVALID_TOKEN_ERROR = (): NegativeTeamFetchOutcome => ({
   type: "INVALID_TOKEN_ERROR",
 });
-const UNDEFINED_ERROR = (): NegativeTeamFetchOutcome => ({
+const UNDEFINED_ERROR = (error): NegativeTeamFetchOutcome => ({
   type: "UNDEFINED_ERROR",
+  error,
 });
-const QUERY_ERROR = (): NegativeTeamFetchOutcome => ({ type: "QUERY_ERROR" });
+const QUERY_ERROR = (errors: t.Errors): NegativeTeamFetchOutcome => ({
+  type: "QUERY_ERROR",
+  errors,
+});
 
 const Team = t.type({
   image: t.type({
@@ -89,106 +88,81 @@ const queryTp = t.type({
 
 type QueryTp = t.TypeOf<typeof queryTp>;
 
-const getTeam = async (
-  session: ISession,
-  teamName: string
-): Promise<Either<NegativeTeamFetchOutcome, ITeam>> => {
-  const _8baseGraphQLClient = new GraphQLClient(
-    process.env.EIGHT_BASE_ENDPOINT,
-    {
-      headers: {
-        authorization: `Bearer ${session.idToken}`,
-      },
-    }
-  );
-
-  const query = `query($teamName: String!) {
-    user {
-      team(filter:{
-        name: {
-          equals: $teamName
-        }
-      }) {
-        items{
-          name
-          image {
-            downloadUrl
+const getTeam = (teamName: string) => async (
+  session: ISession
+): Promise<Either<NegativeTeamFetchOutcome, ITeam>> =>
+  pipe(
+    tryCatch(
+      () =>
+        new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
+          headers: {
+            authorization: `Bearer ${session.idToken}`,
+          },
+        }).request(
+          `query($teamName: String!) {
+      user {
+        team(filter:{
+          name: {
+            equals: $teamName
           }
-          project {
-            items {
-              name
+        }) {
+          items{
+            name
+            image {
+              downloadUrl
+            }
+            project {
+              items {
+                name
+              }
             }
           }
         }
       }
-    }
-  }`;
-
-  try {
-    return pipe(
-      queryTp.decode(await _8baseGraphQLClient.request(query, { teamName })),
-      eFold(
-        () => left(QUERY_ERROR()),
-        (query: QueryTp) =>
-          pipe(
-            head(query.user.team.items),
-            oFold(
-              () => left(TEAM_DOES_NOT_EXIST()),
-              (a: ITeam) => right(a)
-            )
-          )
+    }`,
+          { teamName }
+        ),
+      (e) =>
+        gqlRequestError.is(e) &&
+        e.response.errors.filter((error) => error.code === "InvalidTokenError")
+          .length > 0
+          ? INVALID_TOKEN_ERROR()
+          : UNDEFINED_ERROR(e)
+    ),
+    chainEitherK(pipe(queryTp.decode, mapLeft(QUERY_ERROR))),
+    chainEitherK(
+      flow(
+        Lens.fromPath<QueryTp>()(["user", "team", "items"]).get,
+        head,
+        fromOption(TEAM_DOES_NOT_EXIST)
       )
-    );
-  } catch (e) {
-    if (
-      e.response &&
-      e.response.errors &&
-      e.response.errors.filter((error) => error.code === "InvalidTokenError")
-        .length > 0
-    ) {
-      return left(INVALID_TOKEN_ERROR());
-    }
-    console.error("Undefined 8base error", e.response.errors);
-    return left(UNDEFINED_ERROR());
-  }
-};
+    )
+  )();
 
 type ITeamProps = { team: ITeam; session: ISession };
 
-export async function getServerSideProps(
-  context
-): Promise<{ props: Either<NegativeTeamFetchOutcome, ITeamProps> }> {
-  const {
-    params: { teamName },
-    req,
-  } = context;
-  const session = await auth0().getSession(req);
-  if (!session) {
-    return { props: left(NOT_LOGGED_IN()) };
-  }
-  const createdUser = await confirmOrCreateUser(
-    "id",
-    session,
-    t.type({ id: t.string })
-  );
+const userType = t.type({ id: t.string });
 
-  if (isLeft(createdUser)) {
-    console.error("type safety error in application");
-  }
-  const trans = team => right<NegativeTeamFetchOutcome, ITeamProps>({session, team });
-  return {
-    props: chain(trans)(await getTeam(session, teamName))
-  }
-}
+export const getServerSideProps = ({
+  params: { teamName },
+  req,
+}): Promise<{ props: ITeamProps }> =>
+  pipe(
+    tryCatch(() => auth0().getSession(req), NOT_LOGGED_IN),
+    chainTE(fromNully(NOT_LOGGED_IN())),
+    chainTE(
+      pipe(
+        tryToEitherCatch(confirmOrCreateUser("id", userType), UNDEFINED_ERROR),
+        voidChain(tryToEitherCatch(getTeam(teamName), UNDEFINED_ERROR)),
+        chainEitherKWithAsk((team) => (session) =>
+          right({ props: { session, team } })
+        )
+      )
+    )
+  )().then(eitherAsPromise);
 
-export default function OrganizationPage(teamProps: Either<NegativeTeamFetchOutcome, ITeamProps>) {
-  if (isLeft(teamProps)) {
-    //useRouter().push("/404");
-    return <></>;
-  }
-  const { colorMode } = useColorMode();
-  const team = teamProps.right.team;
-  return (
+export default ({ team, session }: ITeamProps) =>
+  pipe(useColorMode(), ({ colorMode }) => (
     <>
       <Grid templateColumns="repeat(4, 1fr)" gap={6}>
         {team.project.items.map(({ name }, index) => (
@@ -223,7 +197,7 @@ export default function OrganizationPage(teamProps: Either<NegativeTeamFetchOutc
           </Link>
         ))}
         <ChakraLink
-          href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${teamProps.right.session.user.sub}"}`}
+          href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`}
           bg={`mode.${colorMode}.card`}
           p={4}
           rounded="sm"
@@ -239,5 +213,4 @@ export default function OrganizationPage(teamProps: Either<NegativeTeamFetchOutc
         </ChakraLink>
       </Grid>
     </>
-  );
-}
+  ));
