@@ -176,9 +176,8 @@ export default async function defaultWorkspaceHook(req, res) {
 
     const confirmUser = await confirmOrCreateUser(
       "id",
-      session,
       t.type({ id: t.string })
-    );
+    )(session);
 
     if (isLeft(confirmUser)) {
       // there was a logic error with our confirmUser request

@@ -196,9 +196,8 @@ export async function getServerSideProps(
 
   const user = await confirmOrCreateUser(
     "id",
-    session,
     t.type({ id: t.string })
-  );
+  )(session);
   if (isLeft(user)) {
     console.error("type safety error in application");
   }
