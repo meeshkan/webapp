@@ -2,7 +2,7 @@ import * as t from "io-ts";
 import { Lazy } from "fp-ts/lib/function";
 import {
   TaskEither,
-  tryCatch,
+  chain,
   left as teLeft,
   right as teRight,
 } from "fp-ts/lib/TaskEither";
@@ -19,3 +19,7 @@ export function tryToEitherCatch<E, A>(
 export const fromNullable = <E, A>(l: E) => (
   a: A | null | undefined
 ): TaskEither<E, A> => (a ? teRight(a) : teLeft(l));
+
+export const voidChain = <E, A, B>(
+  v: TaskEither<E, B>
+): (ma: TaskEither<E, A>) => TaskEither<E, B> => chain(() => v)

@@ -142,7 +142,4 @@ export const teamsToProjects = (teams: ITeam[]): IProject[] =>
   );
 
 export const useProjects = (session: ISession) =>
-  hookNeedingFetch(async () => {
-    const res = await getProjects(session);
-    return res;
-  });
+  hookNeedingFetch(() => getProjects(session));

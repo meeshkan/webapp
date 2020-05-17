@@ -183,7 +183,7 @@ const getProject = (teamName: string, projectName: string) => async (
             Lens.fromPath<ITeam>()(["project", "items"]).get,
             A.head,
             E.fromOption(PROJECT_DOES_NOT_EXIST),
-            E.chain((project) => E.right({ ...project, teamName: team.name }))
+            E.chain((project) => E.either.of({ ...project, teamName: team.name }))
           )
         )
       )

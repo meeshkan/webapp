@@ -223,7 +223,7 @@ export const fetchGithubAccessToken = async (
       params.append("grant_type", "refresh_token");
       params.append("refresh_token", githubUser.refreshToken);
 
-      const access_token = await authenticateAppWithGithub(id, params, session);
+      const access_token = await authenticateAppWithGithub(id, params)(session);
       return access_token;
     }
   }
@@ -249,7 +249,8 @@ export const getAllGhRepos = async (
     return right([]);
   }
   if (isLeft(accessTokenEither)) {
-    console.log("The app failed for reasons we don't quite understand.");
+    console.error(accessTokenEither.left);
+    console.error("The app failed for reasons we don't quite understand.");
     return left(LOGIC_ERROR());
   }
   // The code below this comment is problematic and should be replaced
@@ -338,11 +339,10 @@ export const getAllGhRepos = async (
   return right(repositories);
 };
 
-export const authenticateAppWithGithub = async (
+export const authenticateAppWithGithub = (
   userId: string,
-  params: URLSearchParams,
-  session: ISession
-): Promise<Either<NegativeGithubFetchOutcome, string>> => {
+  params: URLSearchParams
+) => async (session: ISession): Promise<Either<NegativeGithubFetchOutcome, string>> => {
   const resFromGh = await fetch(process.env.GH_OAUTH_ACCESS_TOKEN_URL, {
     method: "post",
     body: params,
