@@ -57,7 +57,7 @@ const ID_NOT_IN_STATE = (): NegativeGHOAuthOutcome => ({
 
 const userType = t.type({ id: t.string });
 
-const fromQueryParam = (p: string | string[]) =>
+export const fromQueryParam = (p: string | string[]) =>
   t.string.is(p) ? p : pipe(A.head(p), O.getOrElse(constant("")));
 
 export default safeApi(
@@ -67,7 +67,7 @@ export default safeApi(
       TE.chain(_TE.fromNullable(NOT_LOGGED_IN())),
       TE.chain((session) =>
         pipe(
-          t.type({ id: t.string }).decode(req.query.state),
+          t.type({ id: t.string }).decode(JSON.parse(fromQueryParam(req.query.state))),
           TE.fromEither,
           TE.mapLeft(PARSING_ERROR),
           TE.chain(({ id }) =>

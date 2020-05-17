@@ -4,6 +4,7 @@ import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import * as TE from "fp-ts/lib/TaskEither";
 import { constVoid } from "fp-ts/lib/function";
+import  { fromQueryParam } from "./oauth";
 
 interface UNDEFINED_ERROR {
   type: "UNDEFINED_ERROR";
@@ -28,7 +29,7 @@ const PARSING_ERROR = (errors: t.Errors): NegativeOAuthRoutingOutcome => ({
 export default safeApi(
   ({ query: { state, code } }, res) =>
     pipe(
-      t.type({ env: t.string }).decode(state),
+      t.type({ env: t.string }).decode(JSON.parse(fromQueryParam(state))),
       E.mapLeft(PARSING_ERROR),
       E.chain(({ env }) =>
         pipe(
