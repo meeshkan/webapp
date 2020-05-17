@@ -29,7 +29,7 @@ interface INVALID_TOKEN_ERROR {
 }
 interface UNDEFINED_ERROR {
   type: "UNDEFINED_ERROR";
-  error: Error;
+  error: unknown;
 }
 interface QUERY_ERROR {
   type: "QUERY_ERROR";
@@ -53,7 +53,7 @@ const TEAM_DOES_NOT_EXIST = (): NegativeTeamFetchOutcome => ({
 const INVALID_TOKEN_ERROR = (): NegativeTeamFetchOutcome => ({
   type: "INVALID_TOKEN_ERROR",
 });
-const UNDEFINED_ERROR = (error): NegativeTeamFetchOutcome => ({
+const UNDEFINED_ERROR = (error: unknown): NegativeTeamFetchOutcome => ({
   type: "UNDEFINED_ERROR",
   error,
 });
@@ -154,7 +154,7 @@ export const getServerSideProps = ({
         _RTE.tryToEitherCatch(confirmOrCreateUser("id", userType), UNDEFINED_ERROR),
         _RTE.voidChain(_RTE.tryToEitherCatch(getTeam(teamName), UNDEFINED_ERROR)),
         _RTE.chainEitherKWithAsk((team) => (session) =>
-          E.either.of({ props: { session, team } })
+          E.right({ props: { session, team } })
         )
       )
     )

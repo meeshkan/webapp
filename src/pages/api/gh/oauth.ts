@@ -101,13 +101,13 @@ export default safeApi(
         )
       ),
       TE.chain((_) =>
-        TE.taskEither.of(
+        TE.right(
           res.writeHead(301, {
             Location: "/",
           })
         )
       ),
-      TE.chain((_) => TE.taskEither.of(constVoid()))
+      TE.chain((_) => TE.right(constVoid()))
     ),
   _400ErrorHandler
 );

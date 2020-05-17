@@ -44,7 +44,7 @@ export default safeApi(
               code,
           }),
           constVoid,
-          E.either.of
+          E.right
         )
       ),
       TE.fromEither

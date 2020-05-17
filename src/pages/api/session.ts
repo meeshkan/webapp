@@ -8,21 +8,21 @@ import safeApi from "../../utils/safeApi";
 
 interface UNDEFINED_ERROR {
   type: "UNDEFINED_ERROR";
-  error: Error;
+  error: unknown;
 }
 
-interface NOT_LOGGED_IN {
+export interface NOT_LOGGED_IN {
   type: "NOT_LOGGED_IN";
 }
 
 type NegativeSessionFetchOutcome = UNDEFINED_ERROR | NOT_LOGGED_IN;
 
-const UNDEFINED_ERROR = (error: Error): NegativeSessionFetchOutcome => ({
+const UNDEFINED_ERROR = (error: unknown): NegativeSessionFetchOutcome => ({
   type: "UNDEFINED_ERROR",
   error,
 });
 
-const NOT_LOGGED_IN = (): NegativeSessionFetchOutcome => ({
+export const NOT_LOGGED_IN = (): NegativeSessionFetchOutcome => ({
   type: "NOT_LOGGED_IN",
 });
 
@@ -31,7 +31,7 @@ export default safeApi(
     pipe(
       TE.tryCatch(() => auth0().getSession(req), UNDEFINED_ERROR),
       TE.chain(_TE.fromNullable(NOT_LOGGED_IN())),
-      TE.chainEitherK(b => E.either.of(res.json(b)))
+      TE.chainEitherK(b => E.right(res.json(b)))
     ),
   (_, res) => (e) => res.status(e.type === "NOT_LOGGED_IN" ? 401 : 403) 
 );

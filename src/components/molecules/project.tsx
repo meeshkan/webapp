@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/core";
 import Link from "next/link";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
-import { useProjects } from "../../utils/projects";
+import { useTeams } from "../../utils/teams";
 import { isLeft } from "fp-ts/lib/Either";
 
 interface IProjectSettingsProps {
@@ -23,14 +23,14 @@ interface IProjectSettingsProps {
 
 const ProjectSettings = ({ session }: IProjectSettingsProps) => {
   const { colorMode, toggleColorMode } = useColorMode();
-  const fetchedProjects = useProjects(session);
+  const fetchedProjects = useTeams(session);
   const projects = isLeft(fetchedProjects)
     ? // we are loading
       []
     : isLeft(fetchedProjects.right)
     ? // there was an error with the fetch
       []
-    : fetchedProjects.right.right.teams.flatMap((team) =>
+    : fetchedProjects.right.right.flatMap((team) =>
         team.project.items.map((project) => ({
           ...project,
           teamImage: team.image,
