@@ -1,8 +1,8 @@
 import safeApi, { _400ErrorHandler } from "../../../utils/safeApi";
 import { pipe } from "fp-ts/lib/pipeable";
-import { mapLeft, chain, right } from "fp-ts/lib/Either";
+import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
-import { fromEither } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { constVoid } from "fp-ts/lib/function";
 
 interface UNDEFINED_ERROR {
@@ -29,8 +29,8 @@ export default safeApi(
   ({ query: { state, code } }, res) =>
     pipe(
       t.type({ env: t.string }).decode(state),
-      mapLeft(PARSING_ERROR),
-      chain(({ env }) =>
+      E.mapLeft(PARSING_ERROR),
+      E.chain(({ env }) =>
         pipe(
           res.writeHead(301, {
             Location:
@@ -43,10 +43,10 @@ export default safeApi(
               code,
           }),
           constVoid,
-          right
+          E.either.of
         )
       ),
-      fromEither
+      TE.fromEither
     ),
   _400ErrorHandler
 );

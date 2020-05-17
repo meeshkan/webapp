@@ -154,7 +154,7 @@ export const getServerSideProps = ({
         _RTE.tryToEitherCatch(confirmOrCreateUser("id", userType), UNDEFINED_ERROR),
         _RTE.voidChain(_RTE.tryToEitherCatch(getTeam(teamName), UNDEFINED_ERROR)),
         _RTE.chainEitherKWithAsk((team) => (session) =>
-          E.right({ props: { session, team } })
+          E.either.of({ props: { session, team } })
         )
       )
     )

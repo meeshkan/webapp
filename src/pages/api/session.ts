@@ -1,12 +1,10 @@
-import { right as _right } from "fp-ts/lib/Either";
-import { flow } from "fp-ts/lib/function";
+import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/pipeable";
-import { chain as chainTE, chainEitherK, tryCatch } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { NextApiRequest, NextApiResponse } from "next";
-import { fromNullable } from "../../fp-ts/TaskEither";
+import * as _TE from "../../fp-ts/TaskEither";
 import auth0 from "../../utils/auth0";
 import safeApi from "../../utils/safeApi";
-import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 
 interface UNDEFINED_ERROR {
   type: "UNDEFINED_ERROR";
@@ -31,9 +29,9 @@ const NOT_LOGGED_IN = (): NegativeSessionFetchOutcome => ({
 export default safeApi(
   (req: NextApiRequest, res: NextApiResponse) =>
     pipe(
-      tryCatch(() => auth0().getSession(req), UNDEFINED_ERROR),
-      chainTE(fromNullable(NOT_LOGGED_IN())),
-      chainEitherK(b => _right(res.json(b)))
+      TE.tryCatch(() => auth0().getSession(req), UNDEFINED_ERROR),
+      TE.chain(_TE.fromNullable(NOT_LOGGED_IN())),
+      TE.chainEitherK(b => E.either.of(res.json(b)))
     ),
   (_, res) => (e) => res.status(e.type === "NOT_LOGGED_IN" ? 401 : 403) 
 );
