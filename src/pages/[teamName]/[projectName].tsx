@@ -1,16 +1,11 @@
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import { Grid } from "@chakra-ui/core";
-import { head } from "fp-ts/lib/Array";
-import { chain as chainE, Either, fromOption, right } from "fp-ts/lib/Either";
+import * as A from "fp-ts/lib/Array";
+import * as E from "fp-ts/lib/Either";
 import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
-import { mapLeft } from "fp-ts/lib/ReaderEither";
-import { chainEitherK } from "fp-ts/lib/ReaderTaskEither";
-import {
-  chain as chainTE,
-  chainEitherK as chainEitherKTE,
-  tryCatch,
-} from "fp-ts/lib/TaskEither";
+import * as RTE from "fp-ts/lib/ReaderTaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
 import { Lens } from "monocle-ts";
@@ -20,9 +15,9 @@ import Chart from "../../components/Dashboard/chart";
 import Production from "../../components/Dashboard/production";
 // import { DateFromString, IDateFromString } from "../../utils/customTypes";
 import Settings from "../../components/Dashboard/settings";
-import { eitherAsPromise } from "../../fp-ts/Either";
-import { tryToEitherCatch, voidChain } from "../../fp-ts/ReaderTaskEither";
-import { fromNullable } from "../../fp-ts/TaskEither";
+import * as _E from "../../fp-ts/Either";
+import * as _RTE from "../../fp-ts/ReaderTaskEither";
+import * as _TE from "../../fp-ts/TaskEither";
 // cards
 import auth0 from "../../utils/auth0";
 import { gqlRequestError } from "../../utils/graphql";
@@ -122,9 +117,9 @@ type QueryTp = t.TypeOf<typeof queryTp>;
 
 const getProject = (teamName: string, projectName: string) => async (
   session: ISession
-): Promise<Either<NegativeProjectFetchOutcome, IProjectWithTeamName>> =>
+): Promise<E.Either<NegativeProjectFetchOutcome, IProjectWithTeamName>> =>
   pipe(
-    tryCatch(
+    TE.tryCatch(
       () =>
         new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
           headers: {
@@ -176,19 +171,19 @@ const getProject = (teamName: string, projectName: string) => async (
           ? INVALID_TOKEN_ERROR()
           : UNDEFINED_ERROR(e)
     ),
-    chainEitherKTE(pipe(queryTp.decode, mapLeft(QUERY_ERROR))),
-    chainEitherKTE(
+    TE.chainEitherK(flow(queryTp.decode, E.mapLeft(QUERY_ERROR))),
+    TE.chainEitherK(
       flow(
         Lens.fromPath<QueryTp>()(["user", "team", "items"]).get,
-        head,
-        fromOption(TEAM_DOES_NOT_EXIST),
-        chainE((team) =>
+        A.head,
+        E.fromOption(TEAM_DOES_NOT_EXIST),
+        E.chain((team) =>
           pipe(
             team,
             Lens.fromPath<ITeam>()(["project", "items"]).get,
-            head,
-            fromOption(PROJECT_DOES_NOT_EXIST),
-            chainE((project) => right({ ...project, teamName: team.name }))
+            A.head,
+            E.fromOption(PROJECT_DOES_NOT_EXIST),
+            E.chain((project) => E.right({ ...project, teamName: team.name }))
           )
         )
       )
@@ -202,18 +197,18 @@ export const getServerSideProps = ({
   req,
 }): Promise<{ props: IProjectWithTeamName }> =>
   pipe(
-    tryCatch(() => auth0().getSession(req), NOT_LOGGED_IN),
-    chainTE(fromNullable(NOT_LOGGED_IN())),
-    chainTE(
+    TE.tryCatch(() => auth0().getSession(req), NOT_LOGGED_IN),
+    TE.chain(_TE.fromNullable(NOT_LOGGED_IN())),
+    TE.chain(
       pipe(
-        tryToEitherCatch(confirmOrCreateUser("id", userType), UNDEFINED_ERROR),
-        voidChain(
-          tryToEitherCatch(getProject(teamName, projectName), UNDEFINED_ERROR)
+        _RTE.tryToEitherCatch(confirmOrCreateUser("id", userType), UNDEFINED_ERROR),
+        _RTE.voidChain(
+          _RTE.tryToEitherCatch(getProject(teamName, projectName), UNDEFINED_ERROR)
         ),
-        chainEitherK((props) => right({ props }))
+        RTE.chainEitherK((props) => E.right({ props }))
       )
     )
-  )().then(eitherAsPromise);
+  )().then(_E.eitherAsPromise);
 
 export default (projectProps: IProjectWithTeamName) => (
   <>

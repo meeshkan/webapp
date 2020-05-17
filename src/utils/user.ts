@@ -1,87 +1,117 @@
-import React from "react";
+import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/pipeable";
+import * as TE from "fp-ts/lib/TaskEither";
+import { GraphQLClient } from "graphql-request";
+import * as t from "io-ts";
 import fetch from "isomorphic-unfetch";
 import { hookNeedingFetch } from "./hookNeedingFetch";
-import { GraphQLClient } from "graphql-request";
-import { Either, left, right, isRight } from "fp-ts/lib/Either";
-import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
-import * as t from "io-ts";
+import { flow } from "fp-ts/lib/function";
+import { Lens } from "monocle-ts";
 
 export type NotAuthorized = "NotAuthorized";
-export const NotAuthorized: NotAuthorized  = "NotAuthorized";
+export const NotAuthorized: NotAuthorized = "NotAuthorized";
 
-
-export const fetchSession = async (): Promise<Either<NotAuthorized,ISession>> => {
+export const fetchSession = async (): Promise<
+  E.Either<NotAuthorized, ISession>
+> => {
   const res = await fetch("/api/session");
   const session = res.ok ? await res.json() : null;
-  return session ? right(session) : left(NotAuthorized);
+  return session ? E.right(session) : E.left(NotAuthorized);
 };
 
 export const useFetchSession = () => hookNeedingFetch(fetchSession);
 
 export interface INCORRECT_TYPE_SAFETY {
   type: "INCORRECT_TYPE_SAFETY";
+  errors: t.Errors;
 }
 
-export type NegativeConfirmOrCreateUserOutcome = INCORRECT_TYPE_SAFETY;
+export interface UNDEFINED_ERROR {
+  type: "UNDEFINED_ERROR";
+  error: Error;
+}
 
-const INCORRECT_TYPE_SAFETY = (): NegativeConfirmOrCreateUserOutcome => ({
+export type NegativeConfirmOrCreateUserOutcome =
+  | INCORRECT_TYPE_SAFETY
+  | UNDEFINED_ERROR;
+
+export const INCORRECT_TYPE_SAFETY = (
+  errors: t.Errors
+): NegativeConfirmOrCreateUserOutcome => ({
   type: "INCORRECT_TYPE_SAFETY",
+  errors,
 });
 
+const UNDEFINED_ERROR = (error: Error): NegativeConfirmOrCreateUserOutcome => ({
+  type: "UNDEFINED_ERROR",
+  error,
+});
+
+const __confirmOrCreateUser = <A, B>(
+  query: string,
+  vars: Record<string, any>,
+  tp: t.Type<B, B, unknown>,
+  getter: (b: B) => A,
+  session: ISession
+): TE.TaskEither<NegativeConfirmOrCreateUserOutcome, A> =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
+          headers: {
+            authorization: `Bearer ${session.idToken}`,
+          },
+        }).request(query, vars),
+      UNDEFINED_ERROR
+    ),
+    TE.chainEitherK(flow(tp.decode, E.mapLeft(INCORRECT_TYPE_SAFETY))),
+    TE.chainEitherK(flow(getter, E.right))
+  );
 
 export const confirmOrCreateUser = <A>(
   query: string,
   tp: t.Type<A, A, unknown>
-) => async (session: ISession): Promise<Either<NegativeConfirmOrCreateUserOutcome, A>> => {
-  const _8baseUserClient = new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-    headers: {
-      authorization: `Bearer ${session.idToken}`,
-    },
-  });
-  // this uses the flow described on
-  // https://docs.8base.com/docs/8base-console/authentication#3-user-query
-  // it is a bit hackish because it relies on global exceptions as a form of
-  // control logic, but as it is their recommendation, we use it
-  // the cleaner way would be to have a more fine-grained exception or
-  // an isAuth query we could run that did not raise an exception
-  try {
-    const { user } = await _8baseUserClient.request(`query {
-      user {
-        ${query}
-      }
-    }`);
-    const decoded = tp.decode(user);
-    return isRight(decoded)
-      ? right(decoded.right)
-      : (() => {console.error(`Could not perform a typesafe cast of ${user}`); return left(INCORRECT_TYPE_SAFETY())})();
-  } catch {
-    try {
-      const { userSignUpWithToken } = await _8baseUserClient.request(
-        `mutation (
-          $user: UserCreateInput!,
-          $authProfileId: ID!
-        ) {
-          userSignUpWithToken(
-            user: $user,
-            authProfileId: $authProfileId
-          ) {
-            ${query}
-          }
-        }`,
-        {
-          user: {
-            email: session.user.email,
-          },
-          authProfileId: process.env.EIGHT_BASE_AUTH_PROFILE_ID,
+) => (
+  session: ISession
+): Promise<E.Either<NegativeConfirmOrCreateUserOutcome, A>> =>
+  pipe(
+    __confirmOrCreateUser(
+      `query {
+        user {
+          ${query}
         }
-      );
-      const decoded = tp.decode(userSignUpWithToken);
-      return isRight(decoded)
-        ? right(userSignUpWithToken.right)
-        : (() => {console.error(`Could not perform a typesafe cast of ${userSignUpWithToken}`); return left(INCORRECT_TYPE_SAFETY())})();
-      } catch (e) {
-      console.error("Could not register user with the following session", session, e.response.errors);
-      throw e;
-    }
-  }
-};
+      }`,
+      {},
+      t.type({ user: tp }),
+      Lens.fromProp<{ user: A }>()("user").get,
+      session
+    ),
+    TE.fold(
+      () =>
+        __confirmOrCreateUser(
+          `mutation (
+        $user: UserCreateInput!,
+        $authProfileId: ID!
+      ) {
+        userSignUpWithToken(
+          user: $user,
+          authProfileId: $authProfileId
+        ) {
+          ${query}
+        }
+      }`,
+          {
+            user: {
+              email: session.user.email,
+            },
+            authProfileId: process.env.EIGHT_BASE_AUTH_PROFILE_ID,
+          },
+          t.type({ userSignUpWithToken: tp }),
+          Lens.fromProp<{ userSignUpWithToken: A }>()("userSignUpWithToken")
+            .get,
+          session
+        ),
+      TE.right
+    )
+  )();
