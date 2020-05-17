@@ -1,11 +1,19 @@
-import { chain, Either, right as _right, mapLeft } from "fp-ts/lib/Either";
-import { TaskEither, bracket, right, fromEither } from "fp-ts/lib/TaskEither";
-import { NextApiRequest, NextApiResponse } from "next";
-import { eitherAsPromiseWithReject } from "../fp-ts/Either";
-import { flow } from "fp-ts/lib/function";
+import { Either, mapLeft } from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/pipeable";
+import { bracket, fromEither, right, TaskEither } from "fp-ts/lib/TaskEither";
+import { NextApiRequest, NextApiResponse } from "next";
+import logger from "pino";
 
-export const _400ErrorHandler = <E>(_req: NextApiRequest, _res: NextApiResponse) => (e: E) => {console.error("Returning 400"); console.error(e); _res.status(400);}
+const Logger = logger();
+
+export const _400ErrorHandler = <E>(
+  _req: NextApiRequest,
+  _res: NextApiResponse
+) => (e: E) => {
+  Logger.error("Returning 400");
+  Logger.error(JSON.stringify(e));
+  _res.status(400);
+};
 
 export default <E>(
   f: (_req: NextApiRequest, _res: NextApiResponse) => TaskEither<E, void>,
