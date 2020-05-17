@@ -1,20 +1,19 @@
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import { Grid, Heading, Icon, Image, Link as ChakraLink, Stack, Text, useColorMode } from "@chakra-ui/core";
-import { head } from "fp-ts/lib/Array";
-import { Either, fromOption, right } from "fp-ts/lib/Either";
+import * as A from "fp-ts/lib/Array";
+import * as E from "fp-ts/lib/Either";
 import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
-import { mapLeft } from "fp-ts/lib/ReaderEither";
-import { chain as chainTE, chainEitherK, tryCatch } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
 import { Lens } from "monocle-ts";
 import Link from "next/link";
 import React from "react";
 import Card from "../components/molecules/card";
-import { eitherAsPromise } from "../fp-ts/Either";
-import { chainEitherKWithAsk, tryToEitherCatch, voidChain } from "../fp-ts/ReaderTaskEither";
-import { fromNullable } from "../fp-ts/TaskEither";
+import * as _E from "../fp-ts/Either";
+import * as _RTE from "../fp-ts/ReaderTaskEither";
+import * as _TE from "../fp-ts/TaskEither";
 import auth0 from "../utils/auth0";
 import { gqlRequestError } from "../utils/graphql";
 import { confirmOrCreateUser, INCORRECT_TYPE_SAFETY } from "../utils/user";
@@ -90,9 +89,9 @@ type QueryTp = t.TypeOf<typeof queryTp>;
 
 const getTeam = (teamName: string) => async (
   session: ISession
-): Promise<Either<NegativeTeamFetchOutcome, ITeam>> =>
+): Promise<E.Either<NegativeTeamFetchOutcome, ITeam>> =>
   pipe(
-    tryCatch(
+    TE.tryCatch(
       () =>
         new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
           headers: {
@@ -129,12 +128,12 @@ const getTeam = (teamName: string) => async (
           ? INVALID_TOKEN_ERROR()
           : UNDEFINED_ERROR(e)
     ),
-    chainEitherK(pipe(queryTp.decode, mapLeft(QUERY_ERROR))),
-    chainEitherK(
+    TE.chainEitherK(flow(queryTp.decode, E.mapLeft(QUERY_ERROR))),
+    TE.chainEitherK(
       flow(
         Lens.fromPath<QueryTp>()(["user", "team", "items"]).get,
-        head,
-        fromOption(TEAM_DOES_NOT_EXIST)
+        A.head,
+        E.fromOption(TEAM_DOES_NOT_EXIST)
       )
     )
   )();
@@ -148,18 +147,18 @@ export const getServerSideProps = ({
   req,
 }): Promise<{ props: ITeamProps }> =>
   pipe(
-    tryCatch(() => auth0().getSession(req), NOT_LOGGED_IN),
-    chainTE(fromNullable(NOT_LOGGED_IN())),
-    chainTE(
+    TE.tryCatch(() => auth0().getSession(req), NOT_LOGGED_IN),
+    TE.chain(_TE.fromNullable(NOT_LOGGED_IN())),
+    TE.chain(
       pipe(
-        tryToEitherCatch(confirmOrCreateUser("id", userType), UNDEFINED_ERROR),
-        voidChain(tryToEitherCatch(getTeam(teamName), UNDEFINED_ERROR)),
-        chainEitherKWithAsk((team) => (session) =>
-          right({ props: { session, team } })
+        _RTE.tryToEitherCatch(confirmOrCreateUser("id", userType), UNDEFINED_ERROR),
+        _RTE.voidChain(_RTE.tryToEitherCatch(getTeam(teamName), UNDEFINED_ERROR)),
+        _RTE.chainEitherKWithAsk((team) => (session) =>
+          E.right({ props: { session, team } })
         )
       )
     )
-  )().then(eitherAsPromise);
+  )().then(_E.eitherAsPromise);
 
 export default ({ team, session }: ITeamProps) =>
   pipe(useColorMode(), ({ colorMode }) => (
