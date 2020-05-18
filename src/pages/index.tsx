@@ -24,6 +24,8 @@ import {
   useColorMode,
   useDisclosure,
 } from "@chakra-ui/core";
+import { GraphQLClient } from "graphql-request";
+import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
@@ -35,6 +37,7 @@ import { pipe } from "fp-ts/lib/pipeable";
 import { head } from "fp-ts/lib/ReadonlyNonEmptyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
+import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import React, { useState } from "react";
 import VerifyLogin from "../components/Dashboard/verify-login";
 // import { useRouter } from "next/router";
@@ -58,29 +61,90 @@ import {
 import { hookNeedingFetch, Loading } from "../utils/hookNeedingFetch";
 import {
   getTeams,
-  ITeamsProps,
   NOT_LOGGED_IN,
   teamsToProjects,
   UNDEFINED_ERROR,
   useTeams,
+  ITeam,
   NegativeTeamsFetchOutcome,
 } from "../utils/teams";
 import { confirmOrCreateUser } from "../utils/user";
 
-type ImportProps = {
-  repoName: String;
-};
-
-function createProject() {
-  // This will execute the function that takes a repository and makes a project
-  return null;
+interface ImportProjectVariables {
+  userId: string;
+  teamName: string;
+  repositoryName: string;
+  nodeID: string;
+  nodePlusTeam: string;
+  namePlusTeam: string;
 }
 
-const userType = t.type({ id: t.string });
+interface IMPORT_PROJECT_UNDEFINED_ERROR {
+  type: "UNDEFINED_ERROR";
+}
 
-export const getServerSideProps = ({
-  req,
-}): Promise<{ props: ITeamsProps }> =>
+type NegativeOutcomeImportProject = IMPORT_PROJECT_UNDEFINED_ERROR;
+
+const IMPORT_PROJECT_UNDEFINED_ERROR = (): NegativeOutcomeImportProject => ({
+  type: "UNDEFINED_ERROR",
+});
+
+export type ITeamsProps = { session: ISession; teams: ITeam[]; id: string };
+
+const createProject = (importProjectVariables: ImportProjectVariables) => (
+  session: ISession
+): TE.TaskEither<NegativeOutcomeImportProject, any> =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
+          headers: {
+            authorization: `Bearer ${session.idToken}`,
+          },
+        }).request(
+          `mutation CREATE_PROJECT($userId:ID!, $teamName:String!, $repositoryName: String!, $namePlusTeam: String!, $nodePlusTeam: String!, $nodeID: String!) {
+        userUpdate(filter: {
+          id: $userId
+        },
+        data:{
+          team: {
+            update: {
+              filter:{
+                name:$teamName
+              }
+              data:{
+                project: {
+                  create: {
+                    name: $repositoryName
+                    namePlusTeamName: $namePlusTeam
+                    repository: {
+                      create:{
+                        name: $repositoryName
+                        nodeId: $nodeID
+                        nodeIdPlusTeamId:$nodePlusTeam
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }) {
+          id
+        }
+      }`,
+          importProjectVariables
+        ),
+      IMPORT_PROJECT_UNDEFINED_ERROR
+    ),
+    (resultOfNetworkCall) => {
+      console.log(resultOfNetworkCall);
+      return resultOfNetworkCall;
+    }
+  );
+
+const userType = t.type({ id: t.string });
+export const getServerSideProps = ({ req }): Promise<{ props: ITeamsProps }> =>
   pipe(
     TE.tryCatch(() => auth0().getSession(req), NOT_LOGGED_IN),
     TE.chain(_TE.fromNullable(NOT_LOGGED_IN())),
@@ -90,9 +154,14 @@ export const getServerSideProps = ({
           confirmOrCreateUser("id", userType),
           UNDEFINED_ERROR
         ),
-        _RTE.voidChain(_RTE.tryToEitherCatch(getTeams, UNDEFINED_ERROR)),
-        _RTE.chainEitherKWithAsk((teams) => (session) =>
-          E.right({ props: { session, teams } })
+        RTE.chain(({ id }) =>
+          pipe(
+            _RTE.tryToEitherCatch(getTeams, UNDEFINED_ERROR),
+            RTE.chain((teams) => RTE.right({ teams, id }))
+          )
+        ),
+        _RTE.chainEitherKWithAsk(({ teams, id }) => (session) =>
+          E.right({ props: { session, teams, id } })
         )
       )
     )
@@ -100,19 +169,24 @@ export const getServerSideProps = ({
     _E.eitherAsPromiseWithSwallowedError<
       NegativeTeamsFetchOutcome,
       { props: ITeamsProps }
-    >({ props: { session: { user: {}, createdAt: 0 }, teams: [] } })
+    >({ props: { session: { user: {}, createdAt: 0 }, teams: [], id: "" } })
   );
 
 type IRepositoriesGroupedByOwner = NonEmptyArray<IRepository>[];
 
-const ImportProject = ({ repoName }: ImportProps) => {
+type ImportProps = {
+  repoName: String;
+  onClick: TE.TaskEither<NegativeOutcomeImportProject, void>;
+};
+
+const ImportProject = ({ repoName, onClick }: ImportProps) => {
   const { colorMode } = useColorMode();
   return (
     <Button
       w="full"
       variant="ghost"
       rounded="sm"
-      onClick={createProject}
+      onClick={() => onClick()}
       justifyContent="space-between"
       color={`mode.${colorMode}.text`}
     >
@@ -196,7 +270,7 @@ const useRepoList = (
     )
   );
 
-export default ({ session, teams }: ITeamsProps) =>
+export default ({ session, teams, id }: ITeamsProps) =>
   pipe(
     {
       useColorMode: useColorMode(),
@@ -294,7 +368,7 @@ export default ({ session, teams }: ITeamsProps) =>
             <Button
               onClick={onOpen}
               p={4}
-              minH="100%"
+              minH="72px"
               justifyContent="start"
               rounded="sm"
               lineHeight="none"
@@ -436,10 +510,23 @@ export default ({ session, teams }: ITeamsProps) =>
                               isRight(ownerRepos.right) &&
                               isSome(ownerRepos.right.right) &&
                               ownerRepos.right.right.value.map(
-                                (project, index) => (
+                                (repo, index) => (
                                   <ImportProject
                                     key={index}
-                                    repoName={project.name}
+                                    repoName={repo.name}
+                                    onClick={createProject({
+                                      userId: id,
+                                      namePlusTeam: `${repo.name}% [/!${allTeams[0].name}`,
+                                      nodeID: repo.node_id,
+                                      nodePlusTeam:
+                                        repo.node_id + "% [/!" + allTeams[0].id,
+                                      repositoryName: repo.name,
+                                      // this assumes that at least one team exist
+                                      // doesn't cover error case
+                                      // where team addition fails
+                                      // also does not allow multiple teams
+                                      teamName: allTeams[0].name,
+                                    })(session)}
                                   />
                                 )
                               )}
@@ -449,7 +536,7 @@ export default ({ session, teams }: ITeamsProps) =>
                     )}
                   </ModalBody>
                   <ModalFooter d="flex" justifyContent="center" fontSize="sm">
-                    {(isLeft(repoList) || isLeft(repoList.right)) && (
+                    {isRight(repoList) && (
                       <>
                         <Text mr={2} color={`mode.${colorMode}.text`}>
                           Not seeing the repository you want?

@@ -11,8 +11,16 @@ import * as _RTE from "../../fp-ts/ReaderTaskEither";
 import * as _TE from "../../fp-ts/TaskEither";
 import auth0 from "../../utils/auth0";
 import safeApi, { _400ErrorHandler } from "../../utils/safeApi";
-import { confirmOrCreateUser, NegativeConfirmOrCreateUserOutcome, UNDEFINED_ERROR as CU_UNDEFINED_ERROR } from "../../utils/user";
-import { NegativeSessionFetchOutcome, NOT_LOGGED_IN, UNDEFINED_ERROR } from "./session";
+import {
+  confirmOrCreateUser,
+  NegativeConfirmOrCreateUserOutcome,
+  UNDEFINED_ERROR as CU_UNDEFINED_ERROR,
+} from "../../utils/user";
+import {
+  NegativeSessionFetchOutcome,
+  NOT_LOGGED_IN,
+  UNDEFINED_ERROR,
+} from "./session";
 
 const doesUserHaveTeams = <Session extends { idToken?: string }>(
   session: Session

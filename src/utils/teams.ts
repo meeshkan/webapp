@@ -48,6 +48,7 @@ export const QUERY_ERROR = (errors: t.Errors): NegativeTeamsFetchOutcome => ({
 });
 
 export const Team = t.type({
+  id: t.string,
   image: t.union([
     t.null,
     t.type({
@@ -95,6 +96,7 @@ export const getTeams = async (
               team {
                 items{
                   name
+                  id
                   image {
                     downloadUrl
                   }
@@ -123,9 +125,6 @@ export const getTeams = async (
       flow(Lens.fromPath<QueryTp>()(["user", "team", "items"]).get, E.right)
     )
   )();
-
-export type ITeamsProps = { session: ISession; teams: ITeam[] }
-
 export interface IProject {
   teamName: string;
   teamImage: string;
