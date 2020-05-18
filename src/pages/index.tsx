@@ -1,4 +1,29 @@
-import { Button, Flex, Grid, Heading, Icon, Image, Link as ChakraLink, Menu, MenuButton, MenuItemOption, MenuList, MenuOptionGroup, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Skeleton, Stack, Text, useColorMode, useDisclosure } from "@chakra-ui/core";
+import {
+  Button,
+  Flex,
+  Grid,
+  Heading,
+  Icon,
+  Image,
+  Link as ChakraLink,
+  Menu,
+  MenuButton,
+  MenuItemOption,
+  MenuList,
+  MenuOptionGroup,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Skeleton,
+  Stack,
+  Text,
+  useColorMode,
+  useDisclosure,
+} from "@chakra-ui/core";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
@@ -18,9 +43,28 @@ import * as _E from "../fp-ts/Either";
 import * as _RTE from "../fp-ts/ReaderTaskEither";
 import * as _TE from "../fp-ts/TaskEither";
 import auth0 from "../utils/auth0";
-import { eqNegativeGithubFetchOutcome, INTERNAL_REST_ENDPOINT_ERROR, IOwner, IRepository, NEEDS_REAUTH, NegativeGithubFetchOutcome, OAUTH_FLOW_ERROR, PARSING_ERROR as GH_PARSING_ERROR, Repository, UNDEFINED_ERROR as GH_UNDEFINED_ERROR } from "../utils/gh";
+import {
+  eqNegativeGithubFetchOutcome,
+  INTERNAL_REST_ENDPOINT_ERROR,
+  IOwner,
+  IRepository,
+  NEEDS_REAUTH,
+  NegativeGithubFetchOutcome,
+  OAUTH_FLOW_ERROR,
+  PARSING_ERROR as GH_PARSING_ERROR,
+  Repository,
+  UNDEFINED_ERROR as GH_UNDEFINED_ERROR,
+} from "../utils/gh";
 import { hookNeedingFetch, Loading } from "../utils/hookNeedingFetch";
-import { getTeams, ITeamsProps, NOT_LOGGED_IN, teamsToProjects, UNDEFINED_ERROR, useTeams } from "../utils/teams";
+import {
+  getTeams,
+  ITeamsProps,
+  NOT_LOGGED_IN,
+  teamsToProjects,
+  UNDEFINED_ERROR,
+  useTeams,
+  NegativeTeamsFetchOutcome,
+} from "../utils/teams";
 import { confirmOrCreateUser } from "../utils/user";
 
 type ImportProps = {
@@ -34,7 +78,9 @@ function createProject() {
 
 const userType = t.type({ id: t.string });
 
-export const getServerSideProps = ({ req }): Promise<{ props: ITeamsProps }> =>
+export const getServerSideProps = ({
+  req,
+}): Promise<{ props: ITeamsProps }> =>
   pipe(
     TE.tryCatch(() => auth0().getSession(req), NOT_LOGGED_IN),
     TE.chain(_TE.fromNullable(NOT_LOGGED_IN())),
@@ -50,7 +96,12 @@ export const getServerSideProps = ({ req }): Promise<{ props: ITeamsProps }> =>
         )
       )
     )
-  )().then(_E.eitherAsPromise);
+  )().then(
+    _E.eitherAsPromiseWithSwallowedError<
+      NegativeTeamsFetchOutcome,
+      { props: ITeamsProps }
+    >({ props: { session: { user: {}, createdAt: 0 }, teams: [] } })
+  );
 
 type IRepositoriesGroupedByOwner = NonEmptyArray<IRepository>[];
 

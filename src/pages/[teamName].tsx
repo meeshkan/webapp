@@ -1,5 +1,14 @@
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
-import { Grid, Heading, Icon, Image, Link as ChakraLink, Stack, Text, useColorMode } from "@chakra-ui/core";
+import {
+  Grid,
+  Heading,
+  Icon,
+  Image,
+  Link as ChakraLink,
+  Stack,
+  Text,
+  useColorMode,
+} from "@chakra-ui/core";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import { flow } from "fp-ts/lib/function";
@@ -151,14 +160,33 @@ export const getServerSideProps = ({
     TE.chain(_TE.fromNullable(NOT_LOGGED_IN())),
     TE.chain(
       pipe(
-        _RTE.tryToEitherCatch(confirmOrCreateUser("id", userType), UNDEFINED_ERROR),
-        _RTE.voidChain(_RTE.tryToEitherCatch(getTeam(teamName), UNDEFINED_ERROR)),
+        _RTE.tryToEitherCatch(
+          confirmOrCreateUser("id", userType),
+          UNDEFINED_ERROR
+        ),
+        _RTE.voidChain(
+          _RTE.tryToEitherCatch(getTeam(teamName), UNDEFINED_ERROR)
+        ),
         _RTE.chainEitherKWithAsk((team) => (session) =>
           E.right({ props: { session, team } })
         )
       )
     )
-  )().then(_E.eitherAsPromise);
+  )().then(
+    _E.eitherAsPromiseWithSwallowedError<
+      NegativeTeamFetchOutcome,
+      { props: ITeamProps }
+    >({
+      props: {
+        session: { user: {}, createdAt: 0 },
+        team: {
+          name: "Meeshkan",
+          image: { downloadUrl: "https://picsum.photos/200" },
+          project: { items: [] },
+        },
+      },
+    })
+  );
 
 export default ({ team, session }: ITeamProps) =>
   pipe(useColorMode(), ({ colorMode }) => (

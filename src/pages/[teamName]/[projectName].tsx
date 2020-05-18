@@ -195,20 +195,38 @@ const userType = t.type({ id: t.string });
 export const getServerSideProps = ({
   params: { teamName, projectName },
   req,
+  res,
 }): Promise<{ props: IProjectWithTeamName }> =>
   pipe(
     TE.tryCatch(() => auth0().getSession(req), NOT_LOGGED_IN),
     TE.chain(_TE.fromNullable(NOT_LOGGED_IN())),
     TE.chain(
       pipe(
-        _RTE.tryToEitherCatch(confirmOrCreateUser("id", userType), UNDEFINED_ERROR),
+        _RTE.tryToEitherCatch(
+          confirmOrCreateUser("id", userType),
+          UNDEFINED_ERROR
+        ),
         _RTE.voidChain(
-          _RTE.tryToEitherCatch(getProject(teamName, projectName), UNDEFINED_ERROR)
+          _RTE.tryToEitherCatch(
+            getProject(teamName, projectName),
+            UNDEFINED_ERROR
+          )
         ),
         RTE.chainEitherK((props) => E.right({ props }))
       )
     )
-  )().then(_E.eitherAsPromise);
+  )().then(
+    _E.eitherAsPromiseWithSwallowedError<
+      NegativeProjectFetchOutcome,
+      { props: IProjectWithTeamName }
+    >({
+      props: {
+        name: "My awesome project",
+        tests: { items: [] },
+        teamName: "Meeshkan",
+      },
+    })
+  );
 
 export default (projectProps: IProjectWithTeamName) => (
   <>

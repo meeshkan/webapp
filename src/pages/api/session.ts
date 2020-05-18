@@ -26,11 +26,18 @@ export const NOT_LOGGED_IN = (): NegativeSessionFetchOutcome => ({
   type: "NOT_LOGGED_IN",
 });
 
+const logFriend = (s: string) => <A>(a: A): A => {
+  console.log(s);
+  console.log(a);
+  return a;
+}
 export default safeApi(
   (req: NextApiRequest, res: NextApiResponse) =>
     pipe(
       TE.tryCatch(() => auth0().getSession(req), UNDEFINED_ERROR),
+      logFriend("SESSION NOW"),
       TE.chain(_TE.fromNullable(NOT_LOGGED_IN())),
+      logFriend("SESSION AFTER NULL CHECK"),
       TE.chainEitherK(b => E.right(res.json(b)))
     ),
   (_, res) => (e) => res.status(e.type === "NOT_LOGGED_IN" ? 401 : 403) 
