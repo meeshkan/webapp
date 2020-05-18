@@ -20,28 +20,16 @@ import * as _RTE from "../../fp-ts/ReaderTaskEither";
 import * as _TE from "../../fp-ts/TaskEither";
 // cards
 import auth0 from "../../utils/auth0";
-import { gqlRequestError } from "../../utils/graphql";
-import { confirmOrCreateUser, INCORRECT_TYPE_SAFETY } from "../../utils/user";
-
-interface NOT_LOGGED_IN {
-  type: "NOT_LOGGED_IN";
-}
-interface PROJECT_DOES_NOT_EXIST {
-  type: "PROJECT_DOES_NOT_EXIST";
-}
-interface TEAM_DOES_NOT_EXIST {
-  type: "TEAM_DOES_NOT_EXIST";
-}
-interface INVALID_TOKEN_ERROR {
-  type: "INVALID_TOKEN_ERROR";
-}
-interface UNDEFINED_ERROR {
-  type: "UNDEFINED_ERROR";
-  error: Error;
-}
-interface QUERY_ERROR {
-  type: "QUERY_ERROR";
-}
+import { confirmOrCreateUser } from "../../utils/user";
+import {
+  defaultGQLErrorHandler,
+  INCORRECT_TYPE_SAFETY,
+  NOT_LOGGED_IN,
+  TEAM_DOES_NOT_EXIST,
+  PROJECT_DOES_NOT_EXIST,
+  UNDEFINED_ERROR,
+  INVALID_TOKEN_ERROR,
+} from "../../utils/error";
 
 type NegativeProjectFetchOutcome =
   | NOT_LOGGED_IN
@@ -49,28 +37,7 @@ type NegativeProjectFetchOutcome =
   | PROJECT_DOES_NOT_EXIST
   | INVALID_TOKEN_ERROR
   | UNDEFINED_ERROR
-  | QUERY_ERROR
   | INCORRECT_TYPE_SAFETY;
-
-const NOT_LOGGED_IN = (): NegativeProjectFetchOutcome => ({
-  type: "NOT_LOGGED_IN",
-});
-const PROJECT_DOES_NOT_EXIST = (): NegativeProjectFetchOutcome => ({
-  type: "PROJECT_DOES_NOT_EXIST",
-});
-const TEAM_DOES_NOT_EXIST = (): NegativeProjectFetchOutcome => ({
-  type: "TEAM_DOES_NOT_EXIST",
-});
-const INVALID_TOKEN_ERROR = (): NegativeProjectFetchOutcome => ({
-  type: "INVALID_TOKEN_ERROR",
-});
-const UNDEFINED_ERROR = (error): NegativeProjectFetchOutcome => ({
-  type: "UNDEFINED_ERROR",
-  error,
-});
-const QUERY_ERROR = (): NegativeProjectFetchOutcome => ({
-  type: "QUERY_ERROR",
-});
 
 const Project = t.type({
   name: t.string,
@@ -164,25 +131,42 @@ const getProject = (teamName: string, projectName: string) => async (
           }`,
           { teamName, projectName }
         ),
-      (e) =>
-        gqlRequestError.is(e) &&
-        e.response.errors.filter((error) => error.code === "InvalidTokenError")
-          .length > 0
-          ? INVALID_TOKEN_ERROR()
-          : UNDEFINED_ERROR(e)
+      (error): NegativeProjectFetchOutcome =>
+        defaultGQLErrorHandler("getProject query")(error)
     ),
-    TE.chainEitherK(flow(queryTp.decode, E.mapLeft(QUERY_ERROR))),
+    TE.chainEitherK(
+      flow(
+        queryTp.decode,
+        E.mapLeft(
+          (errors): NegativeProjectFetchOutcome => ({
+            type: "INCORRECT_TYPE_SAFETY",
+            msg: "Could not decode team name query",
+            errors,
+          })
+        )
+      )
+    ),
     TE.chainEitherK(
       flow(
         Lens.fromPath<QueryTp>()(["user", "team", "items"]).get,
         A.head,
-        E.fromOption(TEAM_DOES_NOT_EXIST),
+        E.fromOption(
+          (): NegativeProjectFetchOutcome => ({
+            type: "TEAM_DOES_NOT_EXIST",
+            msg: `Could not find team for: ${teamName} ${projectName}`,
+          })
+        ),
         E.chain((team) =>
           pipe(
             team,
             Lens.fromPath<ITeam>()(["project", "items"]).get,
             A.head,
-            E.fromOption(PROJECT_DOES_NOT_EXIST),
+            E.fromOption(
+              (): NegativeProjectFetchOutcome => ({
+                type: "PROJECT_DOES_NOT_EXIST",
+                msg: `Could not find project for: ${teamName} ${projectName}`,
+              })
+            ),
             E.chain((project) => E.right({ ...project, teamName: team.name }))
           )
         )
@@ -198,18 +182,39 @@ export const getServerSideProps = ({
   res,
 }): Promise<{ props: IProjectWithTeamName }> =>
   pipe(
-    TE.tryCatch(() => auth0().getSession(req), NOT_LOGGED_IN),
-    TE.chain(_TE.fromNullable(NOT_LOGGED_IN())),
+    TE.tryCatch(
+      () => auth0().getSession(req),
+      (error): NegativeProjectFetchOutcome => ({
+        type: "UNDEFINED_ERROR",
+        msg: "Undefined auth0 error in [projectName].tsx",
+        error,
+      })
+    ),
+    TE.chain(
+      _TE.fromNullable({
+        type: "NOT_LOGGED_IN",
+        msg: "Session is null in [projectName].tsx",
+      })
+    ),
     TE.chain(
       pipe(
         _RTE.tryToEitherCatch(
           confirmOrCreateUser("id", userType),
-          UNDEFINED_ERROR
+          (error): NegativeProjectFetchOutcome => ({
+            type: "UNDEFINED_ERROR",
+            msg:
+              "Unanticipated confirm or create user error in [projectName].tsx",
+            error,
+          })
         ),
         _RTE.voidChain(
           _RTE.tryToEitherCatch(
             getProject(teamName, projectName),
-            UNDEFINED_ERROR
+            (error): NegativeProjectFetchOutcome => ({
+              type: "UNDEFINED_ERROR",
+              msg: "Unanticipated getProject error",
+              error,
+            })
           )
         ),
         RTE.chainEitherK((props) => E.right({ props }))

@@ -14,13 +14,13 @@ import safeApi, { _400ErrorHandler } from "../../utils/safeApi";
 import {
   confirmOrCreateUser,
   NegativeConfirmOrCreateUserOutcome,
-  UNDEFINED_ERROR as CU_UNDEFINED_ERROR,
 } from "../../utils/user";
+import { NegativeSessionFetchOutcome } from "./session";
 import {
-  NegativeSessionFetchOutcome,
-  NOT_LOGGED_IN,
-  UNDEFINED_ERROR,
-} from "./session";
+  INVALID_TOKEN_ERROR,
+  USER_HAS_NO_TEAMS,
+  defaultGQLErrorHandler,
+} from "../../utils/error";
 
 const doesUserHaveTeams = <Session extends { idToken?: string }>(
   session: Session
@@ -39,11 +39,17 @@ const doesUserHaveTeams = <Session extends { idToken?: string }>(
         }
     }
 }`),
-      UNDEFINED_ERROR
+      (error): NegativeDefaultTeamHookOutcome =>
+        defaultGQLErrorHandler("getTeamName")(error)
     ),
     // todo - add type safety for the query
     TE.chain(({ user: { team: { count } } }) =>
-      count === 0 ? TE.left(USER_HAS_NO_TEAMS()) : TE.right(constVoid())
+      count === 0
+        ? TE.left<NegativeDefaultTeamHookOutcome>({
+            type: "USER_HAS_NO_TEAMS",
+            msg: "Could not find any team for user",
+          })
+        : TE.right(constVoid())
     )
   )();
 
@@ -90,7 +96,8 @@ const createTeamFromUserName = ({
       }`,
           { teamName: user.nickname, userId }
         ),
-      UNDEFINED_ERROR
+      (error): NegativeDefaultTeamHookOutcome =>
+        defaultGQLErrorHandler("mutation to insert default team")(error)
     ),
     // todo - add type safety for the query
     TE.chain(({ userUpdate: { team: { items: [{ id }] } } }) => TE.right(id))
@@ -121,7 +128,10 @@ const uploadPhotoForTeam = (teamId) => ({
         path
       }
     }`),
-          UNDEFINED_ERROR
+          (error): NegativeDefaultTeamHookOutcome =>
+            defaultGQLErrorHandler("query to get file upload information")(
+              error
+            )
         ),
         // todo, add type safety to GQL request
         TE.chain(({ fileUploadInfo: { policy, signature, apiKey, path } }) =>
@@ -134,13 +144,27 @@ const uploadPhotoForTeam = (teamId) => ({
                   body: new URLSearchParams({ url: user.picture }),
                 }
               ),
-            UNDEFINED_ERROR
+            (error): NegativeDefaultTeamHookOutcome => ({
+              type: "UNDEFINED_ERROR",
+              msg: "Call to filestack failed",
+              error,
+            })
           )
         ),
         TE.chain((res) =>
           res.ok
-            ? TE.tryCatch(() => res.json(), UNDEFINED_ERROR)
-            : TE.left(UNDEFINED_ERROR(res))
+            ? TE.tryCatch(
+                () => res.json(),
+                (error) => ({
+                  type: "UNDEFINED_ERROR",
+                  msg: "Conversion of JSON from filestack failed",
+                  error,
+                })
+              )
+            : TE.left({
+                type: "REST_ENDPOINT_ERROR",
+                msg: `Could not call filestack endpoint: ${res.status} ${res.statusText}`,
+              })
         ),
         // add type safety for json
         TE.chain(({ url, filename }) =>
@@ -185,59 +209,97 @@ const uploadPhotoForTeam = (teamId) => ({
                   filename,
                 }
               ),
-            UNDEFINED_ERROR
+            (error): NegativeDefaultTeamHookOutcome =>
+              defaultGQLErrorHandler("file upload graphql mutation")(error)
           )
         ),
         TE.chain((_) => TE.right(constVoid()))
       )
   )();
 
-interface USER_HAS_NO_TEAMS {
-  type: "USER_HAS_NO_TEAMS";
-}
 type NegativeDefaultTeamHookOutcome =
   | NegativeSessionFetchOutcome
   | NegativeConfirmOrCreateUserOutcome
-  | USER_HAS_NO_TEAMS;
+  | USER_HAS_NO_TEAMS
+  | INVALID_TOKEN_ERROR;
 
-const USER_HAS_NO_TEAMS = (): NegativeDefaultTeamHookOutcome => ({
-  type: "USER_HAS_NO_TEAMS",
-});
 const userType = t.type({ id: t.string });
 type UserType = t.TypeOf<typeof userType>;
 
 export default safeApi(
   (req, res) =>
     pipe(
-      TE.tryCatch(() => auth0().getSession(req), UNDEFINED_ERROR),
-      TE.chain(_TE.fromNullable(NOT_LOGGED_IN())),
+      TE.tryCatch(
+        () => auth0().getSession(req),
+        (error): NegativeDefaultTeamHookOutcome => ({
+          type: "UNDEFINED_ERROR",
+          msg: "Call to auth0 getSession failed",
+          error,
+        })
+      ),
+      TE.chain(
+        _TE.fromNullable({
+          type: "NOT_LOGGED_IN",
+          msg: "Session is null in default-team-hook.ts",
+        })
+      ),
       TE.chain((session) =>
         pipe(
           _TE.tryToEitherCatch(
             () => confirmOrCreateUser("id", userType)(session),
-            CU_UNDEFINED_ERROR
+            (error): NegativeDefaultTeamHookOutcome => ({
+              type: "UNDEFINED_ERROR",
+              msg:
+                "Unanticipated confirm or create user error in default team hook",
+              error,
+            })
           ),
           TE.chain(({ id }) => TE.right({ userId: id, ...session }))
         )
       ),
       TE.chain(
         pipe(
-          _RTE.tryToEitherCatch<
-            ISession & { userId: string },
-            NegativeDefaultTeamHookOutcome,
-            UserType
-          >(confirmOrCreateUser("id", userType), UNDEFINED_ERROR),
+          _RTE.tryToEitherCatch(
+            confirmOrCreateUser("id", userType),
+            (error): NegativeDefaultTeamHookOutcome => ({
+              type: "UNDEFINED_ERROR",
+              msg:
+                "Unanticipated confirm or create user error in default team hook",
+              error,
+            })
+          ),
           RTE.chain((_) =>
-            _RTE.tryToEitherCatch(doesUserHaveTeams, UNDEFINED_ERROR)
+            _RTE.tryToEitherCatch(
+              doesUserHaveTeams,
+              (error): NegativeDefaultTeamHookOutcome => ({
+                type: "UNDEFINED_ERROR",
+                msg:
+                  "Unanticipated confirm or create user error in doesUserHaveTeams",
+                error,
+              })
+            )
           ),
           RTE.fold(
             (e) =>
               pipe(
-                _RTE.tryToEitherCatch(createTeamFromUserName, UNDEFINED_ERROR),
+                _RTE.tryToEitherCatch(
+                  createTeamFromUserName,
+                  (error): NegativeDefaultTeamHookOutcome => ({
+                    type: "UNDEFINED_ERROR",
+                    msg:
+                      "Unanticipated confirm or create user error in createTeamFromUserName",
+                    error,
+                  })
+                ),
                 RTE.chain((teamId) =>
                   _RTE.tryToEitherCatch(
                     uploadPhotoForTeam(teamId),
-                    UNDEFINED_ERROR
+                    (error): NegativeDefaultTeamHookOutcome => ({
+                      type: "UNDEFINED_ERROR",
+                      msg:
+                        "Unanticipated confirm or create user error in uploadPhotoForTeam",
+                      error,
+                    })
                   )
                 ),
                 RTE.chain((_) => RTE.right(constVoid()))

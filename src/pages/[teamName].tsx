@@ -24,52 +24,23 @@ import * as _E from "../fp-ts/Either";
 import * as _RTE from "../fp-ts/ReaderTaskEither";
 import * as _TE from "../fp-ts/TaskEither";
 import auth0 from "../utils/auth0";
-import { gqlRequestError } from "../utils/graphql";
-import { confirmOrCreateUser, INCORRECT_TYPE_SAFETY } from "../utils/user";
-
-interface NOT_LOGGED_IN {
-  type: "NOT_LOGGED_IN";
-}
-interface TEAM_DOES_NOT_EXIST {
-  type: "TEAM_DOES_NOT_EXIST";
-}
-interface INVALID_TOKEN_ERROR {
-  type: "INVALID_TOKEN_ERROR";
-}
-interface UNDEFINED_ERROR {
-  type: "UNDEFINED_ERROR";
-  error: unknown;
-}
-interface QUERY_ERROR {
-  type: "QUERY_ERROR";
-  errors: t.Errors;
-}
+import { confirmOrCreateUser } from "../utils/user";
+import {
+  INCORRECT_TYPE_SAFETY,
+  TEAM_DOES_NOT_EXIST,
+  INVALID_TOKEN_ERROR,
+  UNDEFINED_ERROR,
+  NOT_LOGGED_IN,
+  defaultGQLErrorHandler,
+} from "../utils/error";
 
 type NegativeTeamFetchOutcome =
   | NOT_LOGGED_IN
   | TEAM_DOES_NOT_EXIST
   | INVALID_TOKEN_ERROR
   | UNDEFINED_ERROR
-  | QUERY_ERROR
+  | INCORRECT_TYPE_SAFETY
   | INCORRECT_TYPE_SAFETY;
-
-const NOT_LOGGED_IN = (): NegativeTeamFetchOutcome => ({
-  type: "NOT_LOGGED_IN",
-});
-const TEAM_DOES_NOT_EXIST = (): NegativeTeamFetchOutcome => ({
-  type: "TEAM_DOES_NOT_EXIST",
-});
-const INVALID_TOKEN_ERROR = (): NegativeTeamFetchOutcome => ({
-  type: "INVALID_TOKEN_ERROR",
-});
-const UNDEFINED_ERROR = (error: unknown): NegativeTeamFetchOutcome => ({
-  type: "UNDEFINED_ERROR",
-  error,
-});
-const QUERY_ERROR = (errors: t.Errors): NegativeTeamFetchOutcome => ({
-  type: "QUERY_ERROR",
-  errors,
-});
 
 const Team = t.type({
   image: t.type({
@@ -130,19 +101,28 @@ const getTeam = (teamName: string) => async (
     }`,
           { teamName }
         ),
-      (e) =>
-        gqlRequestError.is(e) &&
-        e.response.errors.filter((error) => error.code === "InvalidTokenError")
-          .length > 0
-          ? INVALID_TOKEN_ERROR()
-          : UNDEFINED_ERROR(e)
+      (error) => defaultGQLErrorHandler("get team query")(error)
     ),
-    TE.chainEitherK(flow(queryTp.decode, E.mapLeft(QUERY_ERROR))),
+    TE.chainEitherK(
+      flow(
+        queryTp.decode,
+        E.mapLeft(
+          (errors): NegativeTeamFetchOutcome => ({
+            type: "INCORRECT_TYPE_SAFETY",
+            msg: "Could not decode team name query",
+            errors,
+          })
+        )
+      )
+    ),
     TE.chainEitherK(
       flow(
         Lens.fromPath<QueryTp>()(["user", "team", "items"]).get,
         A.head,
-        E.fromOption(TEAM_DOES_NOT_EXIST)
+        E.fromOption<NegativeTeamFetchOutcome>(() => ({
+          type: "TEAM_DOES_NOT_EXIST",
+          msg: "The requested team does not exist",
+        }))
       )
     )
   )();
@@ -156,16 +136,39 @@ export const getServerSideProps = ({
   req,
 }): Promise<{ props: ITeamProps }> =>
   pipe(
-    TE.tryCatch(() => auth0().getSession(req), NOT_LOGGED_IN),
-    TE.chain(_TE.fromNullable(NOT_LOGGED_IN())),
+    TE.tryCatch(
+      () => auth0().getSession(req),
+      (error): NegativeTeamFetchOutcome => ({
+        type: "UNDEFINED_ERROR",
+        msg: "Undefined auth0 error in [teamName].tsx",
+        error,
+      })
+    ),
+    TE.chain(
+      _TE.fromNullable({
+        type: "NOT_LOGGED_IN",
+        msg: "Session is null in [teamName].tsx",
+      })
+    ),
     TE.chain(
       pipe(
         _RTE.tryToEitherCatch(
           confirmOrCreateUser("id", userType),
-          UNDEFINED_ERROR
+          (error): NegativeTeamFetchOutcome => ({
+            type: "UNDEFINED_ERROR",
+            msg: "Unanticipated confirm or create user error in [teamName].tsx",
+            error,
+          })
         ),
         _RTE.voidChain(
-          _RTE.tryToEitherCatch(getTeam(teamName), UNDEFINED_ERROR)
+          _RTE.tryToEitherCatch(
+            getTeam(teamName),
+            (error): NegativeTeamFetchOutcome => ({
+              type: "UNDEFINED_ERROR",
+              msg: "Unanticipated getTeam error",
+              error,
+            })
+          )
         ),
         _RTE.chainEitherKWithAsk((team) => (session) =>
           E.right({ props: { session, team } })

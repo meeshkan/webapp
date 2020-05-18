@@ -6,12 +6,12 @@ import logger from "pino";
 
 const Logger = logger();
 
-export const _400ErrorHandler = <E>(
+export const _400ErrorHandler = <E extends object>(
   _req: NextApiRequest,
   _res: NextApiResponse
 ) => (e: E) => {
   Logger.error("Returning 400");
-  Logger.error(JSON.stringify(e));
+  Logger.error(e);
   _res.status(400);
 };
 

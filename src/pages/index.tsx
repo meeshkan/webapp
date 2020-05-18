@@ -48,27 +48,21 @@ import * as _TE from "../fp-ts/TaskEither";
 import auth0 from "../utils/auth0";
 import {
   eqNegativeGithubFetchOutcome,
-  INTERNAL_REST_ENDPOINT_ERROR,
   IOwner,
   IRepository,
-  NEEDS_REAUTH,
   NegativeGithubFetchOutcome,
-  OAUTH_FLOW_ERROR,
-  PARSING_ERROR as GH_PARSING_ERROR,
   Repository,
-  UNDEFINED_ERROR as GH_UNDEFINED_ERROR,
 } from "../utils/gh";
 import { hookNeedingFetch, Loading } from "../utils/hookNeedingFetch";
 import {
   getTeams,
-  NOT_LOGGED_IN,
   teamsToProjects,
-  UNDEFINED_ERROR,
   useTeams,
   ITeam,
   NegativeTeamsFetchOutcome,
 } from "../utils/teams";
 import { confirmOrCreateUser } from "../utils/user";
+import { UNDEFINED_ERROR } from "../utils/error";
 
 interface ImportProjectVariables {
   userId: string;
@@ -79,21 +73,13 @@ interface ImportProjectVariables {
   namePlusTeam: string;
 }
 
-interface IMPORT_PROJECT_UNDEFINED_ERROR {
-  type: "UNDEFINED_ERROR";
-}
-
-type NegativeOutcomeImportProject = IMPORT_PROJECT_UNDEFINED_ERROR;
-
-const IMPORT_PROJECT_UNDEFINED_ERROR = (): NegativeOutcomeImportProject => ({
-  type: "UNDEFINED_ERROR",
-});
+type NegativeImportProjectOutcome = UNDEFINED_ERROR;
 
 export type ITeamsProps = { session: ISession; teams: ITeam[]; id: string };
 
 const createProject = (importProjectVariables: ImportProjectVariables) => (
   session: ISession
-): TE.TaskEither<NegativeOutcomeImportProject, any> =>
+): TE.TaskEither<NegativeImportProjectOutcome, any> =>
   pipe(
     TE.tryCatch(
       () =>
@@ -135,7 +121,7 @@ const createProject = (importProjectVariables: ImportProjectVariables) => (
       }`,
           importProjectVariables
         ),
-      IMPORT_PROJECT_UNDEFINED_ERROR
+      (error): NegativeImportProjectOutcome => ({ type: "UNDEFINED_ERROR", msg: "Could not make import project mutation", error })
     ),
     (resultOfNetworkCall) => {
       console.log(resultOfNetworkCall);
@@ -143,20 +129,21 @@ const createProject = (importProjectVariables: ImportProjectVariables) => (
     }
   );
 
+
 const userType = t.type({ id: t.string });
 export const getServerSideProps = ({ req }): Promise<{ props: ITeamsProps }> =>
   pipe(
-    TE.tryCatch(() => auth0().getSession(req), NOT_LOGGED_IN),
-    TE.chain(_TE.fromNullable(NOT_LOGGED_IN())),
+    TE.tryCatch(() => auth0().getSession(req), (error) => ({ type: "UNDEFINED_ERROR", msg: "Could not get session in server side props", error })),
+    TE.chain(_TE.fromNullable({ type: "NOT_LOGGED_IN", msg: "Not logged in in server side props for index.tsx"})),
     TE.chain(
       pipe(
         _RTE.tryToEitherCatch(
           confirmOrCreateUser("id", userType),
-          UNDEFINED_ERROR
+          (error): NegativeTeamsFetchOutcome => ({ type: "UNDEFINED_ERROR", msg: "Could not get session in index.tsx server side props", error })
         ),
         RTE.chain(({ id }) =>
           pipe(
-            _RTE.tryToEitherCatch(getTeams, UNDEFINED_ERROR),
+            _RTE.tryToEitherCatch(getTeams, (error): NegativeTeamsFetchOutcome => ({ type: "UNDEFINED_ERROR", msg: "Could not confirm or create user in index.tsx server side props", error })),
             RTE.chain((teams) => RTE.right({ teams, id }))
           )
         ),
@@ -176,7 +163,7 @@ type IRepositoriesGroupedByOwner = NonEmptyArray<IRepository>[];
 
 type ImportProps = {
   repoName: String;
-  onClick: TE.TaskEither<NegativeOutcomeImportProject, void>;
+  onClick: TE.TaskEither<NegativeImportProjectOutcome, void>;
 };
 
 const ImportProject = ({ repoName, onClick }: ImportProps) => {
@@ -233,16 +220,16 @@ const useRepoList = (
     Either<NegativeGithubFetchOutcome, IRepositoriesGroupedByOwner>
   >(
     pipe(
-      TE.tryCatch(() => fetch("/api/gh/repos"), GH_UNDEFINED_ERROR),
+      TE.tryCatch(() => fetch("/api/gh/repos"), (error) => ({ type: "UNDEFINED_ERROR", msg: "Could not fetch api/gh/repos from index.tsx", error })),
       TE.chain((res) =>
         res.ok
-          ? TE.tryCatch(() => res.json(), GH_UNDEFINED_ERROR)
-          : TE.left(INTERNAL_REST_ENDPOINT_ERROR())
+          ? TE.tryCatch(() => res.json(), (error) => ({ type: "UNDEFINED_ERROR", msg: "Could not convert result of api/gh/repos to json from index.tsx", error }))
+          : TE.left({type: "REST_ENDPOINT_ERROR", msg: `Could not call internal endpoint api/gh/repos: ${res.status} ${res.statusText}`})
       ),
       TE.chain(
         flow(
           t.array(Repository).decode,
-          E.mapLeft(GH_PARSING_ERROR),
+          E.mapLeft(errors => ({ type: "INCORRECT_TYPE_SAFETY", msg: "Could not parse repository from github", errors })),
           TE.fromEither
         )
       ),
@@ -311,11 +298,11 @@ export default ({ session, teams, id }: ITeamsProps) =>
       isLeft(repoList.right) &&
       pipe(repoList.right.left, (err) =>
         [
-          INTERNAL_REST_ENDPOINT_ERROR(),
-          NEEDS_REAUTH(),
-          OAUTH_FLOW_ERROR(),
+          "REST_ENDPOINT_ERROR",
+          "NEEDS_REAUTH",
+          "OAUTH_FLOW_ERROR",
         ].reduce(
-          (a, b) => a || eqNegativeGithubFetchOutcome.equals(err, b),
+          (a, b) => a || b == err.type,
           false
         )
       ) ? (

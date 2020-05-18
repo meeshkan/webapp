@@ -8,6 +8,7 @@ import fetch from "isomorphic-unfetch";
 import { hookNeedingFetch } from "./hookNeedingFetch";
 import { flow } from "fp-ts/lib/function";
 import { Lens } from "monocle-ts";
+import { INCORRECT_TYPE_SAFETY, UNDEFINED_ERROR } from "./error";
 
 export type NotAuthorized = "NotAuthorized";
 export const NotAuthorized: NotAuthorized = "NotAuthorized";
@@ -22,40 +23,24 @@ export const fetchSession = async (): Promise<
 
 export const useFetchSession = () => hookNeedingFetch(fetchSession);
 
-export interface INCORRECT_TYPE_SAFETY {
-  type: "INCORRECT_TYPE_SAFETY";
-  errors: t.Errors;
-}
-
-export interface UNDEFINED_ERROR {
-  type: "UNDEFINED_ERROR";
-  error: Error;
-}
-
 export type NegativeConfirmOrCreateUserOutcome =
   | INCORRECT_TYPE_SAFETY
   | UNDEFINED_ERROR;
 
-export const INCORRECT_TYPE_SAFETY = (
-  errors: t.Errors
-): NegativeConfirmOrCreateUserOutcome => ({
-  type: "INCORRECT_TYPE_SAFETY",
-  errors,
-});
-
-export const UNDEFINED_ERROR = (error: Error): NegativeConfirmOrCreateUserOutcome => ({
-  type: "UNDEFINED_ERROR",
-  error,
-});
-
-const __confirmOrCreateUser = <A, B, Session extends { idToken?: string, user: any}>(
+const __confirmOrCreateUser = <
+  A,
+  B,
+  Session extends { idToken?: string; user: any }
+>(
   query: string,
   vars: Record<string, any>,
   tp: t.Type<B, B, unknown>,
   getter: (b: B) => A,
+  isConfirm: boolean,
   session: Session
 ): TE.TaskEither<NegativeConfirmOrCreateUserOutcome, A> =>
   pipe(
+    // attempt graphql operation
     TE.tryCatch(
       () =>
         new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
@@ -63,19 +48,45 @@ const __confirmOrCreateUser = <A, B, Session extends { idToken?: string, user: a
             authorization: `Bearer ${session.idToken}`,
           },
         }).request(query, vars),
-      UNDEFINED_ERROR
+      (error): NegativeConfirmOrCreateUserOutcome => ({
+        type: "UNDEFINED_ERROR",
+        msg: `Could not ${isConfirm ? "confirm" : "create"} user`,
+        error,
+      })
     ),
-    TE.chainEitherK(flow(tp.decode, E.mapLeft(INCORRECT_TYPE_SAFETY))),
+    TE.chainEitherK(
+      // try to decode using the incoming type
+      // and report an error if we can't
+      flow(
+        tp.decode,
+        E.mapLeft(
+          (errors): NegativeConfirmOrCreateUserOutcome => ({
+            type: "INCORRECT_TYPE_SAFETY",
+            msg: `Type error on response while ${
+              isConfirm ? "confirming" : "creating"
+            } user`,
+            errors,
+          })
+        )
+      )
+    ),
+    // use a getter to get the outcome from the toplevel result
+    // for example, if the result is { user: { id: "a" } }, a getter
+    // could be (res) => res.user with would yield { id: "a" }
     TE.chainEitherK(flow(getter, E.right))
   );
 
-export const confirmOrCreateUser = <A, Session extends { idToken?: string, user: any}>(
+export const confirmOrCreateUser = <
+  A,
+  Session extends { idToken?: string; user: any }
+>(
   query: string,
   tp: t.Type<A, A, unknown>
 ) => (
   session: Session
 ): Promise<E.Either<NegativeConfirmOrCreateUserOutcome, A>> =>
   pipe(
+    // attempt to confirm the euser
     __confirmOrCreateUser(
       `query {
         user {
@@ -85,9 +96,11 @@ export const confirmOrCreateUser = <A, Session extends { idToken?: string, user:
       {},
       t.type({ user: tp }),
       Lens.fromProp<{ user: A }>()("user").get,
+      true,
       session
     ),
     TE.fold(
+      // if not successful, attempt to create the user
       () =>
         __confirmOrCreateUser(
           `mutation (
@@ -110,8 +123,10 @@ export const confirmOrCreateUser = <A, Session extends { idToken?: string, user:
           t.type({ userSignUpWithToken: tp }),
           Lens.fromProp<{ userSignUpWithToken: A }>()("userSignUpWithToken")
             .get,
+          false,
           session
         ),
+      // if successful, return as is (meaning the right of an either)
       TE.right
     )
   )();
