@@ -11,7 +11,7 @@ export const hookNeedingFetch = <T>(fetchFunction: () => Promise<T>): Either<Loa
   React.useEffect(() => {
     // anonymous function because the function passed to
     // `useEffect` cannot return a promise
-    (async () => {console.log("PRE RUNNING FETCH FUNCTION");
+    (async () => {
       __(right(await fetchFunction()));
     })();
   }, [isLeft(_)]);

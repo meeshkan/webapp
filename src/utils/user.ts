@@ -43,17 +43,17 @@ export const INCORRECT_TYPE_SAFETY = (
   errors,
 });
 
-const UNDEFINED_ERROR = (error: Error): NegativeConfirmOrCreateUserOutcome => ({
+export const UNDEFINED_ERROR = (error: Error): NegativeConfirmOrCreateUserOutcome => ({
   type: "UNDEFINED_ERROR",
   error,
 });
 
-const __confirmOrCreateUser = <A, B>(
+const __confirmOrCreateUser = <A, B, Session extends { idToken?: string, user: any}>(
   query: string,
   vars: Record<string, any>,
   tp: t.Type<B, B, unknown>,
   getter: (b: B) => A,
-  session: ISession
+  session: Session
 ): TE.TaskEither<NegativeConfirmOrCreateUserOutcome, A> =>
   pipe(
     TE.tryCatch(
@@ -69,11 +69,11 @@ const __confirmOrCreateUser = <A, B>(
     TE.chainEitherK(flow(getter, E.right))
   );
 
-export const confirmOrCreateUser = <A>(
+export const confirmOrCreateUser = <A, Session extends { idToken?: string, user: any}>(
   query: string,
   tp: t.Type<A, A, unknown>
 ) => (
-  session: ISession
+  session: Session
 ): Promise<E.Either<NegativeConfirmOrCreateUserOutcome, A>> =>
   pipe(
     __confirmOrCreateUser(

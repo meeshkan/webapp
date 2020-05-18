@@ -2,7 +2,7 @@ import { tryCatch as _tryCatch } from "fp-ts/lib/TaskEither";
 import { tryToEitherCatch as _tryToEitherCatch } from "./TaskEither";
 import { ReaderTaskEither, chain } from "fp-ts/lib/ReaderTaskEither";
 import { Either, isLeft } from "fp-ts/lib/Either";
-
+import { ReaderTask } from "fp-ts/lib/ReaderTask";
 
 export function tryCatch<R, E, A>(
   f: (r: R) => Promise<A>,
@@ -24,9 +24,18 @@ export const chainWithAsk = <R, E, A, B>(
   r: R
 ) => () => ma(r)().then((v) => (isLeft(v) ? v : f(v.right)(r)(r)()));
 
+export const foldWithAsk = <R, E, A, B>(
+  onLeft: (e: E) => (r: R) => ReaderTask<R, B>,
+  onRight: (a: A) => (r: R) => ReaderTask<R, B>
+) => (ma: ReaderTaskEither<R, E, A>): ReaderTask<R, B> => (r: R) => () =>
+  ma(r)().then((v) =>
+    isLeft(v) ? onLeft(v.left)(r)(r)() : onRight(v.right)(r)(r)()
+  );
+
 export const voidChain = <R, E, A, B>(
   v: ReaderTaskEither<R, E, B>
-): (ma: ReaderTaskEither<R, E, A>) => ReaderTaskEither<R, E, B> => chain(() => v)
+): ((ma: ReaderTaskEither<R, E, A>) => ReaderTaskEither<R, E, B>) =>
+  chain(() => v);
 
 export const chainEitherKWithAsk = <R, E, A, B>(
   f: (a: A) => (r: R) => Either<E, B>
