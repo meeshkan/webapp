@@ -6,10 +6,6 @@ export interface INCORRECT_TYPE_SAFETY {
   msg: string;
   errors: t.Errors;
 }
-export interface STALE_TOKEN_ERROR {
-  type: "STALE_TOKEN_ERROR";
-  msg: string;
-}
 export interface UNDEFINED_ERROR {
   type: "UNDEFINED_ERROR";
   msg: string;
@@ -21,10 +17,6 @@ export interface NOT_LOGGED_IN {
 }
 export interface INVALID_TOKEN_ERROR {
   type: "INVALID_TOKEN_ERROR";
-  msg: string;
-}
-export interface GITHUB_API_MISBEHAVING_ERROR {
-  type: "GITHUB_API_MISBEHAVING_ERROR";
   msg: string;
 }
 export interface REST_ENDPOINT_ERROR {

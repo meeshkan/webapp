@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const algorithm = 'aes-256-cbc';
 const key = process.env.GH_TOKEN_SIGNING_KEY;
 
-interface IEncryptedString { iv: string, encryptedData: string}
+export interface IEncryptedString { iv: string, encryptedData: string}
 
 export function encrypt(text: string, iv: Buffer) {
  let cipher = crypto.createCipheriv(algorithm, Buffer.from(key), iv);
