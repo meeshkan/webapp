@@ -54,7 +54,7 @@ const ConfigurationPage = ({ user }) => {
           <ItemLink href={stringToUrl(link)}>{link}</ItemLink>
         ))}
       </Box>
-      <Stack w="100%" spacing={8} gridArea="1 / 2 / 4 / 4" overflow="scroll">
+      <Stack w="100%" spacing={8} gridArea="1 / 2 / 4 / 4" overflow="auto">
         <Card heading="Build settings">
           <FormControl d="flex" alignItems="center" mt={4}>
             <FormLabel

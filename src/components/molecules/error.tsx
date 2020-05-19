@@ -48,7 +48,7 @@ const ErrorComponent = ({ errorMessage }: ErrorProps) => {
           fontFamily="mono"
           fontWeight={900}
           maxH="400px"
-          overflow="scroll"
+          overflow="auto"
         >
           {errorMessage}
         </AlertDescription>
