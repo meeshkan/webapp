@@ -20,6 +20,7 @@ import {
   UNDEFINED_ERROR,
   NOT_LOGGED_IN,
 } from "../../../utils/error";
+import { retrieveSession } from "../session";
 
 type NegativeGHOAuthOutcome =
   | ID_NOT_IN_STATE
@@ -36,20 +37,7 @@ export const fromQueryParam = (p: string | string[]) =>
 export default safeApi(
   (req, res) =>
     pipe(
-      TE.tryCatch(
-        () => auth0().getSession(req),
-        (error): NegativeGHOAuthOutcome => ({
-          type: "UNDEFINED_ERROR",
-          msg: "Undefined auth0 error in repos.ts",
-          error,
-        })
-      ),
-      TE.chain(
-        _TE.fromNullable({
-          type: "NOT_LOGGED_IN",
-          msg: "Session is null in repos.ts",
-        })
-      ),
+      retrieveSession(req, "oauth.ts default export"),
       TE.chain((session) =>
         pipe(
           t

@@ -30,6 +30,7 @@ import {
   UNDEFINED_ERROR,
   INVALID_TOKEN_ERROR,
 } from "../../utils/error";
+import { retrieveSession } from "../api/session";
 
 type NegativeProjectFetchOutcome =
   | NOT_LOGGED_IN
@@ -182,20 +183,7 @@ export const getServerSideProps = ({
   res,
 }): Promise<{ props: IProjectWithTeamName }> =>
   pipe(
-    TE.tryCatch(
-      () => auth0().getSession(req),
-      (error): NegativeProjectFetchOutcome => ({
-        type: "UNDEFINED_ERROR",
-        msg: "Undefined auth0 error in [projectName].tsx",
-        error,
-      })
-    ),
-    TE.chain(
-      _TE.fromNullable({
-        type: "NOT_LOGGED_IN",
-        msg: "Session is null in [projectName].tsx",
-      })
-    ),
+    retrieveSession(req, "[projecName].tsx getServerSideProps"),
     TE.chain(
       pipe(
         _RTE.tryToEitherCatch(

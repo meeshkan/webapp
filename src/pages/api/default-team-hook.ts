@@ -15,7 +15,7 @@ import {
   confirmOrCreateUser,
   NegativeConfirmOrCreateUserOutcome,
 } from "../../utils/user";
-import { NegativeSessionFetchOutcome } from "./session";
+import { NegativeSessionFetchOutcome, retrieveSession } from "./session";
 import {
   INVALID_TOKEN_ERROR,
   USER_HAS_NO_TEAMS,
@@ -229,20 +229,7 @@ type UserType = t.TypeOf<typeof userType>;
 export default safeApi(
   (req, res) =>
     pipe(
-      TE.tryCatch(
-        () => auth0().getSession(req),
-        (error): NegativeDefaultTeamHookOutcome => ({
-          type: "UNDEFINED_ERROR",
-          msg: "Call to auth0 getSession failed",
-          error,
-        })
-      ),
-      TE.chain(
-        _TE.fromNullable({
-          type: "NOT_LOGGED_IN",
-          msg: "Session is null in default-team-hook.ts",
-        })
-      ),
+      retrieveSession(req, "default-team-hook.ts default export"),
       TE.chain((session) =>
         pipe(
           _TE.tryToEitherCatch(

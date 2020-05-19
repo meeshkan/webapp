@@ -33,6 +33,7 @@ import {
   NOT_LOGGED_IN,
   defaultGQLErrorHandler,
 } from "../utils/error";
+import { retrieveSession } from "./api/session";
 
 type NegativeTeamFetchOutcome =
   | NOT_LOGGED_IN
@@ -136,20 +137,7 @@ export const getServerSideProps = ({
   req,
 }): Promise<{ props: ITeamProps }> =>
   pipe(
-    TE.tryCatch(
-      () => auth0().getSession(req),
-      (error): NegativeTeamFetchOutcome => ({
-        type: "UNDEFINED_ERROR",
-        msg: "Undefined auth0 error in [teamName].tsx",
-        error,
-      })
-    ),
-    TE.chain(
-      _TE.fromNullable({
-        type: "NOT_LOGGED_IN",
-        msg: "Session is null in [teamName].tsx",
-      })
-    ),
+    retrieveSession(req, "[teamName].tsx getServerSideProps"),
     TE.chain(
       pipe(
         _RTE.tryToEitherCatch(
