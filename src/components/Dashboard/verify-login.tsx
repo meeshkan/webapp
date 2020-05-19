@@ -43,7 +43,7 @@ export default ({ link }: { link: string }) => {
         variantColor="red"
       >
         <Icon name="github" mr={2} />
-        Import from GitHub
+        Sign in to GitHub
       </Button>
     </Stack>
   );

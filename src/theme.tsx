@@ -60,6 +60,7 @@ const customTheme = {
         titleHover: "#DC1853", // red.500
         text: "#3E4C59", // gray.700
         icon: "#E4E7EB", // gray.100
+        link: "#264AD9", // blue.500
       },
       dark: {
         background: "#323F4B", // gray.800
@@ -68,6 +69,7 @@ const customTheme = {
         titleHover: "#F0759A", // red.300
         text: "#CBD2D9", // gray.200
         icon: "#323F4B", // gray.800
+        link: "#7D92E8", // blue.300
       },
     },
   },
