@@ -23,14 +23,14 @@ interface IProjectSettingsProps {
 
 const ProjectSettings = ({ session }: IProjectSettingsProps) => {
   const { colorMode, toggleColorMode } = useColorMode();
-  const fetchedProjects = useTeams(session);
-  const projects = isLeft(fetchedProjects)
+  const fetchedProjectsAndThunk = useTeams(session);
+  const projects = isLeft(fetchedProjectsAndThunk[0])
     ? // we are loading
       []
-    : isLeft(fetchedProjects.right)
+    : isLeft(fetchedProjectsAndThunk[0].right)
     ? // there was an error with the fetch
       []
-    : fetchedProjects.right.right.flatMap((team) =>
+    : fetchedProjectsAndThunk[0].right.right.flatMap((team) =>
         team.project.items.map((project) => ({
           ...project,
           teamImage: team.image,

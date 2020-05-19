@@ -1,20 +1,34 @@
 import React from "react";
 import { Either, left, right, isLeft } from "fp-ts/lib/Either";
 
-export type Loading = "Loading";
-export const Loading: Loading  = "Loading";
+export type Loading = InitialLoading | ReLoading;
+export type InitialLoading = "InitialLoading";
+export type ReLoading = "ReLoading";
+export const InitialLoading: Loading = "InitialLoading";
+export const ReLoading: ReLoading = "ReLoading";
 
-export const hookNeedingFetch = <T>(fetchFunction: () => Promise<T>): Either<Loading, T> => {
+// returns Either<Loading, value>, and thunk that will refetch the value, and a hydration function
+export const hookNeedingFetch = <T>(
+  fetchFunction: () => Promise<T>
+): [
+  Either<Loading, T>,
+  () => void,
+  React.Dispatch<React.SetStateAction<Either<Loading, T>>>
+] => {
   // we need the cast because of a bug in React's type framework
-  const [_, __] = React.useState(left(Loading) as Either<Loading, T>);
+  const [_, __] = React.useState(left(InitialLoading) as Either<Loading, T>);
 
-  React.useEffect(() => {
+  const thunk = () => {
+    __(left(ReLoading));
     // anonymous function because the function passed to
     // `useEffect` cannot return a promise
     (async () => {
       __(right(await fetchFunction()));
     })();
-  }, [isLeft(_)]);
+  };
+  
+  ///....aaaaaadnnnnnnnnnnnnnnnnnnnndddddd
+  React.useEffect(thunk, [0]);
 
-  return _;
+  return [_, thunk, __ ];
 };

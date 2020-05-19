@@ -23,19 +23,24 @@ import {
   Text,
   useColorMode,
   useDisclosure,
+  useToast,
+  Spinner,
+  useToastOptions,
+  Box,
 } from "@chakra-ui/core";
 import { GraphQLClient } from "graphql-request";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
-import { flow } from "fp-ts/lib/function";
+import { flow, constant } from "fp-ts/lib/function";
 import { groupSort, NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import { chain, isSome, Option, some } from "fp-ts/lib/Option";
 import { Ord, ordString } from "fp-ts/lib/Ord";
 import { pipe } from "fp-ts/lib/pipeable";
 import { head } from "fp-ts/lib/ReadonlyNonEmptyArray";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as T from "fp-ts/lib/Task";
 import * as t from "io-ts";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import React, { useState } from "react";
@@ -53,42 +58,79 @@ import {
   NegativeGithubFetchOutcome,
   Repository,
 } from "../utils/gh";
-import { hookNeedingFetch, Loading } from "../utils/hookNeedingFetch";
+import {
+  hookNeedingFetch,
+  Loading,
+  InitialLoading,
+} from "../utils/hookNeedingFetch";
 import {
   getTeams,
   teamsToProjects,
   useTeams,
   ITeam,
   NegativeTeamsFetchOutcome,
+  Team,
 } from "../utils/teams";
 import { confirmOrCreateUser } from "../utils/user";
-import { UNDEFINED_ERROR } from "../utils/error";
+import { UNDEFINED_ERROR, INCORRECT_TYPE_SAFETY } from "../utils/error";
 
 interface ImportProjectVariables {
   userId: string;
   teamName: string;
+  closeModal: () => void;
   repositoryName: string;
   nodeID: string;
   nodePlusTeam: string;
   namePlusTeam: string;
+  importProjectIsExecuting: React.Dispatch<React.SetStateAction<boolean>>;
+  toast: (props: useToastOptions) => void;
+  setTeams: React.Dispatch<
+    React.SetStateAction<
+      Either<Loading, Either<NegativeTeamsFetchOutcome, ITeam[]>>
+    >
+  >;
 }
 
-type NegativeImportProjectOutcome = UNDEFINED_ERROR;
+const teamsMutationType = t.type({
+  userUpdate: t.type({
+    team: t.type({
+      items: t.array(Team),
+    }),
+  }),
+});
+
+type TeamsMutationType = t.TypeOf<typeof teamsMutationType>;
+
+type NegativeImportProjectOutcome = UNDEFINED_ERROR | INCORRECT_TYPE_SAFETY;
 
 export type ITeamsProps = { session: ISession; teams: ITeam[]; id: string };
 
-const createProject = (importProjectVariables: ImportProjectVariables) => (
+const createProject = ({
+  setTeams,
+  importProjectIsExecuting,
+  toast,
+  closeModal,
+  ...importProjectVariables
+}: ImportProjectVariables) => (
   session: ISession
-): TE.TaskEither<NegativeImportProjectOutcome, any> =>
-  pipe(
-    TE.tryCatch(
-      () =>
-        new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-          headers: {
-            authorization: `Bearer ${session.idToken}`,
-          },
-        }).request(
-          `mutation CREATE_PROJECT($userId:ID!, $teamName:String!, $repositoryName: String!, $namePlusTeam: String!, $nodePlusTeam: String!, $nodeID: String!) {
+): TE.TaskEither<NegativeImportProjectOutcome, void> =>
+  TE.bracket<NegativeImportProjectOutcome, void, void>(
+    () =>
+      Promise.resolve(
+        E.right<NegativeImportProjectOutcome, void>(
+          importProjectIsExecuting(true)
+        )
+      ),
+    () =>
+      pipe(
+        TE.tryCatch(
+          () =>
+            new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
+              headers: {
+                authorization: `Bearer ${session.idToken}`,
+              },
+            }).request(
+              `mutation CREATE_PROJECT($userId:ID!, $teamName:String!, $repositoryName: String!, $namePlusTeam: String!, $nodePlusTeam: String!, $nodeID: String!) {
         userUpdate(filter: {
           id: $userId
         },
@@ -117,33 +159,108 @@ const createProject = (importProjectVariables: ImportProjectVariables) => (
           }
         }) {
           id
+          team {
+            items{
+              name
+              id
+              image {
+                downloadUrl
+              }
+              project {
+                items {
+                  name
+                  repository {
+                      nodeId
+                  }
+                }
+              }
+            }
+          }
         }
       }`,
-          importProjectVariables
+              importProjectVariables
+            ),
+          (error): NegativeImportProjectOutcome => ({
+            type: "UNDEFINED_ERROR",
+            msg: "Could not make import project mutation",
+            error,
+          })
         ),
-      (error): NegativeImportProjectOutcome => ({ type: "UNDEFINED_ERROR", msg: "Could not make import project mutation", error })
-    ),
-    (resultOfNetworkCall) => {
-      console.log(resultOfNetworkCall);
-      return resultOfNetworkCall;
-    }
+        TE.chainEitherK<NegativeImportProjectOutcome, any, TeamsMutationType>(
+          flow(
+            teamsMutationType.decode,
+            E.mapLeft(
+              (errors): NegativeImportProjectOutcome => ({
+                type: "INCORRECT_TYPE_SAFETY",
+                msg:
+                  "Teams list from gql endpoint does not match type definition",
+                errors,
+              })
+            )
+          )
+        ),
+        TE.chain(({ userUpdate: { team: { items } } }) =>
+          TE.right(setTeams(E.right(E.right(items))))
+        ),
+        TE.mapLeft((l) =>
+          pipe(
+            toast({
+              title: "Oh no!",
+              description:
+                "We could not import your repository. Please try again soon!",
+              status: "error",
+              duration: 5000,
+              isClosable: true,
+              position: "bottom-right",
+            }),
+            constant(l)
+          )
+        )
+      ),
+    (_, e) => () =>
+      Promise.resolve(
+        E.right({ _: closeModal(), __: importProjectIsExecuting(false) }._)
+      )
   );
-
 
 const userType = t.type({ id: t.string });
 export const getServerSideProps = ({ req }): Promise<{ props: ITeamsProps }> =>
   pipe(
-    TE.tryCatch(() => auth0().getSession(req), (error) => ({ type: "UNDEFINED_ERROR", msg: "Could not get session in server side props", error })),
-    TE.chain(_TE.fromNullable({ type: "NOT_LOGGED_IN", msg: "Not logged in in server side props for index.tsx"})),
+    TE.tryCatch(
+      () => auth0().getSession(req),
+      (error) => ({
+        type: "UNDEFINED_ERROR",
+        msg: "Could not get session in server side props",
+        error,
+      })
+    ),
+    TE.chain(
+      _TE.fromNullable({
+        type: "NOT_LOGGED_IN",
+        msg: "Not logged in in server side props for index.tsx",
+      })
+    ),
     TE.chain(
       pipe(
         _RTE.tryToEitherCatch(
           confirmOrCreateUser("id", userType),
-          (error): NegativeTeamsFetchOutcome => ({ type: "UNDEFINED_ERROR", msg: "Could not get session in index.tsx server side props", error })
+          (error): NegativeTeamsFetchOutcome => ({
+            type: "UNDEFINED_ERROR",
+            msg: "Could not get session in index.tsx server side props",
+            error,
+          })
         ),
         RTE.chain(({ id }) =>
           pipe(
-            _RTE.tryToEitherCatch(getTeams, (error): NegativeTeamsFetchOutcome => ({ type: "UNDEFINED_ERROR", msg: "Could not confirm or create user in index.tsx server side props", error })),
+            _RTE.tryToEitherCatch(
+              getTeams,
+              (error): NegativeTeamsFetchOutcome => ({
+                type: "UNDEFINED_ERROR",
+                msg:
+                  "Could not confirm or create user in index.tsx server side props",
+                error,
+              })
+            ),
             RTE.chain((teams) => RTE.right({ teams, id }))
           )
         ),
@@ -201,16 +318,16 @@ async function authorizeGithub() {
 }
 
 const useRepoList = (
-  owner: Either<"Loading", Either<NegativeGithubFetchOutcome, Option<IOwner>>>,
+  owner: Either<Loading, Either<NegativeGithubFetchOutcome, Option<IOwner>>>,
   setOwner: React.Dispatch<
     React.SetStateAction<
-      Either<"Loading", Either<NegativeGithubFetchOutcome, Option<IOwner>>>
+      Either<Loading, Either<NegativeGithubFetchOutcome, Option<IOwner>>>
     >
   >,
   setOwnerRepos: React.Dispatch<
     React.SetStateAction<
       Either<
-        "Loading",
+        Loading,
         Either<NegativeGithubFetchOutcome, Option<NonEmptyArray<IRepository>>>
       >
     >
@@ -220,16 +337,38 @@ const useRepoList = (
     Either<NegativeGithubFetchOutcome, IRepositoriesGroupedByOwner>
   >(
     pipe(
-      TE.tryCatch(() => fetch("/api/gh/repos"), (error) => ({ type: "UNDEFINED_ERROR", msg: "Could not fetch api/gh/repos from index.tsx", error })),
+      TE.tryCatch(
+        () => fetch("/api/gh/repos"),
+        (error) => ({
+          type: "UNDEFINED_ERROR",
+          msg: "Could not fetch api/gh/repos from index.tsx",
+          error,
+        })
+      ),
       TE.chain((res) =>
         res.ok
-          ? TE.tryCatch(() => res.json(), (error) => ({ type: "UNDEFINED_ERROR", msg: "Could not convert result of api/gh/repos to json from index.tsx", error }))
-          : TE.left({type: "REST_ENDPOINT_ERROR", msg: `Could not call internal endpoint api/gh/repos: ${res.status} ${res.statusText}`})
+          ? TE.tryCatch(
+              () => res.json(),
+              (error) => ({
+                type: "UNDEFINED_ERROR",
+                msg:
+                  "Could not convert result of api/gh/repos to json from index.tsx",
+                error,
+              })
+            )
+          : TE.left({
+              type: "REST_ENDPOINT_ERROR",
+              msg: `Could not call internal endpoint api/gh/repos: ${res.status} ${res.statusText}`,
+            })
       ),
       TE.chain(
         flow(
           t.array(Repository).decode,
-          E.mapLeft(errors => ({ type: "INCORRECT_TYPE_SAFETY", msg: "Could not parse repository from github", errors })),
+          E.mapLeft((errors) => ({
+            type: "INCORRECT_TYPE_SAFETY",
+            msg: "Could not parse repository from github",
+            errors,
+          })),
           TE.fromEither
         )
       ),
@@ -262,46 +401,52 @@ export default ({ session, teams, id }: ITeamsProps) =>
     {
       useColorMode: useColorMode(),
       useDisclosure: useDisclosure(),
-      newProps: useTeams(session),
+      teamsFromClientSideFetch: useTeams(session),
       stateForLogin: `{"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`,
       useOwner: useState(
-        left(Loading) as Either<
+        left(InitialLoading) as Either<
           Loading,
           Either<NegativeGithubFetchOutcome, Option<IOwner>>
         >
       ),
+      importProjectIsExecuting: React.useState(false),
       useOwnerRepos: useState(
         left<
           Loading,
           Either<NegativeGithubFetchOutcome, Option<NonEmptyArray<IRepository>>>
-        >(Loading)
+        >(InitialLoading)
       ),
+      toast: useToast(),
     },
     (p) => ({
       ...p,
       allTeams:
-        isRight(p.newProps) && isRight(p.newProps.right)
-          ? p.newProps.right.right
+        isRight(p.teamsFromClientSideFetch[0]) &&
+        isRight(p.teamsFromClientSideFetch[0].right)
+          ? p.teamsFromClientSideFetch[0].right.right
           : teams,
-      repoList: useRepoList(p.useOwner[0], p.useOwner[1], p.useOwnerRepos[1]),
+      repoListAndThunk: useRepoList(
+        p.useOwner[0],
+        p.useOwner[1],
+        p.useOwnerRepos[1]
+      ),
     }),
     ({
-      repoList,
+      repoListAndThunk,
       allTeams,
+      teamsFromClientSideFetch,
+      importProjectIsExecuting,
+      toast,
       useColorMode: { colorMode },
       useDisclosure: { onOpen, isOpen, onClose },
       stateForLogin,
       useOwner: [owner, setOwner],
       useOwnerRepos: [ownerRepos, setOwnerRepos],
     }) =>
-      isRight(repoList) &&
-      isLeft(repoList.right) &&
-      pipe(repoList.right.left, (err) =>
-        [
-          "REST_ENDPOINT_ERROR",
-          "NEEDS_REAUTH",
-          "OAUTH_FLOW_ERROR",
-        ].reduce(
+      isRight(repoListAndThunk[0]) &&
+      isLeft(repoListAndThunk[0].right) &&
+      pipe(repoListAndThunk[0].right.left, (err) =>
+        ["REST_ENDPOINT_ERROR", "NEEDS_REAUTH", "OAUTH_FLOW_ERROR"].reduce(
           (a, b) => a || b == err.type,
           false
         )
@@ -378,7 +523,7 @@ export default ({ session, teams, id }: ITeamsProps) =>
               closeOnOverlayClick={true}
               size="lg"
             >
-              <Skeleton isLoaded={!isLeft(repoList)}>
+              <Skeleton isLoaded={!isLeft(repoListAndThunk[0])}>
                 <ModalOverlay />
                 <ModalContent
                   rounded="sm"
@@ -405,7 +550,23 @@ export default ({ session, teams, id }: ITeamsProps) =>
                     color={`mode.${colorMode}.text`}
                   />
                   <ModalBody px={2}>
-                    {isRight(repoList) && isLeft(repoList.right) ? (
+                    {importProjectIsExecuting[0] ? (
+                      <Box
+                        h="100%"
+                        w="100%"
+                        d="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                      >
+                        <Spinner
+                          color={colorMode === "light" ? "red.500" : "red.300"}
+                          size="xl"
+                          thickness="4px"
+                          emptyColor={`mode.${colorMode}.icon`}
+                        />
+                      </Box>
+                    ) : isRight(repoListAndThunk[0]) &&
+                      isLeft(repoListAndThunk[0].right) ? (
                       <Flex h="100%" justify="center" align="center">
                         <Button
                           rounded="sm"
@@ -422,8 +583,8 @@ export default ({ session, teams, id }: ITeamsProps) =>
                         </Button>
                       </Flex>
                     ) : (
-                      isRight(repoList) &&
-                      isRight(repoList.right) &&
+                      isRight(repoListAndThunk[0]) &&
+                      isRight(repoListAndThunk[0].right) &&
                       isRight(owner) &&
                       isRight(owner.right) &&
                       isSome(owner.right.right) && (
@@ -467,7 +628,7 @@ export default ({ session, teams, id }: ITeamsProps) =>
                                 defaultValue={owner.right.right.value.login}
                                 type="radio"
                               >
-                                {repoList.right.right.map(
+                                {repoListAndThunk[0].right.right.map(
                                   (reposForOwner, index) => (
                                     <MenuItemOption
                                       key={index}
@@ -502,6 +663,10 @@ export default ({ session, teams, id }: ITeamsProps) =>
                                     key={index}
                                     repoName={repo.name}
                                     onClick={createProject({
+                                      importProjectIsExecuting:
+                                        importProjectIsExecuting[1],
+                                      closeModal: onClose,
+                                      toast,
                                       userId: id,
                                       namePlusTeam: `${repo.name}% [/!${allTeams[0].name}`,
                                       nodeID: repo.node_id,
@@ -513,6 +678,7 @@ export default ({ session, teams, id }: ITeamsProps) =>
                                       // where team addition fails
                                       // also does not allow multiple teams
                                       teamName: allTeams[0].name,
+                                      setTeams: teamsFromClientSideFetch[2],
                                     })(session)}
                                   />
                                 )
@@ -523,7 +689,7 @@ export default ({ session, teams, id }: ITeamsProps) =>
                     )}
                   </ModalBody>
                   <ModalFooter d="flex" justifyContent="center" fontSize="sm">
-                    {isRight(repoList) && (
+                    {isRight(repoListAndThunk[0]) && (
                       <>
                         <Text mr={2} color={`mode.${colorMode}.text`}>
                           Not seeing the repository you want?

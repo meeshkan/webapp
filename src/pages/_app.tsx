@@ -21,7 +21,7 @@ import { isLeft, isRight } from "fp-ts/lib/Either";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const { colorMode } = useColorMode();
-  const session = useFetchSession();
+  const sessionAndThunk = useFetchSession();
   const router = useRouter();
 
   return (
@@ -34,9 +34,9 @@ function MyApp({ Component, pageProps }: AppProps) {
         <CSSReset />
         <ColorModeProvider>
           <Layout>
-            <Navigation session={session} />
-            <Skeleton isLoaded={isRight(session)}>
-                {isLeft(session) ? <></> : isLeft(session.right) ?
+            <Navigation session={sessionAndThunk[0]} />
+            <Skeleton isLoaded={isRight(sessionAndThunk[0])}>
+                {isLeft(sessionAndThunk[0]) ? <></> : isLeft(sessionAndThunk[0].right) ?
                 <Box as="section" my={12}>
                   <Heading
                     as="h2"

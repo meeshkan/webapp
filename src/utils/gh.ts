@@ -366,8 +366,8 @@ export const getAllGhRepos = (
 const githubTokenType = t.type({
   refresh_token: t.string,
   access_token: t.string,
-  expires_in: t.number,
-  refresh_token_expires_in: t.number,
+  expires_in: t.string,
+  refresh_token_expires_in: t.string,
   token_type: t.string,
 });
 const githubIdQueryType = t.type({
@@ -475,10 +475,10 @@ export const authenticateAppWithGithub = (
             tokenType: githubToken.token_type,
             expiresAt:
               new Date().getTime() / MS_IN_SEC +
-              githubToken.expires_in,
+              parseInt(githubToken.expires_in),
             refreshTokenExpiresAt:
               new Date().getTime() / MS_IN_SEC +
-              githubToken.refresh_token_expires_in,
+              parseInt(githubToken.refresh_token_expires_in),
             nodeId: viewerResult.viewer.id,
           }),
           crypto.randomBytes(16)

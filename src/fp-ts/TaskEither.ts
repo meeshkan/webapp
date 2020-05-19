@@ -3,11 +3,11 @@ import { Lazy } from "fp-ts/lib/function";
 import {
   TaskEither,
   chain,
+  fold,
   left as teLeft,
   right as teRight,
 } from "fp-ts/lib/TaskEither";
 import { left, right, Either, isLeft } from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/pipeable";
 
 export function tryToEitherCatch<E, A>(
   f: Lazy<Promise<Either<E, A>>>,
