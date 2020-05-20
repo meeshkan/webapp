@@ -39,7 +39,7 @@ const Card = ({
             maxH="80vh"
             rounded="sm"
             gridArea={gridArea}
-            overflow="scroll"
+            overflow="auto"
           >
             <Box>
               {heading ? (
@@ -68,7 +68,7 @@ const Card = ({
           maxH="80vh"
           rounded="sm"
           gridArea={gridArea}
-          overflow="scroll"
+          overflow="auto"
         >
           {headingLink ? (
             <Link
