@@ -6,6 +6,7 @@
     "dev": "node server.js",
     "build": "next build",
     "start": "node server.js",
+    "test": "jest",
     "export": "next export",
     "deploy": "npm run build && npm run export"
   },
@@ -37,12 +38,16 @@
     "querystring": "^0.2.0",
     "react": "16.13.1",
     "react-dom": "16.13.1",
+    "ts-node": "^8.10.1",
     "uuid": "^8.0.0"
   },
   "devDependencies": {
+    "@types/jest": "^25.2.3",
     "@types/node": "^13.13.0",
     "@types/pino": "^6.0.1",
     "@types/react": "^16.9.34",
+    "jest": "^26.0.1",
+    "ts-jest": "^26.0.0",
     "typescript": "^3.8.3"
   },
   "peerDependencies": {

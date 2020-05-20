@@ -3,10 +3,17 @@ import * as E from "fp-ts/lib/Either";
 import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as A from "fp-ts/lib/Array";
 import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
 import { Lens } from "monocle-ts";
-import { defaultGQLErrorHandler, INCORRECT_TYPE_SAFETY, INVALID_TOKEN_ERROR, NOT_LOGGED_IN, UNDEFINED_ERROR } from "./error";
+import {
+  defaultGQLErrorHandler,
+  INCORRECT_TYPE_SAFETY,
+  INVALID_TOKEN_ERROR,
+  NOT_LOGGED_IN,
+  UNDEFINED_ERROR,
+} from "./error";
 import { hookNeedingFetch } from "./hookNeedingFetch";
 
 export type NegativeTeamsFetchOutcome =
@@ -107,12 +114,15 @@ export interface IProject {
 }
 
 export const teamsToProjects = (teams: ITeam[]): IProject[] =>
-  teams.flatMap(({ name, image, project: { items } }) =>
-    items.map((item) => ({
-      teamName: name,
-      teamImage: image ? image.downloadUrl : "https://picsum.photos/200",
-      projectName: item.name,
-    }))
+  pipe(
+    teams.map(({ name, image, project: { items } }) =>
+      items.map((item) => ({
+        teamName: name,
+        teamImage: image ? image.downloadUrl : "https://picsum.photos/200",
+        projectName: item.name,
+      }))
+    ),
+    A.flatten
   );
 
 export const useTeams = (session: ISession) =>
