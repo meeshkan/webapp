@@ -9,7 +9,7 @@ import { retrieveSession } from "../session";
 
 type NegativeGithubReposOutcome = NegativeGithubFetchOutcome | NOT_LOGGED_IN;
 
-export default safeApi<NegativeGithubReposOutcome>(
+export default safeApi(
   (req, res) =>
     pipe(
       retrieveSession(req, "repos.ts default export"),
