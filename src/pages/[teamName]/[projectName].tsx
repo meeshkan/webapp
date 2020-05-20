@@ -1,3 +1,4 @@
+import React from "react";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import { Grid } from "@chakra-ui/core";
 import * as A from "fp-ts/lib/Array";
@@ -9,17 +10,13 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
 import { Lens } from "monocle-ts";
-import React from "react";
 import Branch from "../../components/Dashboard/branch";
 import Chart from "../../components/Dashboard/chart";
 import Production from "../../components/Dashboard/production";
-// import { DateFromString, IDateFromString } from "../../utils/customTypes";
 import Settings from "../../components/Dashboard/settings";
 import * as _E from "../../fp-ts/Either";
 import * as _RTE from "../../fp-ts/ReaderTaskEither";
 import * as _TE from "../../fp-ts/TaskEither";
-// cards
-import auth0 from "../../utils/auth0";
 import { confirmOrCreateUser } from "../../utils/user";
 import {
   defaultGQLErrorHandler,
@@ -48,8 +45,9 @@ const Project = t.type({
       t.type({
         location: t.union([t.literal("master"), t.literal("branch")]),
         status: t.string,
-        createdAt: t.string, //DateFromString,
+        createdAt: t.string,
         commitHash: t.string,
+        id: t.string,
       })
     ),
   }),
@@ -119,6 +117,7 @@ const getProject = (teamName: string, projectName: string) => async (
                       name
                       tests {
                         items {
+                          id
                           location
                           status
                           createdAt
@@ -237,6 +236,8 @@ export default (
               repositoryName={projectProps.name}
             />
             <Production
+              teamName={projectProps.teamName}
+              projectName={projectProps.name}
               tests={projectProps.tests.items.filter(
                 (test) => test.location === "master"
               )}
