@@ -52,18 +52,18 @@ export const _400ErrorHandler = <E extends object>(
   );
 };
 
-export default <E>(
-  f: (_req: NextApiRequest, _res: NextApiResponse) => TaskEither<E, void>,
+export default <E, A>(
+  f: (_req: NextApiRequest, _res: NextApiResponse) => TaskEither<E, A>,
   fe: (_req: NextApiRequest, _res: NextApiResponse) => (e: E) => void
-) => (request: NextApiRequest, response: NextApiResponse): Promise<void> =>
+) => (request: NextApiRequest, response: NextApiResponse): Promise<E.Either<E, A>> =>
   bracket(
     right(response),
     (res) => f(request, res),
-    (res: NextApiResponse, e: Either<E, void>) =>
+    (res: NextApiResponse, e: Either<E, A>) =>
       pipe(
         e,
         mapLeft(fe(request, res)),
         () => res.end(),
-        () => fromEither(e)
+        () => fromEither(E.right(constNull()))
       )
-  )().then();
+  )();

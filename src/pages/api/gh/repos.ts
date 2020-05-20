@@ -1,21 +1,16 @@
-import auth0 from "../../../utils/auth0";
-import {
-  getAllGhRepos,
-  NegativeGithubFetchOutcome,
-  IRepository,
-} from "../../../utils/gh";
-import safeApi, { _400ErrorHandler } from "../../../utils/safeApi";
-import * as TE from "fp-ts/lib/TaskEither";
-import * as _TE from "../../../fp-ts/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/pipeable";
-import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
+import * as TE from "fp-ts/lib/TaskEither";
+import * as _TE from "../../../fp-ts/TaskEither";
 import { NOT_LOGGED_IN } from "../../../utils/error";
+import { getAllGhRepos, NegativeGithubFetchOutcome, IRepository } from "../../../utils/gh";
+import safeApi, { _400ErrorHandler } from "../../../utils/safeApi";
 import { retrieveSession } from "../session";
+import { ITeam } from "../../../utils/teams";
 
 type NegativeGithubReposOutcome = NegativeGithubFetchOutcome | NOT_LOGGED_IN;
 
-export default safeApi<NegativeGithubReposOutcome>(
+export default safeApi<NegativeGithubReposOutcome, IRepository[]>(
   (req, res) =>
     pipe(
       retrieveSession(req, "repos.ts default export"),
@@ -29,7 +24,7 @@ export default safeApi<NegativeGithubReposOutcome>(
           })
         )
       ),
-      TE.chainEitherK((b) => E.right(res.json(b)))
+      TE.chainFirst((b) => TE.right(res.json(b)))
     ),
   _400ErrorHandler
 );

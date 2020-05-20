@@ -1,0 +1,14 @@
+import { mockAuth0WithSession } from "../../../../../mocks/auth0";
+import { mockRequest, mockResponse } from "../../../../../mocks/reqres";
+import { mock8BaseWithResult } from "../../../../../mocks/8base";
+
+import endpoint from "../../../../../src/pages/api/gh/repos";
+import * as E from "fp-ts/lib/Either";
+
+mockAuth0WithSession();
+mock8BaseWithResult({this: "is", incorrectly: "typed"});
+
+test("endpoint returns INCORRECT_TYPE_SAFETY when 8base returns incorrectly-typed data", () =>
+  expect(
+    endpoint(mockRequest(), mockResponse()).then(E.mapLeft((e) => e.type))
+  ).resolves.toEqual(E.left("INCORRECT_TYPE_SAFETY")));
