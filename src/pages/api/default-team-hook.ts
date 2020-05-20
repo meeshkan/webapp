@@ -141,7 +141,7 @@ const uploadPhotoForTeam = (teamId) => ({
                 `https://www.filestackapi.com/api/store/S3?key=${apiKey}&policy=${policy}&signature=${signature}&path=${path}`,
                 {
                   method: "post",
-                  body: new URLSearchParams({ url: user.picture }),
+                  body: new URLSearchParams({ url: user.picture || `https://api.adorable.io/avatars/300/${signature}.png` }),
                 }
               ),
             (error): NegativeDefaultTeamHookOutcome => ({
