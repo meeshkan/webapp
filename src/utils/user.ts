@@ -30,7 +30,7 @@ export type NegativeConfirmOrCreateUserOutcome =
 const __confirmOrCreateUser = <
   A,
   B,
-  Session extends { idToken?: string; user: any }
+  Session extends ISession
 >(
   query: string,
   vars: Record<string, any>,
@@ -78,7 +78,7 @@ const __confirmOrCreateUser = <
 
 export const confirmOrCreateUser = <
   A,
-  Session extends { idToken?: string; user: any }
+  Session extends ISession
 >(
   query: string,
   tp: t.Type<A, A, unknown>

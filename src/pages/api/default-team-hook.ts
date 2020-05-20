@@ -22,7 +22,7 @@ import {
   defaultGQLErrorHandler,
 } from "../../utils/error";
 
-const doesUserHaveTeams = <Session extends { idToken?: string }>(
+const doesUserHaveTeams = <Session extends ISession>(
   session: Session
 ): Promise<E.Either<NegativeDefaultTeamHookOutcome, void>> =>
   pipe(

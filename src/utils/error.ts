@@ -66,3 +66,8 @@ export const defaultGQLErrorHandler = (ctx: string) => (
         msg: `Undefined error in graphql call when in context; ${ctx}`,
         error,
       };
+
+export interface GET_SERVER_SIDE_PROPS_ERROR {
+  type: "GET_SERVER_SIDE_PROPS_ERROR"
+}
+export const GET_SERVER_SIDE_PROPS_ERROR: GET_SERVER_SIDE_PROPS_ERROR = {type: "GET_SERVER_SIDE_PROPS_ERROR"};

@@ -9,6 +9,7 @@ import {
   Text,
   useColorMode,
 } from "@chakra-ui/core";
+import ErrorComponent from "../components/molecules/error";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import { flow } from "fp-ts/lib/function";
@@ -32,6 +33,7 @@ import {
   UNDEFINED_ERROR,
   NOT_LOGGED_IN,
   defaultGQLErrorHandler,
+  GET_SERVER_SIDE_PROPS_ERROR,
 } from "../utils/error";
 import { retrieveSession } from "./api/session";
 
@@ -135,7 +137,7 @@ const userType = t.type({ id: t.string });
 export const getServerSideProps = ({
   params: { teamName },
   req,
-}): Promise<{ props: ITeamProps }> =>
+}): Promise<{ props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps> }> =>
   pipe(
     retrieveSession(req, "[teamName].tsx getServerSideProps"),
     TE.chain(
@@ -159,76 +161,62 @@ export const getServerSideProps = ({
           )
         ),
         _RTE.chainEitherKWithAsk((team) => (session) =>
-          E.right({ props: { session, team } })
+          E.right({ session, team })
         )
       )
     )
-  )().then(
-    _E.eitherAsPromiseWithSwallowedError<
-      NegativeTeamFetchOutcome,
-      { props: ITeamProps }
-    >({
-      props: {
-        session: { user: {}, createdAt: 0 },
-        team: {
-          name: "Meeshkan",
-          image: { downloadUrl: "https://picsum.photos/200" },
-          project: { items: [] },
-        },
-      },
-    })
-  );
+  )().then(_E.eitherSanitizedWithGenericError);
 
-export default ({ team, session }: ITeamProps) =>
-  pipe(useColorMode(), ({ colorMode }) => (
-    <>
-      <Grid templateColumns="repeat(4, 1fr)" gap={6}>
-        {team.project.items.map(({ name }, index) => (
-          <Link key={name} href={`/${team.name}/${name}`}>
-            <a>
-              <Card key={index}>
-                <Stack spacing={4} isInline>
-                  <Image
-                    size={10}
-                    src={team.image.downloadUrl}
-                    bg="gray.50"
-                    border="1px solid"
-                    borderColor={`mode.${colorMode}.icon`}
-                    rounded="sm"
-                  />
-                  <Stack spacing={2}>
-                    <Text color={`mode.${colorMode}.text`} lineHeight="none">
-                      {team.name}
-                    </Text>
-                    <Heading
-                      as="h3"
-                      lineHeight="none"
-                      fontSize="md"
-                      fontWeight={900}
-                    >
-                      {name}
-                    </Heading>
-                  </Stack>
+export default (props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>) =>
+pipe(props, E.fold(() => <ErrorComponent errorMessage={"Uh oh. Looks like this resource does not exist. If you suspect it should, reach out to us using the Intercom below."} />, ({ team, session }) =>   pipe(useColorMode(), ({ colorMode }) => (
+  <>
+    <Grid templateColumns="repeat(4, 1fr)" gap={6}>
+      {team.project.items.map(({ name }, index) => (
+        <Link key={name} href={`/${team.name}/${name}`}>
+          <a>
+            <Card key={index}>
+              <Stack spacing={4} isInline>
+                <Image
+                  size={10}
+                  src={team.image.downloadUrl}
+                  bg="gray.50"
+                  border="1px solid"
+                  borderColor={`mode.${colorMode}.icon`}
+                  rounded="sm"
+                />
+                <Stack spacing={2}>
+                  <Text color={`mode.${colorMode}.text`} lineHeight="none">
+                    {team.name}
+                  </Text>
+                  <Heading
+                    as="h3"
+                    lineHeight="none"
+                    fontSize="md"
+                    fontWeight={900}
+                  >
+                    {name}
+                  </Heading>
                 </Stack>
-              </Card>
-            </a>
-          </Link>
-        ))}
-        <ChakraLink
-          href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`}
-          bg={`mode.${colorMode}.card`}
-          p={4}
-          rounded="sm"
-          color={`mode.${colorMode}.title`}
-          _hover={{ color: `mode.${colorMode}.titleHover` }}
-        >
-          <Stack spacing={4} align="center" isInline>
-            <Icon h={10} w={10} name="add" stroke="2px" />
-            <Heading as="h3" lineHeight="none" fontSize="md" fontWeight={900}>
-              Authorize a repository
-            </Heading>
-          </Stack>
-        </ChakraLink>
-      </Grid>
-    </>
-  ));
+              </Stack>
+            </Card>
+          </a>
+        </Link>
+      ))}
+      <ChakraLink
+        href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`}
+        bg={`mode.${colorMode}.card`}
+        p={4}
+        rounded="sm"
+        color={`mode.${colorMode}.title`}
+        _hover={{ color: `mode.${colorMode}.titleHover` }}
+      >
+        <Stack spacing={4} align="center" isInline>
+          <Icon h={10} w={10} name="add" stroke="2px" />
+          <Heading as="h3" lineHeight="none" fontSize="md" fontWeight={900}>
+            Authorize a repository
+          </Heading>
+        </Stack>
+      </ChakraLink>
+    </Grid>
+  </>
+))));

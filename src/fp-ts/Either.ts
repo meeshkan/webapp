@@ -1,7 +1,8 @@
-import { Either, isLeft, chain } from "fp-ts/lib/Either";
+import { Either, isLeft, chain, mapLeft } from "fp-ts/lib/Either";
 import { identity, constNull } from "fp-ts/lib/function";
 import { NextApiResponse } from "next";
 import { pipe } from "fp-ts/lib/pipeable";
+import { GET_SERVER_SIDE_PROPS_ERROR } from "../utils/error";
 
 export const eitherAsPromiseWithReject = <E, A, B>(f: (e: E) => B) => (
   v: Either<E, A>
@@ -24,6 +25,12 @@ export const eitherAsPromiseWithRedirect = <E, A>(res: NextApiResponse) => (
         )
       : resolve(v.right)
   );
+
+export const eitherSanitizedWithGenericError = <E, A>(v: Either<E, A>) => pipe(
+  v,
+  mapLeft((_) => GET_SERVER_SIDE_PROPS_ERROR),
+  (props) => ({ props })
+)
 
 export const eitherAsPromiseWithSwallowedError = <E, A>(defaultTo: A) => (
   v: Either<E, A>

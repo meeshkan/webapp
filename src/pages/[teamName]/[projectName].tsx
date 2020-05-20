@@ -2,9 +2,9 @@ import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import { Grid } from "@chakra-ui/core";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
+import ErrorComponent from "../../components/molecules/error";
 import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
-import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
@@ -29,6 +29,7 @@ import {
   PROJECT_DOES_NOT_EXIST,
   UNDEFINED_ERROR,
   INVALID_TOKEN_ERROR,
+  GET_SERVER_SIDE_PROPS_ERROR,
 } from "../../utils/error";
 import { retrieveSession } from "../api/session";
 
@@ -181,7 +182,9 @@ export const getServerSideProps = ({
   params: { teamName, projectName },
   req,
   res,
-}): Promise<{ props: IProjectWithTeamName }> =>
+}): Promise<{
+  props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, IProjectWithTeamName>;
+}> =>
   pipe(
     retrieveSession(req, "[projecName].tsx getServerSideProps"),
     TE.chain(
@@ -204,45 +207,48 @@ export const getServerSideProps = ({
               error,
             })
           )
-        ),
-        RTE.chainEitherK((props) => E.right({ props }))
+        )
       )
     )
-  )().then(
-    _E.eitherAsPromiseWithSwallowedError<
-      NegativeProjectFetchOutcome,
-      { props: IProjectWithTeamName }
-    >({
-      props: {
-        name: "My awesome project",
-        tests: { items: [] },
-        teamName: "Meeshkan",
-      },
-    })
-  );
+  )().then(_E.eitherSanitizedWithGenericError);
 
-export default (projectProps: IProjectWithTeamName) => (
-  <>
-    <Grid
-      templateColumns="repeat(3, 1fr)"
-      templateRows="repeat(2, minmax(204px, 45%))"
-      gap={8}
-    >
-      <Settings
-        organizationName={projectProps.teamName}
-        repositoryName={projectProps.name}
-      />
-      <Production
-        tests={projectProps.tests.items.filter(
-          (test) => test.location === "master"
-        )}
-      />
-      <Branch
-        tests={projectProps.tests.items.filter(
-          (test) => test.location === "branch"
-        )}
-      />
-      <Chart />
-    </Grid>
-  </>
-);
+export default (
+  props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, IProjectWithTeamName>
+) =>
+  pipe(
+    props,
+    E.fold(
+      () => (
+        <ErrorComponent
+          errorMessage={
+            "Uh oh. It looks like this resource does not exist! If you suspect it should, please reach out using the Intercom below."
+          }
+        />
+      ),
+      (projectProps) => (
+        <>
+          <Grid
+            templateColumns="repeat(3, 1fr)"
+            templateRows="repeat(2, minmax(204px, 45%))"
+            gap={8}
+          >
+            <Settings
+              organizationName={projectProps.teamName}
+              repositoryName={projectProps.name}
+            />
+            <Production
+              tests={projectProps.tests.items.filter(
+                (test) => test.location === "master"
+              )}
+            />
+            <Branch
+              tests={projectProps.tests.items.filter(
+                (test) => test.location === "branch"
+              )}
+            />
+            <Chart />
+          </Grid>
+        </>
+      )
+    )
+  );
