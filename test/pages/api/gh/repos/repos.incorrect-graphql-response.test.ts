@@ -1,8 +1,8 @@
-import { mockAuth0WithSession } from "../../../../mocks/auth0";
-import { mockRequest, mockResponse } from "../../../../mocks/reqres";
-import { mock8BaseWithResult } from "../../../../mocks/8base";
+import { mockAuth0WithSession } from "../../../../../mocks/auth0";
+import { mockRequest, mockResponse } from "../../../../../mocks/reqres";
+import { mock8BaseWithResult } from "../../../../../mocks/8base";
 
-import endpoint from "../../../../src/pages/api/gh/repos";
+import endpoint from "../../../../../src/pages/api/gh/repos";
 import * as E from "fp-ts/lib/Either";
 
 mockAuth0WithSession();
