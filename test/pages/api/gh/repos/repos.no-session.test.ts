@@ -6,7 +6,7 @@ import * as E from "fp-ts/lib/Either";
 
 mockAuth0WithNoSession();
 
-test("endpoint returns null without any additional mocking", () =>
+test("endpoint returns NOT_LOGGED_IN when there is no session", () =>
   expect(
     endpoint(mockRequest(), mockResponse()).then(E.mapLeft((e) => e.type))
   ).resolves.toEqual(E.left("NOT_LOGGED_IN")));
