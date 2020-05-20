@@ -243,6 +243,8 @@ export default (
               )}
             />
             <Branch
+              teamName={projectProps.teamName}
+              projectName={projectProps.name}
               tests={projectProps.tests.items.filter(
                 (test) => test.location === "branch"
               )}
