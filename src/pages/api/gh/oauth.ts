@@ -34,7 +34,7 @@ const userType = t.type({ id: t.string });
 export const fromQueryParam = (p: string | string[]) =>
   t.string.is(p) ? p : pipe(A.head(p), O.getOrElse(constant("")));
 
-export default safeApi(
+export default safeApi<NegativeGHOAuthOutcome, void>(
   (req, res) =>
     pipe(
       retrieveSession(req, "oauth.ts default export"),

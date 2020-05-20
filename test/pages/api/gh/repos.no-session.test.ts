@@ -17,9 +17,6 @@ import { NextApiRequest, NextApiResponse } from "next";
 import * as E from "fp-ts/lib/Either";
 
 test("endpoint returns null without any additional mocking", () =>
-  expect(endpoint(mockRequest, mockResponse)).resolves.toEqual(
-    E.left({
-      msg: "Session is null in: repos.ts default export",
-      type: "NOT_LOGGED_IN",
-    })
+  expect(endpoint(mockRequest, mockResponse).then(E.mapLeft(e => e.type))).resolves.toEqual(
+    E.left("NOT_LOGGED_IN")
   ));

@@ -31,11 +31,11 @@ export const retrieveSession = (
     )
   );
 
-export default safeApi(
+export default safeApi<NegativeSessionFetchOutcome, ISession>(
   (req: NextApiRequest, res: NextApiResponse) =>
     pipe(
       retrieveSession(req, "session.ts default export"),
-      TE.chainEitherK((b) => E.right(res.json(b)))
+      TE.chainFirst((b) => TE.right(res.json(b)))
     ),
   (_, res) => (e) => res.status(e.type === "NOT_LOGGED_IN" ? 401 : 403)
 );

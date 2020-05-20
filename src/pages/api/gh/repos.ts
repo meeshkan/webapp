@@ -3,13 +3,14 @@ import { pipe } from "fp-ts/lib/pipeable";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as _TE from "../../../fp-ts/TaskEither";
 import { NOT_LOGGED_IN } from "../../../utils/error";
-import { getAllGhRepos, NegativeGithubFetchOutcome } from "../../../utils/gh";
+import { getAllGhRepos, NegativeGithubFetchOutcome, IRepository } from "../../../utils/gh";
 import safeApi, { _400ErrorHandler } from "../../../utils/safeApi";
 import { retrieveSession } from "../session";
+import { ITeam } from "../../../utils/teams";
 
 type NegativeGithubReposOutcome = NegativeGithubFetchOutcome | NOT_LOGGED_IN;
 
-export default safeApi(
+export default safeApi<NegativeGithubReposOutcome, IRepository[]>(
   (req, res) =>
     pipe(
       retrieveSession(req, "repos.ts default export"),
@@ -23,7 +24,7 @@ export default safeApi(
           })
         )
       ),
-      TE.chainEitherK((b) => E.right(res.json(b)))
+      TE.chainFirst((b) => TE.right(res.json(b)))
     ),
   _400ErrorHandler
 );
