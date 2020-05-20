@@ -37,7 +37,7 @@ export const Test = ({
             lineHeight="normal"
             color={`mode.${colorMode}.title`}
           >
-            {`${branchName}@${commitHash}`}
+            {`${branchName}@${commitHash.slice(0, 7)}`}
           </Text>
           <Badge
             variantColor={
