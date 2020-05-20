@@ -455,19 +455,7 @@ export default (props: E.Either<NegativeTeamsFetchOutcome, ITeamsProps>) =>
             useOwner: [owner, setOwner],
             useOwnerRepos: [ownerRepos, setOwnerRepos],
           }) =>
-            E.isRight(repoListAndThunk[0]) &&
-            E.isLeft(repoListAndThunk[0].right) &&
-            pipe(repoListAndThunk[0].right.left, (err) =>
-              [
-                "REST_ENDPOINT_ERROR",
-                "NEEDS_REAUTH",
-                "OAUTH_FLOW_ERROR",
-              ].reduce((a, b) => a || b == err.type, false)
-            ) ? (
-              <VerifyLogin
-                link={`https://github.com/login/oauth/authorize?client_id=${process.env.GH_OAUTH_APP_CLIENT_ID}&redirect_uri=https://app.meeshkan.com/api/gh/oauth-triage&state=${stateForLogin}`}
-              />
-            ) : (
+            (
               <>
                 <Grid
                   templateColumns={[
