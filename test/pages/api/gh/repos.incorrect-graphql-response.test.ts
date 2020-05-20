@@ -33,5 +33,5 @@ import * as E from "fp-ts/lib/Either";
 
 test("endpoint returns null without any additional mocking", () =>
   expect(
-    endpoint(mockRequest, mockResponse).then(E.getOrElse((e) => e.type))
-  ).resolves.toEqual("INCORRECT_TYPE_SAFETY"));
+    endpoint(mockRequest, mockResponse).then(E.mapLeft((e) => e.type))
+  ).resolves.toEqual(E.left("INCORRECT_TYPE_SAFETY")));
