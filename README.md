@@ -1,45 +1,63 @@
 # Webapp readme
 
+## Installing, building, testing and running
+
+Here are instructions on how to install, build and run this web app.
+
+### Installation
+
+To install the webapp, download this repository and run:
+
+```bash
+yarn
+```
+
+### Build
+
+To build the webapp, run:
+
+```bash
+yarn build
+```
+
+Note that there are many environment variables used in `webapp`. If you are attempting to build it without those variables, the build and/or first run will likely fail. If you are a member of the Meeshkan organization on `vercel`, you can obtain the development version of these variables by running `vercel env pull`. Otherwise, you can create an `.env` file and populate it with the variables you need to run the parts of the app you wish to run. At a minimum, you will need an Auth0 app with GitHub login configured and the GitHub login will need a mandatory e-mail field.
+
+### Test
+
+To test the webapp, invoke
+
+```bash
+yarn test
+```
+
+Please see the above note about environment variables before attempting to test the web app.
+
+### Run
+
+To run the webapp, invoke
+
+```bash
+yarn dev
+```
+
+Please see the above note about environment variables before attempting to run the web app.
+
 ## Routing style
 
-Optimize for user experience (clear URL structure) and only add an abstraction if absolutely necessary. The repercussion of this is we will have some reserved paths such as `settings`, `user`, and more. We percieve this to have minimal impact and aren't actively solving for these edge cases.
+We optimize for user experience (clear URL structure) and only add an abstraction if absolutely necessary. The repercussion of this is we will have some reserved paths such as `settings`, `user`, and more. We percieve this to have minimal impact and aren't actively solving for these edge cases.
 
-## Loading / Error / Result pattern using Either
+## Important dependencies
 
-A lot of the code uses the following type pattern for asynchronous communication with a server:
+This repository makes heavy use of certain libraries. Without being familiar with the basics of how these libraries work, it will be difficult to understand the code base.
 
-```typescript
-type MyType = Either<Loading, Either<Error, Result>>
-const myAsyncFunc = (): MyType => { /** some stuff */ };
-const res = await myAsyncFunc();
-isLeft(res) // it is loading
-isRight(res) && isLeft(res.right) // it produced an error
-isRight(res) && isRight(res.right) // it produced a successful outcome
-```
+These libraries are, in no particualr order:
 
-This pattern enforces type safety in the following way. Let's say we want to use a result. We can only do that using the following pattern:
-
-```typescript
-isRight(res) && isRight(res.right) && doSomethingWithResult(res.right.right)
-```
-
-If we leave out the second `isRight`, it will not compile and will raise a type error:
-
-```typescript
-isRight(res) && doSomethingWithResult(res.right.right)
-```
-
-That is how the `Either` pattern guarantees type safety of results - `isLeft` and `isRight` act as [predicate](https://www.typescriptlang.org/docs/handbook/advanced-types.html#using-type-predicates) that give typesafety to whatever follows. 
-
-## Typesafe graphql using `io-ts`
-
-Ideally, we will use a typesafe schema for all of our queries, but until then, we are using `io-ts` for typesafe graphql IO. `io-ts` allows you to construct types that act both as runtime guards and compile-time types. For example, look at the function `confirmOrCreateUser` in `src/utils/user.ts` and its usages to see how this is done.
+- [`next.js`](https://github.com/zeit/next.js)
+- [`fp-ts`](https://github.com/gcanti/fp-ts)
+- [`ip-ts`](https://github.com/gcanti/io-ts)
+- [`monocle-ts`](https://github.com/gcanti/monocle-ts)
 
 ## Known issues
-
-### Team name and project name
-
-There is currently only a naive mechanism to dynamically generate a `teamName` that is not a GitHub owner name or `projectName` that is not a github repo name. That means that, in very rare cases, if there is a conflict because the `teamName` or `projectName` is not unique, the app will `/404`. As this is a rare occurence, we do not have any code to cover that. Eventually, we can write code that more-resiliently generates a new `teamName` or `projectName` if the current name is taken already.
 
 ### Slack webhooks
 
