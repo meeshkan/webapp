@@ -54,7 +54,7 @@ These libraries are, in no particualr order:
 
 - [`next.js`](https://github.com/zeit/next.js)
 - [`fp-ts`](https://github.com/gcanti/fp-ts)
-- [`ip-ts`](https://github.com/gcanti/io-ts)
+- [`io-ts`](https://github.com/gcanti/io-ts)
 - [`monocle-ts`](https://github.com/gcanti/monocle-ts)
 
 ## Known issues
