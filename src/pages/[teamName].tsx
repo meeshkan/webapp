@@ -73,9 +73,9 @@ const queryTp = t.type({
 
 type QueryTp = t.TypeOf<typeof queryTp>;
 
-const getTeam = (teamName: string) => async (
+const getTeam = (teamName: string) => (
   session: ISession
-): Promise<E.Either<NegativeTeamFetchOutcome, ITeam>> =>
+): TE.TaskEither<NegativeTeamFetchOutcome, ITeam> =>
   pipe(
     TE.tryCatch(
       () =>
@@ -131,7 +131,7 @@ const getTeam = (teamName: string) => async (
         }))
       )
     )
-  )();
+  );
 
 type ITeamProps = { team: ITeam; session: ISession };
 

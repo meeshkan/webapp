@@ -95,13 +95,9 @@ const queryTp = t.type({
 
 type QueryTp = t.TypeOf<typeof queryTp>;
 
-const getTest = (
-  teamName: string,
-  projectName: string,
-  testID: string
-) => async (
+const getTest = (teamName: string, projectName: string, testID: string) => (
   session: ISession
-): Promise<E.Either<NegativeTestFetchOutcome, ITestT>> =>
+): TE.TaskEither<NegativeTestFetchOutcome, ITestT> =>
   pipe(
     TE.tryCatch<NegativeTestFetchOutcome, any>(
       () =>
@@ -197,7 +193,7 @@ const getTest = (
           })
         )
       ).get
-  )();
+  );
 
 const userType = t.type({ id: t.string });
 type UserType = t.TypeOf<typeof userType>;
@@ -234,9 +230,7 @@ export const getServerSideProps = ({
           >(
             flow(
               getTest(teamName, projectName, testId),
-              constant,
-              TE.chain((test) => TE.right({ test, id })),
-              (p) => p()
+              TE.chain((test) => TE.right({ test, id }))
             ),
             (error): NegativeTestFetchOutcome => ({
               type: "UNDEFINED_ERROR",

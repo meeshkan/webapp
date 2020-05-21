@@ -98,15 +98,14 @@ export const fetchGithubAccessToken = async (
 ): Promise<Either<NegativeGithubFetchOutcome, string>> =>
   pipe(
     _TE.tryToEitherCatch(
-      () =>
-        confirmOrCreateUser(
-          `id
+      confirmOrCreateUser(
+        `id
     githubInfo {
       githubSyncChecksum
       githubSyncNonce
     }`,
-          githubAccessTokenType
-        )(session),
+        githubAccessTokenType
+      )(session),
       (error): NegativeGithubFetchOutcome => ({
         type: "UNDEFINED_ERROR",
         msg: "Could not fetch access token from gql endpoint",
@@ -159,16 +158,15 @@ export const fetchGithubAccessToken = async (
           TWENTY_SECONDS
           ? TE.left({ type: "NEEDS_REAUTH", msg: "Refresh token expires soon" })
           : _TE.tryToEitherCatch(
-              () =>
-                authenticateAppWithGithub(
-                  id,
-                  new URLSearchParams({
-                    client_id: process.env.GH_OAUTH_APP_CLIENT_ID,
-                    client_secret: process.env.GH_OAUTH_APP_CLIENT_SECRET,
-                    grant_type: "refresh_token",
-                    refresh_token: githubAccessToken.refreshToken,
-                  })
-                )(session),
+              authenticateAppWithGithub(
+                id,
+                new URLSearchParams({
+                  client_id: process.env.GH_OAUTH_APP_CLIENT_ID,
+                  client_secret: process.env.GH_OAUTH_APP_CLIENT_SECRET,
+                  grant_type: "refresh_token",
+                  refresh_token: githubAccessToken.refreshToken,
+                })
+              )(session),
               (error): NegativeGithubFetchOutcome => ({
                 type: "UNDEFINED_ERROR",
                 msg: "Unexpected error when renewing token from access token",
@@ -213,7 +211,7 @@ const getRepositories = (
         TE.chain<NegativeGithubFetchOutcome, Response, IRepository[]>(
           pipe(
             _RTE.tryCatch<Response, NegativeGithubFetchOutcome, any>(
-              (res) => res.json(),
+              (res) => () => res.json(),
               (error) => ({
                 type: "UNDEFINED_ERROR",
                 msg: "Conversion of json response from github API failed",
@@ -294,7 +292,7 @@ const getInstallationRepositories = (
         TE.chain(
           pipe(
             _RTE.tryCatch<Response, NegativeGithubFetchOutcome, any>(
-              (res) => res.json(),
+              (res) => () => res.json(),
               (error) => ({
                 type: "UNDEFINED_ERROR",
                 msg: "Conversion of json response from github API failed",
@@ -388,9 +386,7 @@ type GithubTokenType = t.TypeOf<typeof githubTokenType>;
 export const authenticateAppWithGithub = (
   userId: string,
   params: URLSearchParams
-) => async (
-  session: ISession
-): Promise<Either<NegativeGithubFetchOutcome, string>> =>
+) => (session: ISession): TE.TaskEither<NegativeGithubFetchOutcome, string> =>
   pipe(
     TE.tryCatch(
       () =>
@@ -537,4 +533,4 @@ export const authenticateAppWithGithub = (
       )
     ),
     TE.chain(({ access_token }) => TE.right(access_token))
-  )();
+  );

@@ -55,9 +55,9 @@ const queryTp = t.type({
 
 type QueryTp = t.TypeOf<typeof queryTp>;
 
-export const getTeams = async (
+export const getTeams = (
   session: ISession
-): Promise<E.Either<NegativeTeamsFetchOutcome, ITeam[]>> =>
+): TE.TaskEither<NegativeTeamsFetchOutcome, ITeam[]> =>
   pipe(
     TE.tryCatch(
       () =>
@@ -106,7 +106,8 @@ export const getTeams = async (
     TE.chainEitherK(
       flow(Lens.fromPath<QueryTp>()(["user", "team", "items"]).get, E.right)
     )
-  )();
+  );
+
 export interface IProject {
   teamName: string;
   teamImage: string;
@@ -126,4 +127,4 @@ export const teamsToProjects = (teams: ITeam[]): IProject[] =>
   );
 
 export const useTeams = (session: ISession) =>
-  hookNeedingFetch(() => getTeams(session));
+  pipe(session, getTeams, hookNeedingFetch);

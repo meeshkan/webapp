@@ -13,13 +13,10 @@ import { INCORRECT_TYPE_SAFETY, UNDEFINED_ERROR } from "./error";
 export type NotAuthorized = "NotAuthorized";
 export const NotAuthorized: NotAuthorized = "NotAuthorized";
 
-export const fetchSession = async (): Promise<
-  E.Either<NotAuthorized, ISession>
-> => {
-  const res = await fetch("/api/session");
-  const session = res.ok ? await res.json() : null;
-  return session ? E.right(session) : E.left(NotAuthorized);
-};
+export const fetchSession: TE.TaskEither<NotAuthorized, ISession> = () =>
+  fetch("/api/session")
+    .then((res) => (res.ok ? res.json() : null))
+    .then((session) => (session ? E.right(session) : E.left(NotAuthorized)));
 
 export const useFetchSession = () => hookNeedingFetch(fetchSession);
 
@@ -27,11 +24,7 @@ export type NegativeConfirmOrCreateUserOutcome =
   | INCORRECT_TYPE_SAFETY
   | UNDEFINED_ERROR;
 
-const __confirmOrCreateUser = <
-  A,
-  B,
-  Session extends ISession
->(
+const __confirmOrCreateUser = <A, B, Session extends ISession>(
   query: string,
   vars: Record<string, any>,
   tp: t.Type<B, B, unknown>,
@@ -76,15 +69,10 @@ const __confirmOrCreateUser = <
     TE.chainEitherK(flow(getter, E.right))
   );
 
-export const confirmOrCreateUser = <
-  A,
-  Session extends ISession
->(
+export const confirmOrCreateUser = <A, Session extends ISession>(
   query: string,
   tp: t.Type<A, A, unknown>
-) => (
-  session: Session
-): Promise<E.Either<NegativeConfirmOrCreateUserOutcome, A>> =>
+) => (session: Session): TE.TaskEither<NegativeConfirmOrCreateUserOutcome, A> =>
   pipe(
     // attempt to confirm the euser
     __confirmOrCreateUser(
@@ -129,4 +117,4 @@ export const confirmOrCreateUser = <
       // if successful, return as is (meaning the right of an either)
       TE.right
     )
-  )();
+  );

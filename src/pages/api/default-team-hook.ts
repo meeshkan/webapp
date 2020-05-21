@@ -24,7 +24,7 @@ import {
 
 const doesUserHaveTeams = <Session extends ISession>(
   session: Session
-): Promise<E.Either<NegativeDefaultTeamHookOutcome, void>> =>
+): TE.TaskEither<NegativeDefaultTeamHookOutcome, void> =>
   pipe(
     TE.tryCatch(
       () =>
@@ -51,14 +51,15 @@ const doesUserHaveTeams = <Session extends ISession>(
           })
         : TE.right(constVoid())
     )
-  )();
+  );
 
 const createTeamFromUserName = ({
   idToken,
   user,
   userId,
-}: ISession & { userId: string }): Promise<
-  E.Either<NegativeDefaultTeamHookOutcome, string>
+}: ISession & { userId: string }): TE.TaskEither<
+  NegativeDefaultTeamHookOutcome,
+  string
 > =>
   pipe(
     TE.tryCatch(
@@ -101,14 +102,15 @@ const createTeamFromUserName = ({
     ),
     // todo - add type safety for the query
     TE.chain(({ userUpdate: { team: { items: [{ id }] } } }) => TE.right(id))
-  )();
+  );
 
 const uploadPhotoForTeam = (teamId) => ({
   idToken,
   userId,
   user,
-}: ISession & { userId: string }): Promise<
-  E.Either<NegativeDefaultTeamHookOutcome, void>
+}: ISession & { userId: string }): TE.TaskEither<
+  NegativeDefaultTeamHookOutcome,
+  void
 > =>
   pipe(
     new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
@@ -141,7 +143,11 @@ const uploadPhotoForTeam = (teamId) => ({
                 `https://www.filestackapi.com/api/store/S3?key=${apiKey}&policy=${policy}&signature=${signature}&path=${path}`,
                 {
                   method: "post",
-                  body: new URLSearchParams({ url: user.picture || `https://api.adorable.io/avatars/300/${signature}.png` }),
+                  body: new URLSearchParams({
+                    url:
+                      user.picture ||
+                      `https://api.adorable.io/avatars/300/${signature}.png`,
+                  }),
                 }
               ),
             (error): NegativeDefaultTeamHookOutcome => ({
@@ -215,7 +221,7 @@ const uploadPhotoForTeam = (teamId) => ({
         ),
         TE.chain((_) => TE.right(constVoid()))
       )
-  )();
+  );
 
 type NegativeDefaultTeamHookOutcome =
   | NegativeSessionFetchOutcome
@@ -230,10 +236,10 @@ export default safeApi(
   (req, res) =>
     pipe(
       retrieveSession(req, "default-team-hook.ts default export"),
-      TE.chain((session) =>
+      TE.chain(
         pipe(
-          _TE.tryToEitherCatch(
-            () => confirmOrCreateUser("id", userType)(session),
+          _RTE.tryToEitherCatch(
+            confirmOrCreateUser("id", userType),
             (error): NegativeDefaultTeamHookOutcome => ({
               type: "UNDEFINED_ERROR",
               msg:
@@ -241,7 +247,9 @@ export default safeApi(
               error,
             })
           ),
-          TE.chain(({ id }) => TE.right({ userId: id, ...session }))
+          _RTE.chainWithAsk(({ id }) => (session) =>
+            RTE.right({ userId: id, ...session })
+          )
         )
       ),
       TE.chain(

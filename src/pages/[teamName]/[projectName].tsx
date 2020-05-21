@@ -85,9 +85,9 @@ const queryTp = t.type({
 
 type QueryTp = t.TypeOf<typeof queryTp>;
 
-const getProject = (teamName: string, projectName: string) => async (
+const getProject = (teamName: string, projectName: string) => (
   session: ISession
-): Promise<E.Either<NegativeProjectFetchOutcome, IProjectWithTeamName>> =>
+): TE.TaskEither<NegativeProjectFetchOutcome, IProjectWithTeamName> =>
   pipe(
     TE.tryCatch(
       () =>
@@ -167,7 +167,7 @@ const getProject = (teamName: string, projectName: string) => async (
         )
       ).get,
     TE.chain((project) => TE.right({ ...project, teamName: teamName }))
-  )();
+  );
 
 const userType = t.type({ id: t.string });
 

@@ -105,9 +105,9 @@ const queryTp = t.type({
 });
 
 type QueryTp = t.TypeOf<typeof queryTp>;
-const getConfiguration = (teamName: string, projectName: string) => async (
+const getConfiguration = (teamName: string, projectName: string) => (
   session: ISession
-): Promise<E.Either<NegativeConfigurationFetchOutcome, IConfiguration>> =>
+): TE.TaskEither<NegativeConfigurationFetchOutcome, IConfiguration> =>
   pipe(
     TE.tryCatch<NegativeConfigurationFetchOutcome, any>(
       () =>
@@ -204,7 +204,7 @@ const getConfiguration = (teamName: string, projectName: string) => async (
         )
       )
     )
-  )();
+  );
 
 const userType = t.type({ id: t.string });
 type UserType = t.TypeOf<typeof userType>;
@@ -245,9 +245,7 @@ export const getServerSideProps = ({
           >(
             flow(
               getConfiguration(teamName, projectName),
-              constant,
-              TE.chain((configuration) => TE.right({ configuration, id })),
-              thunk
+              TE.chain((configuration) => TE.right({ configuration, id }))
             ),
             (error): NegativeConfigurationFetchOutcome => ({
               type: "UNDEFINED_ERROR",
@@ -517,7 +515,7 @@ const ConfigurationPage = (
             useForm: useForm({
               ...(configuration ? { defaultValues: configuration } : {}),
             }),
-            useGetConfiguration: hookNeedingFetch(() =>
+            useGetConfiguration: hookNeedingFetch(
               getConfiguration(teamName, projectName)(session)
             ),
             useNotifications: useState(false),

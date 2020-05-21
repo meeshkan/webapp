@@ -5,17 +5,17 @@ import { Either, isLeft } from "fp-ts/lib/Either";
 import { ReaderTask } from "fp-ts/lib/ReaderTask";
 
 export function tryCatch<R, E, A>(
-  f: (r: R) => Promise<A>,
+  f: (r: R) => () => Promise<A>,
   onRejected: (reason: unknown) => E
 ): ReaderTaskEither<R, E, A> {
-  return (r: R) => _tryCatch(() => f(r), onRejected);
+  return (r: R) => _tryCatch(f(r), onRejected);
 }
 
 export function tryToEitherCatch<R, E, A>(
-  f: (r: R) => Promise<Either<E, A>>,
+  f: (r: R) => () => Promise<Either<E, A>>,
   onRejected: (reason: unknown) => E
 ): ReaderTaskEither<R, E, A> {
-  return (r: R) => _tryToEitherCatch(() => f(r), onRejected);
+  return (r: R) => _tryToEitherCatch(f(r), onRejected);
 }
 
 export const chainWithAsk = <R, E, A, B>(
