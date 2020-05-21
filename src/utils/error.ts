@@ -39,6 +39,10 @@ export interface TEAM_DOES_NOT_EXIST {
   type: "TEAM_DOES_NOT_EXIST";
   msg: string;
 }
+export interface TEST_DOES_NOT_EXIST {
+  type: "TEST_DOES_NOT_EXIST";
+  msg: string;
+}
 export interface USER_HAS_NO_TEAMS {
   type: "USER_HAS_NO_TEAMS";
   msg: string;
@@ -68,6 +72,8 @@ export const defaultGQLErrorHandler = (ctx: string) => (
       };
 
 export interface GET_SERVER_SIDE_PROPS_ERROR {
-  type: "GET_SERVER_SIDE_PROPS_ERROR"
+  type: "GET_SERVER_SIDE_PROPS_ERROR";
 }
-export const GET_SERVER_SIDE_PROPS_ERROR: GET_SERVER_SIDE_PROPS_ERROR = {type: "GET_SERVER_SIDE_PROPS_ERROR"};
+export const GET_SERVER_SIDE_PROPS_ERROR: GET_SERVER_SIDE_PROPS_ERROR = {
+  type: "GET_SERVER_SIDE_PROPS_ERROR",
+};
