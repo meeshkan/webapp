@@ -28,6 +28,7 @@ import { flow, constant } from "fp-ts/lib/function";
 import { retrieveSession } from "../../../pages/api/session";
 import { confirmOrCreateUser } from "../../../utils/user";
 import ErrorComponent from "../../../components/molecules/error";
+import LogItem from "../../../components/molecules/logItem";
 
 type NegativeTestFetchOutcome =
   | NOT_LOGGED_IN
@@ -273,17 +274,28 @@ const TestPage = (props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>) =>
           errorMessage={"Could not find this test resource."}
         ></ErrorComponent>
       ),
-      ({ test: { log } }) => (
-        <Grid
-          templateColumns="repeat(3, 1fr)"
-          templateRows="repeat(2, minmax(204px, 45%))"
-          gap={8}
-        >
-          <Card heading="Tests">
-            <pre>{JSON.stringify(JSON.parse(log), null, 2)}</pre>
-          </Card>
-        </Grid>
-      )
+      ({ test: { log } }) => {
+        const logs = JSON.parse(log);
+        return (
+          <Grid
+            templateColumns="repeat(3, 1fr)"
+            templateRows="repeat(2, minmax(204px, 45%))"
+            gap={8}
+          >
+            <Card gridArea="1 / 2 / 3 / 1" heading="Tests">
+              {logs.commands.map((item, index) => (
+                <LogItem
+                  key={index}
+                  success={item.success}
+                  path={item.path}
+                  method={item.method}
+                />
+              ))}
+              {/* <pre>{JSON.stringify(logs, null, 2)}</pre> */}
+            </Card>
+          </Grid>
+        );
+      }
     )
   );
 
