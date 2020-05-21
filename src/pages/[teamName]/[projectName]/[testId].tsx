@@ -1,44 +1,41 @@
-import React from "react";
-import {
-  Grid,
-  Box,
-  Accordion,
-  Heading,
-  useColorMode,
-  Code,
-  Text,
-} from "@chakra-ui/core";
-import Card from "../../../components/molecules/card";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
-import { GraphQLClient } from "graphql-request";
 import {
-  NOT_LOGGED_IN,
-  TEAM_DOES_NOT_EXIST,
-  PROJECT_DOES_NOT_EXIST,
-  INVALID_TOKEN_ERROR,
-  TEST_DOES_NOT_EXIST,
-  UNDEFINED_ERROR,
-  INCORRECT_TYPE_SAFETY,
+  Accordion,
+  Box,
+  Code,
+  Grid,
+  Heading,
+  Text,
+  useColorMode,
+} from "@chakra-ui/core";
+import * as E from "fp-ts/lib/Either";
+import { constant, flow } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/pipeable";
+import * as RTE from "fp-ts/lib/ReaderTaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
+import { GraphQLClient } from "graphql-request";
+import * as t from "io-ts";
+import React from "react";
+import Card from "../../../components/molecules/card";
+import ErrorComponent from "../../../components/molecules/error";
+import FailureMessage from "../../../components/molecules/failureMessage";
+import LogItem from "../../../components/molecules/logItem";
+import * as _E from "../../../fp-ts/Either";
+import * as _RTE from "../../../fp-ts/ReaderTaskEither";
+import { LensTaskEither, lensTaskEitherHead } from "../../../monocle-ts";
+import { retrieveSession } from "../../../pages/api/session";
+import {
   defaultGQLErrorHandler,
   GET_SERVER_SIDE_PROPS_ERROR,
+  INCORRECT_TYPE_SAFETY,
+  INVALID_TOKEN_ERROR,
+  NOT_LOGGED_IN,
+  PROJECT_DOES_NOT_EXIST,
+  TEAM_DOES_NOT_EXIST,
+  TEST_DOES_NOT_EXIST,
+  UNDEFINED_ERROR,
 } from "../../../utils/error";
-import { Lens } from "monocle-ts";
-import * as t from "io-ts";
-import * as O from "fp-ts/lib/Option";
-import * as A from "fp-ts/lib/Array";
-import * as _RTE from "../../../fp-ts/ReaderTaskEither";
-import * as _E from "../../../fp-ts/Either";
-import * as RTE from "fp-ts/lib/ReaderTaskEither";
-import * as E from "fp-ts/lib/Either";
-import * as TE from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/pipeable";
-import { flow, constant } from "fp-ts/lib/function";
-import { retrieveSession } from "../../../pages/api/session";
 import { confirmOrCreateUser } from "../../../utils/user";
-import ErrorComponent from "../../../components/molecules/error";
-import LogItem from "../../../components/molecules/logItem";
-import FailureMessage from "../../../components/molecules/failureMessage";
-import { LensTaskEither, lensTaskEitherHead } from "../../../monocle-ts";
 
 type NegativeTestFetchOutcome =
   | NOT_LOGGED_IN
