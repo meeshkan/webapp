@@ -8,7 +8,9 @@ type CardProps = {
   heading?: string;
   headingLink?: string;
   link?: string;
+  linkLabel?: string;
   id?: string;
+  minH?: string;
 };
 
 const Card = ({
@@ -17,7 +19,9 @@ const Card = ({
   heading,
   headingLink,
   link,
+  linkLabel,
   id,
+  minH,
 }: CardProps) => {
   const { colorMode } = useColorMode();
   const router = useRouter();
@@ -34,13 +38,14 @@ const Card = ({
           onClick={handleClick}
           color={`mode.${colorMode}.title`}
           _hover={{ color: `mode.${colorMode}.titleHover` }}
+          aria-label={linkLabel}
         >
           <Box
             id={id}
             bg={`mode.${colorMode}.card`}
             p={4}
             maxH="80vh"
-            minH="35vh"
+            minH={minH && minH}
             rounded="sm"
             gridArea={gridArea}
             overflow="auto"
@@ -71,7 +76,7 @@ const Card = ({
           bg={`mode.${colorMode}.card`}
           p={4}
           maxH="80vh"
-          minH="35vh"
+          minH={minH && minH}
           rounded="sm"
           gridArea={gridArea}
           overflow="auto"
@@ -79,6 +84,7 @@ const Card = ({
           {headingLink ? (
             <Link
               href={headingLink}
+              aria-label={linkLabel}
               onClick={handleClick}
               color={`mode.${colorMode}.title`}
               _hover={{ color: `mode.${colorMode}.titleHover` }}

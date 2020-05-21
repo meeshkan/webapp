@@ -24,7 +24,10 @@ export const Test = ({
 }: TestProps) => {
   const { colorMode } = useColorMode();
   return (
-    <Link href={`/${teamName}/${projectName}/${testId}`}>
+    <Link
+      href={`/${teamName}/${projectName}/${testId}`}
+      aria-label={`An individual test for ${teamName}'s project, ${projectName}`}
+    >
       <Box
         my={3}
         borderBottom="1px solid"

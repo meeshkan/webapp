@@ -5,7 +5,7 @@ import Card from "../molecules/card";
 const Chart = () => {
   const { colorMode } = useColorMode();
   return (
-    <Card gridArea="2 / 1 / 3 / 3" heading="Bugs">
+    <Card gridArea="2 / 1 / 3 / 3" heading="Bugs" minH="35vh">
       <Text mt={2} color={`mode.${colorMode}.text`}>
         Burn-down chart of bugs, coming soon...
       </Text>

@@ -186,7 +186,11 @@ export default (props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>) =>
           <>
             <Grid templateColumns="repeat(4, 1fr)" gap={6}>
               {team.project.items.map(({ name }, index) => (
-                <Link key={name} href={`/${team.name}/${name}`}>
+                <Link
+                  key={name}
+                  href={`/${team.name}/${name}`}
+                  aria-label={`Links to ${team.name}'s project ${name}`}
+                >
                   <a>
                     <Card key={index}>
                       <Stack spacing={4} isInline>
@@ -197,6 +201,7 @@ export default (props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>) =>
                               ? team.image.downloadUrl
                               : "https://picsum.photos/200"
                           }
+                          alt={`${team.name}'s organization image`}
                           bg="gray.50"
                           border="1px solid"
                           borderColor={`mode.${colorMode}.icon`}
@@ -225,6 +230,7 @@ export default (props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>) =>
               ))}
               <ChakraLink
                 href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`}
+                aria-label="Link to GitHub to install meeshkan on a repository"
                 bg={`mode.${colorMode}.card`}
                 p={4}
                 rounded="sm"

@@ -311,11 +311,6 @@ const ordRepositoryByOwner: Ord.Ord<IRepository> = {
 const groupReposByOwner = (repos: IRepository[]): IRepositoriesGroupedByOwner =>
   groupSort(ordRepositoryByOwner)(repos);
 
-async function authorizeGithub() {
-  // This is a placholder for the function that calls the GitHub API for what Meeshkan is installed on an returns an object currently represented by a variable called 'owners'. This includes the organizations with Meeshkan installed, and lists the specific repos below.
-  return null;
-}
-
 const useRepoList = (
   owner: E.Either<
     Loading,
@@ -475,11 +470,16 @@ export default (props: E.Either<NegativeTeamsFetchOutcome, ITeamsProps>) =>
               >
                 {teamsToProjects(allTeams).map(
                   ({ teamName, teamImage, projectName }, index) => (
-                    <Card key={index} link={`/${teamName}/${projectName}`}>
+                    <Card
+                      key={index}
+                      link={`/${teamName}/${projectName}`}
+                      linkLabel={`Links to ${teamName}'s project ${projectName}`}
+                    >
                       <Stack spacing={4} isInline>
                         <Image
                           size={10}
                           src={teamImage}
+                          alt={`${teamName}'s organization image`}
                           bg="gray.50"
                           border="1px solid"
                           borderColor={`mode.${colorMode}.icon`}
@@ -549,8 +549,7 @@ export default (props: E.Either<NegativeTeamsFetchOutcome, ITeamsProps>) =>
                         fontWeight={900}
                         color={`mode.${colorMode}.title`}
                       >
-                        {/* TODO make this team name dynamic */}
-                        Import a project to Makenna’s Team
+                        Import a project to {allTeams[0].name}'s Team
                       </ModalHeader>
                       <ModalCloseButton
                         rounded="sm"
@@ -588,6 +587,7 @@ export default (props: E.Either<NegativeTeamsFetchOutcome, ITeamsProps>) =>
                               variantColor="red"
                               // @ts-ignore
                               href={`https://github.com/apps/meeshkan/installations/new?state=${stateForLogin}`}
+                              aria-label="Link to GitHub to install meeshkan on a repository"
                             >
                               <Icon name="github" mr={2} />
                               Import from GitHub
@@ -721,6 +721,7 @@ export default (props: E.Either<NegativeTeamsFetchOutcome, ITeamsProps>) =>
                               </Text>
                               <ChakraLink
                                 href={`https://github.com/apps/meeshkan/installations/new?state=${stateForLogin}`}
+                                aria-label="Link to GitHub to install meeshkan on a repository"
                                 color={
                                   colorMode == "light" ? "red.500" : "red.200"
                                 }
