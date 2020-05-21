@@ -1,5 +1,13 @@
 import React from "react";
-import { Grid, Text } from "@chakra-ui/core";
+import {
+  Grid,
+  Box,
+  Accordion,
+  Heading,
+  useColorMode,
+  Code,
+  Text,
+} from "@chakra-ui/core";
 import Card from "../../../components/molecules/card";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import { GraphQLClient } from "graphql-request";
@@ -29,6 +37,7 @@ import { retrieveSession } from "../../../pages/api/session";
 import { confirmOrCreateUser } from "../../../utils/user";
 import ErrorComponent from "../../../components/molecules/error";
 import LogItem from "../../../components/molecules/logItem";
+import FailureMessage from "../../../components/molecules/failureMessage";
 
 type NegativeTestFetchOutcome =
   | NOT_LOGGED_IN
@@ -103,46 +112,46 @@ const getTest = (
           },
         }).request(
           `query(
-  $teamName: String!
-  $projectName:String!
-  $testID:ID!
-  ) {
-    user {
-      team(filter:{
-        name: {
-          equals: $teamName
-        }
-      }) {
-        items{
-          image {
-            downloadUrl
-          }
-          name
-          project(filter:{
-            name: {
-              equals: $projectName
-            }
-          }) {
-            items {
-              name
-              tests(filter:{
-                id: {
-                  equals:$testID
-                }
-              }) {
-                items{
-                  commitHash
-                  status
-                  location
-                  log
+            $teamName: String!
+            $projectName:String!
+            $testID:ID!
+            ) {
+              user {
+                team(filter:{
+                  name: {
+                    equals: $teamName
+                  }
+                }) {
+                  items{
+                    image {
+                      downloadUrl
+                    }
+                    name
+                    project(filter:{
+                      name: {
+                        equals: $projectName
+                      }
+                    }) {
+                      items {
+                        name
+                        tests(filter:{
+                          id: {
+                            equals:$testID
+                          }
+                        }) {
+                          items{
+                            commitHash
+                            status
+                            location
+                            log
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
-            }
-          }
-        }
-      }
-    }
-  }`,
+            }`,
           { teamName, projectName, testID }
         ),
       (error): NegativeTestFetchOutcome =>
@@ -274,15 +283,17 @@ const TestPage = (props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>) =>
           errorMessage={"Could not find this test resource."}
         ></ErrorComponent>
       ),
-      ({ test: { log } }) => {
+      ({ test: { log, location, commitHash } }) => {
+        const { colorMode } = useColorMode();
         const logs = JSON.parse(log);
+        var failures = logs.commands.filter((a) => a.success === false);
         return (
           <Grid
             templateColumns="repeat(3, 1fr)"
             templateRows="repeat(2, minmax(204px, 45%))"
             gap={8}
           >
-            <Card gridArea="1 / 2 / 3 / 1" heading="Tests">
+            <Card gridArea="1 / 2 / 4 / 1" heading="Tests">
               {logs.commands.map((item, index) => (
                 <LogItem
                   key={index}
@@ -291,8 +302,38 @@ const TestPage = (props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>) =>
                   method={item.method}
                 />
               ))}
-              {/* <pre>{JSON.stringify(logs, null, 2)}</pre> */}
             </Card>
+            <Box gridArea="1 / 4 / 4 / 2">
+              <Heading
+                mb={4}
+                color={`mode.${colorMode}.title`}
+                fontWeight={900}
+                fontSize="xl"
+              >
+                Test Failures
+                <Code
+                  ml={2}
+                  fontSize="inherit"
+                  variantColor="red"
+                >{`${location}@${commitHash}`}</Code>
+              </Heading>
+              <Accordion w="full" defaultIndex={[0]} allowMultiple>
+                {failures.length > 0 ? (
+                  failures.map((item, index) => (
+                    <FailureMessage
+                      key={index}
+                      method={item.method}
+                      path={item.path}
+                      headers={item.headers}
+                    />
+                  ))
+                ) : (
+                  <Text color={`mode.${colorMode}.text`}>
+                    No bugs found here!
+                  </Text>
+                )}
+              </Accordion>
+            </Box>
           </Grid>
         );
       }
