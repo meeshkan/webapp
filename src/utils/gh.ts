@@ -17,7 +17,16 @@ import parseLinkHeader from "parse-link-header";
 import querystring, { ParsedUrlQuery } from "querystring";
 import * as _RTE from "../fp-ts/ReaderTaskEither";
 import * as _TE from "../fp-ts/TaskEither";
-import { defaultGQLErrorHandler, INCORRECT_TYPE_SAFETY, INVALID_TOKEN_ERROR, NEEDS_REAUTH, NO_TOKEN_YET, OAUTH_FLOW_ERROR, REST_ENDPOINT_ERROR, UNDEFINED_ERROR } from "./error";
+import {
+  defaultGQLErrorHandler,
+  INCORRECT_TYPE_SAFETY,
+  INVALID_TOKEN_ERROR,
+  NEEDS_REAUTH,
+  NO_TOKEN_YET,
+  OAUTH_FLOW_ERROR,
+  REST_ENDPOINT_ERROR,
+  UNDEFINED_ERROR,
+} from "./error";
 import { decrypt, encrypt } from "./sec";
 import { confirmOrCreateUser } from "./user";
 
@@ -486,16 +495,15 @@ export const authenticateAppWithGithub = (
       })
     ),
     TE.chain(({ githubToken, saltedEncryptedData }) =>
-      pipe(
-        TE.tryCatch(
-          () =>
-            new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-              headers: {
-                authorization: `Bearer ${session.idToken}`,
-              },
-            })
-              .request(
-                `mutation(
+      TE.tryCatch(
+        () =>
+          new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
+            headers: {
+              authorization: `Bearer ${session.idToken}`,
+            },
+          })
+            .request(
+              `mutation(
     $userId:ID!
     $githubSyncChecksum:String!
     $githubSyncNonce:String!
@@ -504,9 +512,10 @@ export const authenticateAppWithGithub = (
       filter: {
         id:$userId
       }
+      force: true
       data:{
         githubInfo: {
-          update: {
+          create: {
             githubSyncChecksum:$githubSyncChecksum
             githubSyncNonce:$githubSyncNonce
           }
@@ -516,59 +525,15 @@ export const authenticateAppWithGithub = (
       id
     }
   }`,
-                {
-                  userId,
-                  githubSyncChecksum: saltedEncryptedData.encryptedData,
-                  githubSyncNonce: saltedEncryptedData.iv,
-                }
-              )
-              .then(() => githubToken),
-          (error): NegativeGithubFetchOutcome =>
-            defaultGQLErrorHandler("insert github token mutation")(error)
-        ),
-        TE.fold(
-          () =>
-            TE.tryCatch(
-              () =>
-                new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-                  headers: {
-                    authorization: `Bearer ${session.idToken}`,
-                  },
-                })
-                  .request(
-                    `mutation(
-            $userId:ID!
-            $githubSyncChecksum:String!
-            $githubSyncNonce:String!
-          ) {
-            userUpdate(
-              filter: {
-                id:$userId
+              {
+                userId,
+                githubSyncChecksum: saltedEncryptedData.encryptedData,
+                githubSyncNonce: saltedEncryptedData.iv,
               }
-              data:{
-                githubInfo: {
-                  create:{
-                    githubSyncNonce:$githubSyncNonce
-                    githubSyncChecksum:$githubSyncChecksum
-                  }
-                }
-              }
-            ) {
-              id
-            }
-          }`,
-                    {
-                      userId,
-                      githubSyncChecksum: saltedEncryptedData.encryptedData,
-                      githubSyncNonce: saltedEncryptedData.iv,
-                    }
-                  )
-                  .then(() => githubToken),
-              (error): NegativeGithubFetchOutcome =>
-                defaultGQLErrorHandler("insert github token mutation")(error)
-            ),
-          TE.right
-        )
+            )
+            .then(() => githubToken),
+        (error): NegativeGithubFetchOutcome =>
+          defaultGQLErrorHandler("insert github token mutation")(error)
       )
     ),
     TE.chain(({ access_token }) => TE.right(access_token))
