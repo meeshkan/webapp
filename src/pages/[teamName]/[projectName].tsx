@@ -10,6 +10,13 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
 import { Lens } from "monocle-ts";
+import {
+  LensM2,
+  lensM2Head,
+  lensTaskEitherHead,
+  LensTaskEither,
+} from "../../monocle-ts";
+import React from "react";
 import Branch from "../../components/Dashboard/branch";
 import Chart from "../../components/Dashboard/chart";
 import Production from "../../components/Dashboard/production";
@@ -53,6 +60,8 @@ const Project = t.type({
     ),
   }),
 });
+
+type IProject = t.TypeOf<typeof Project>;
 
 const ProjectWithTeamName = t.intersection([
   Project,
@@ -140,44 +149,34 @@ const getProject = (teamName: string, projectName: string) => async (
       (error): NegativeProjectFetchOutcome =>
         defaultGQLErrorHandler("getProject query")(error)
     ),
-    TE.chainEitherK(
-      flow(
-        queryTp.decode,
-        E.mapLeft(
-          (errors): NegativeProjectFetchOutcome => ({
-            type: "INCORRECT_TYPE_SAFETY",
-            msg: "Could not decode team name query",
-            errors,
-          })
-        )
-      )
-    ),
-    TE.chainEitherK(
-      flow(
-        Lens.fromPath<QueryTp>()(["user", "team", "items"]).get,
-        A.head,
-        E.fromOption(
-          (): NegativeProjectFetchOutcome => ({
+    LensTaskEither.fromPath<NegativeProjectFetchOutcome, QueryTp>()([
+      "user",
+      "team",
+      "items",
+    ])
+      .compose(
+        lensTaskEitherHead<NegativeProjectFetchOutcome, ITeam>(
+          TE.left({
             type: "TEAM_DOES_NOT_EXIST",
             msg: `Could not find team for: ${teamName} ${projectName}`,
           })
-        ),
-        E.chain((team) =>
-          pipe(
-            team,
-            Lens.fromPath<ITeam>()(["project", "items"]).get,
-            A.head,
-            E.fromOption(
-              (): NegativeProjectFetchOutcome => ({
-                type: "PROJECT_DOES_NOT_EXIST",
-                msg: `Could not find project for: ${teamName} ${projectName}`,
-              })
-            ),
-            E.chain((project) => E.right({ ...project, teamName: team.name }))
-          )
         )
       )
-    )
+      .compose(
+        LensTaskEither.fromPath<NegativeProjectFetchOutcome, ITeam>()([
+          "project",
+          "items",
+        ])
+      )
+      .compose(
+        lensTaskEitherHead<NegativeProjectFetchOutcome, IProject>(
+          TE.left({
+            type: "PROJECT_DOES_NOT_EXIST",
+            msg: `Could not find project for: ${teamName} ${projectName}`,
+          })
+        )
+      ).get,
+    TE.chain((project) => TE.right({ ...project, teamName: teamName }))
   )();
 
 const userType = t.type({ id: t.string });
