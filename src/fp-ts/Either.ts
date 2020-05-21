@@ -26,11 +26,15 @@ export const eitherAsPromiseWithRedirect = <E, A>(res: NextApiResponse) => (
       : resolve(v.right)
   );
 
-export const eitherSanitizedWithGenericError = <E, A>(v: Either<E, A>) => pipe(
-  v,
-  mapLeft((_) => GET_SERVER_SIDE_PROPS_ERROR),
-  (props) => ({ props })
-)
+export const eitherSanitizedWithGenericError = <E, A>(v: Either<E, A>) =>
+  pipe(
+    v,
+    mapLeft((_) => {
+      console.log(_);
+      return GET_SERVER_SIDE_PROPS_ERROR;
+    }),
+    (props) => ({ props })
+  );
 
 export const eitherAsPromiseWithSwallowedError = <E, A>(defaultTo: A) => (
   v: Either<E, A>

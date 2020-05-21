@@ -11,16 +11,23 @@ import {
   UNDEFINED_ERROR,
   INCORRECT_TYPE_SAFETY,
   defaultGQLErrorHandler,
+  GET_SERVER_SIDE_PROPS_ERROR,
 } from "../../utils/error";
 import { Lens } from "monocle-ts";
 import * as t from "io-ts";
+import * as O from "fp-ts/lib/Option";
 import * as A from "fp-ts/lib/Array";
+import * as _RTE from "../../fp-ts/ReaderTaskEither";
+import * as _E from "../../fp-ts/Either";
+import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import * as E from "fp-ts/lib/Either";
 import { GraphQLClient } from "graphql-request";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/pipeable";
-import { flow } from "fp-ts/lib/function";
+import { flow, constant } from "fp-ts/lib/function";
+import { retrieveSession } from "../../pages/api/session";
+import { confirmOrCreateUser } from "../../utils/user";
 
 type NegativeTestFetchOutcome =
   | NOT_LOGGED_IN
@@ -31,25 +38,29 @@ type NegativeTestFetchOutcome =
   | TEST_DOES_NOT_EXIST
   | INCORRECT_TYPE_SAFETY;
 
-const Configuration = t.type({
-  buildCommand: t.union([t.null, t.string]),
-  openAPISpec: t.union([t.null, t.string]),
-  directory: t.union([t.null, t.string]),
+const TestT = t.type({
+  commitHash: t.string,
+  status: t.string,
+  location: t.string,
+  log: t.string,
 });
 
-type IConfiguration = t.TypeOf<typeof Configuration>;
+type ITestT = t.TypeOf<typeof TestT>;
 
-type IConfigurationProps = {
+type ITestProps = {
   session: ISession;
-  configuration?: IConfiguration;
+  test: ITestT;
   teamName: string;
   projectName: string;
+  testID: string;
   id: string;
 };
 
 const Project = t.type({
   name: t.string,
-  configuration: t.union([t.null, Configuration]),
+  tests: t.type({
+    items: t.array(TestT),
+  }),
 });
 
 type IProject = t.TypeOf<typeof Project>;
@@ -75,9 +86,13 @@ const queryTp = t.type({
 });
 
 type QueryTp = t.TypeOf<typeof queryTp>;
-const getTest = (teamName: string, projectName: string) => async (
+const getTest = (
+  teamName: string,
+  projectName: string,
+  testID: string
+) => async (
   session: ISession
-): Promise<E.Either<NegativeTestFetchOutcome, IConfiguration>> =>
+): Promise<E.Either<NegativeTestFetchOutcome, ITestT>> =>
   pipe(
     TE.tryCatch<NegativeTestFetchOutcome, any>(
       () =>
@@ -87,39 +102,47 @@ const getTest = (teamName: string, projectName: string) => async (
           },
         }).request(
           `query(
-            $teamName: String!
-            $projectName:String!
-          ) {
-            user {
-              team(filter:{
-                name: {
-                  equals: $teamName
+  $teamName: String!
+  $projectName:String!
+  $testID:ID!
+  ) {
+    user {
+      team(filter:{
+        name: {
+          equals: $teamName
+        }
+      }) {
+        items{
+          image {
+            downloadUrl
+          }
+          name
+          project(filter:{
+            name: {
+              equals: $projectName
+            }
+          }) {
+            items {
+              name
+              tests(filter:{
+                id: {
+                  equals:$testID
                 }
               }) {
                 items{
-                  image {
-                    downloadUrl
-                  }
-                  name
-                  project(filter:{
-                    name: {
-                      equals: $projectName
-                    }
-                  }) {
-                    items {
-                      name
-                      configuration{
-                        buildCommand
-                        openAPISpec
-                        directory
-                      }
-                    }
-                  }
+                  commitHash
+                  status
+                  location
+                  log
                 }
               }
             }
-          }`,
-          { teamName, projectName }
+          }
+        }
+      }
+    }
+  }`,
+          { teamName, projectName, testID }
         ),
       (error): NegativeTestFetchOutcome =>
         defaultGQLErrorHandler("getTest query")(error)
@@ -136,14 +159,14 @@ const getTest = (teamName: string, projectName: string) => async (
         )
       )
     ),
-    TE.chainEitherK<NegativeTestFetchOutcome, QueryTp, IConfiguration>(
+    TE.chainEitherK<NegativeTestFetchOutcome, QueryTp, ITestT>(
       flow(
         Lens.fromPath<QueryTp>()(["user", "team", "items"]).get,
         A.head,
         E.fromOption(
           (): NegativeTestFetchOutcome => ({
             type: "TEAM_DOES_NOT_EXIST",
-            msg: `Could not find team for: ${teamName} ${projectName}`,
+            msg: `Could not find team for: ${teamName} ${projectName} ${testID}`,
           })
         ),
         E.chain((team) =>
@@ -154,20 +177,20 @@ const getTest = (teamName: string, projectName: string) => async (
             E.fromOption(
               (): NegativeTestFetchOutcome => ({
                 type: "PROJECT_DOES_NOT_EXIST",
-                msg: `Could not find project for: ${teamName} ${projectName}`,
+                msg: `Could not find project for: ${teamName} ${projectName} ${testID}`,
               })
             ),
             E.chain((project) =>
               pipe(
                 project,
-                Lens.fromPath<IProject>()(["configuration"]).get,
-                O.fromNullable,
-                O.getOrElse<IConfiguration>(() => ({
-                  buildCommand: null,
-                  openAPISpec: null,
-                  directory: null,
-                })),
-                (configuration) => E.right(configuration)
+                Lens.fromPath<IProject>()(["tests", "items"]).get,
+                A.head,
+                E.fromOption(
+                  (): NegativeTestFetchOutcome => ({
+                    type: "TEST_DOES_NOT_EXIST",
+                    msg: `Could not find test for: ${teamName} ${projectName} ${testID}`,
+                  })
+                )
               )
             )
           )
@@ -180,10 +203,10 @@ const userType = t.type({ id: t.string });
 type UserType = t.TypeOf<typeof userType>;
 
 export const getServerSideProps = ({
-  params: { teamName, projectName },
+  params: { teamName, projectName, testID },
   req,
 }): Promise<{
-  props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, IConfigurationProps>;
+  props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>;
 }> =>
   pipe(
     retrieveSession(req, "configuration.tsx getServerSideProps"),
@@ -202,18 +225,18 @@ export const getServerSideProps = ({
           ISession,
           NegativeTestFetchOutcome,
           UserType,
-          { id: string; configuration: IConfiguration }
+          { id: string; test: ITestT }
         >(({ id }) =>
           _RTE.tryToEitherCatch<
             ISession,
             NegativeTestFetchOutcome,
-            { id: string; configuration: IConfiguration }
+            { id: string; test: ITestT }
           >(
             flow(
-              getTest(teamName, projectName),
+              getTest(teamName, projectName, testID),
               constant,
-              TE.chain((configuration) => TE.right({ configuration, id })),
-              thunk
+              TE.chain((test) => TE.right({ test, id })),
+              (p) => p()
             ),
             (error): NegativeTestFetchOutcome => ({
               type: "UNDEFINED_ERROR",
@@ -225,14 +248,15 @@ export const getServerSideProps = ({
         _RTE.chainEitherKWithAsk<
           ISession,
           NegativeTestFetchOutcome,
-          { id: string; configuration: IConfiguration },
-          IConfigurationProps
-        >(({ id, configuration }) => (session) =>
-          E.right<NegativeTestFetchOutcome, IConfigurationProps>({
+          { id: string; test: ITestT },
+          ITestProps
+        >(({ id, test }) => (session) =>
+          E.right<NegativeTestFetchOutcome, ITestProps>({
             session,
             id,
-            configuration,
+            test,
             teamName,
+            testID,
             projectName,
           })
         )
