@@ -40,6 +40,7 @@ type NegativeProjectFetchOutcome =
 
 const Project = t.type({
   name: t.string,
+  configured: t.boolean,
   tests: t.type({
     items: t.array(
       t.type({
@@ -115,6 +116,7 @@ const getProject = (teamName: string, projectName: string) => async (
                   }) {
                     items {
                       name
+                      configured
                       tests {
                         items {
                           id
@@ -234,6 +236,7 @@ export default (
             <Settings
               organizationName={projectProps.teamName}
               repositoryName={projectProps.name}
+              configured={projectProps.configured}
             />
             <Production
               teamName={projectProps.teamName}

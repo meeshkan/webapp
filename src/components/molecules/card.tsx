@@ -8,6 +8,7 @@ type CardProps = {
   heading?: string;
   headingLink?: string;
   link?: string;
+  id?: string;
 };
 
 const Card = ({
@@ -16,6 +17,7 @@ const Card = ({
   heading,
   headingLink,
   link,
+  id,
 }: CardProps) => {
   const { colorMode } = useColorMode();
   const router = useRouter();
@@ -34,9 +36,11 @@ const Card = ({
           _hover={{ color: `mode.${colorMode}.titleHover` }}
         >
           <Box
+            id={id}
             bg={`mode.${colorMode}.card`}
             p={4}
             maxH="80vh"
+            minH="35vh"
             rounded="sm"
             gridArea={gridArea}
             overflow="auto"
@@ -63,9 +67,11 @@ const Card = ({
         </Link>
       ) : (
         <Box
+          id={id}
           bg={`mode.${colorMode}.card`}
           p={4}
           maxH="80vh"
+          minH="35vh"
           rounded="sm"
           gridArea={gridArea}
           overflow="auto"

@@ -13,7 +13,7 @@ import { constNull } from "fp-ts/lib/function";
 
 const Logger = logger();
 
-const incorrectTypeSafetyHack = (u: unknown): u is INCORRECT_TYPE_SAFETY =>
+export const incorrectTypeSafetyHack = (u: unknown): u is INCORRECT_TYPE_SAFETY =>
   t
     .type({
       type: t.literal("INCORRECT_TYPE_SAFETY"),
