@@ -48,6 +48,7 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
         >
           <Image
             src={session.user.picture}
+            alt={`${session.user.name}'s headshot`}
             size={10}
             roundedLeft="sm"
             borderColor={`mode.${colorMode}.background`}
@@ -77,6 +78,7 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
             <MenuItem color={`mode.${colorMode}.text`}>
               <ChakraLink
                 href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_OAUTH_APP_CLIENT_ID}&scope=incoming-webhook&state=${session.user.sub}&redirect_uri=${process.env.SLACK_OAUTH_REDIRECT_URI}`}
+                aria-label="Link to install the slack app"
                 isExternal
                 color={`mode.${colorMode}.text`}
                 _hover={{ textDecor: "none" }}
@@ -93,7 +95,11 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
             color={`mode.${colorMode}.title`}
           >
             {projects.map(({ teamImage, teamName, name }, index) => (
-              <Link href={`/${teamName}/${name}`} key={index}>
+              <Link
+                href={`/${teamName}/${name}`}
+                key={index}
+                aria-label={`Links to ${teamName}'s project ${name}`}
+              >
                 <MenuItem
                   color={`mode.${colorMode}.text`}
                   d="flex"
@@ -105,6 +111,7 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
                         ? teamImage.downloadUrl
                         : "https://picsum.photos/200"
                     }
+                    alt={`${teamName}'s organization image`}
                     h={4}
                     w={4}
                     mr={2}
@@ -118,6 +125,7 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
             <ChakraLink
               isExternal
               href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`}
+              aria-label="Link to GitHub to install the Meeshkan app on a repository"
               color={`mode.${colorMode}.text`}
               _hover={{ textDecor: "none" }}
             >
@@ -130,6 +138,7 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
             <MenuItem color={`mode.${colorMode}.text`}>
               <ChakraLink
                 href="https://meeshkan.com/docs/"
+                aria-label="The documentation for how to use Meeshkan"
                 isExternal
                 color={`mode.${colorMode}.text`}
                 _hover={{ textDecor: "none" }}

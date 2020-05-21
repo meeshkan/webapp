@@ -1,7 +1,6 @@
 import React from "react";
 import { Text, Stack, useColorMode, Link as ChakraLink } from "@chakra-ui/core";
 import Card from "../molecules/card";
-import Link from "next/link";
 
 type SettingsProps = {
   repositoryName: String;
@@ -20,6 +19,8 @@ const Settings = ({
       gridArea="1 / 1 / 2 / 2"
       heading="Project details"
       headingLink={`/${organizationName}/${repositoryName}/configuration`}
+      linkLabel="This project's configuration page"
+      minH="35vh"
     >
       <Stack isInline my={2}>
         <Text color={`mode.${colorMode}.text`}>Repository:</Text>

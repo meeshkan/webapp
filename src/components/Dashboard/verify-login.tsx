@@ -36,6 +36,7 @@ export default ({ link }: { link: string }) => {
         as="a"
         // @ts-ignore
         href={link}
+        aria-label="Sign in to GitHub to verify your credentials"
         rounded="sm"
         fontWeight={900}
         px={4}

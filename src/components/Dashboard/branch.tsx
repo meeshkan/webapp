@@ -3,21 +3,23 @@ import Card from "../molecules/card";
 import { Test } from "../molecules/test";
 import { Text, useColorMode } from "@chakra-ui/core";
 import * as t from "io-ts";
-//import { DateFromString } from "../../utils/customTypes";
 
 const TTest = t.type({
   status: t.string,
-  createdAt: t.string, //DateFromString
+  createdAt: t.string,
   commitHash: t.string,
+  id: t.string,
 });
 
 type ITTest = t.TypeOf<typeof TTest>;
 
 type BranchProps = {
   tests: ITTest[];
+  projectName: string;
+  teamName: string;
 };
 
-const Branch = ({ tests }: BranchProps) => {
+const Branch = ({ tests, teamName, projectName }: BranchProps) => {
   const { colorMode } = useColorMode();
   return (
     <Card gridArea="1 / 3 / 3 / 4" heading="Branch tests">
@@ -33,6 +35,9 @@ const Branch = ({ tests }: BranchProps) => {
             commitHash={test.commitHash}
             date={test.createdAt}
             status={test.status}
+            teamName={teamName}
+            testId={test.id}
+            projectName={projectName}
           />
         ))
       )}

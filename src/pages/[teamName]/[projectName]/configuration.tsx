@@ -721,14 +721,15 @@ const ConfigurationPage = (
                       onChange={() => setNotificaitons(!notifications)}
                     />
                   </Flex>
-                  {/*<Link
+                  <Link
                     color={colorMode === "light" ? "blue.500" : "blue.200"}
                     onClick={slackClick}
+                    aria-label="Link to slack to authorize posting notifications from Meeshkan"
                     verticalAlign="middle"
                   >
                     <Icon name="slack" mr={2} />
                     Install the slack app here
-                  </Link>*/}
+                  </Link>
                 </Card>
               </Stack>
             </Grid>
