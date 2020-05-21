@@ -53,6 +53,7 @@ This repository makes heavy use of certain libraries. Without being familiar wit
 These libraries are, in no particualr order:
 
 - [`next.js`](https://github.com/zeit/next.js)
+- [`chakra-ui`](https://github.com/chakra-ui/chakra-ui)
 - [`fp-ts`](https://github.com/gcanti/fp-ts)
 - [`io-ts`](https://github.com/gcanti/io-ts)
 - [`monocle-ts`](https://github.com/gcanti/monocle-ts)
