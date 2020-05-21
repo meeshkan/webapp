@@ -9,11 +9,13 @@ import { PathReporter } from "io-ts/lib/PathReporter";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import * as I from "fp-ts/lib/Identity";
-import { constNull } from "fp-ts/lib/function";
+import { constNull, flow } from "fp-ts/lib/function";
 
 const Logger = logger();
 
-export const incorrectTypeSafetyHack = (u: unknown): u is INCORRECT_TYPE_SAFETY =>
+export const incorrectTypeSafetyHack = (
+  u: unknown
+): u is INCORRECT_TYPE_SAFETY =>
   t
     .type({
       type: t.literal("INCORRECT_TYPE_SAFETY"),
@@ -23,10 +25,7 @@ export const incorrectTypeSafetyHack = (u: unknown): u is INCORRECT_TYPE_SAFETY 
     })
     .is(u);
 
-export const _400ErrorHandler = <E extends object>(
-  _req: NextApiRequest,
-  _res: NextApiResponse
-) => (e: E) => {
+export const logchain = <E extends object>(e: E) =>
   pipe(
     incorrectTypeSafetyHack(e)
       ? {
@@ -43,19 +42,23 @@ export const _400ErrorHandler = <E extends object>(
               Accept: "application/json",
               "Content-Type": "application/json",
             },
-            body: JSON.stringify([toLog]),
+            body: JSON.stringify([{ tag: "MEESHKAN_MANUAL_LOG", ...toLog }]),
           })
         : constNull()
     ),
-    I.chainFirst((toLog) => Logger.error(toLog)),
-    () => _res.status(400)
+    I.chainFirst((toLog) => Logger.error(toLog))
   );
-};
+
+export const _400ErrorHandler = (_req: NextApiRequest, _res: NextApiResponse) =>
+  flow(logchain, () => _res.status(400));
 
 export default <E, A>(
   f: (_req: NextApiRequest, _res: NextApiResponse) => TaskEither<E, A>,
   fe: (_req: NextApiRequest, _res: NextApiResponse) => (e: E) => void
-) => (request: NextApiRequest, response: NextApiResponse): Promise<E.Either<E, A>> =>
+) => (
+  request: NextApiRequest,
+  response: NextApiResponse
+): Promise<E.Either<E, A>> =>
   bracket(
     right(response),
     (res) => f(request, res),

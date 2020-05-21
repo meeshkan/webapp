@@ -49,7 +49,7 @@ import { Lens } from "monocle-ts";
 import { confirmOrCreateUser } from "../../../utils/user";
 import { Loading, hookNeedingFetch } from "../../../utils/hookNeedingFetch";
 import { useRouter } from "next/router";
-import { optionalHead } from "../../../monocle-ts/Optional";
+import { optionalHead } from "../../../monocle-ts";
 import { SEPARATOR } from "../../../utils/separator";
 import { thunk } from "../../../fp-ts/function";
 
