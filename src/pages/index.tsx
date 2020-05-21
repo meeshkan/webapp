@@ -33,7 +33,7 @@ import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
-import { flow, constant } from "fp-ts/lib/function";
+import { flow, constant, constVoid } from "fp-ts/lib/function";
 import { groupSort, NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import * as Ord from "fp-ts/lib/Ord";
 import { pipe } from "fp-ts/lib/pipeable";
@@ -75,6 +75,7 @@ import {
   GET_SERVER_SIDE_PROPS_ERROR,
 } from "../utils/error";
 import { SEPARATOR } from "../utils/separator";
+import { useRouter, NextRouter } from "next/router";
 
 interface ImportProjectVariables {
   userId: string;
@@ -84,6 +85,7 @@ interface ImportProjectVariables {
   nodeID: string;
   nodePlusTeam: string;
   namePlusTeam: string;
+  router: NextRouter;
   importProjectIsExecuting: React.Dispatch<React.SetStateAction<boolean>>;
   toast: (props: useToastOptions) => void;
   setTeams: React.Dispatch<
@@ -112,6 +114,7 @@ const createProject = ({
   importProjectIsExecuting,
   toast,
   closeModal,
+  router,
   ...importProjectVariables
 }: ImportProjectVariables) => (
   session: ISession
@@ -220,9 +223,14 @@ const createProject = ({
         )
       ),
     (_, e) => () =>
-      Promise.resolve(
-        E.right({ _: closeModal(), __: importProjectIsExecuting(false) }._)
-      )
+      router
+        .push(
+          `/${importProjectVariables.teamName}/${importProjectVariables.repositoryName}/configuration`
+        )
+        .then((_) =>
+          E.right({ _: closeModal(), __: importProjectIsExecuting(false) }._)
+        )
+        .then((_) => E.right(constVoid()))
   );
 
 const userType = t.type({ id: t.string });
@@ -416,6 +424,7 @@ export default (props: E.Either<NegativeTeamsFetchOutcome, ITeamsProps>) =>
         pipe(
           {
             useColorMode: useColorMode(),
+            router: useRouter(),
             useDisclosure: useDisclosure(),
             teamsFromClientSideFetch: useTeams(session),
             stateForLogin: `{"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`,
@@ -453,6 +462,7 @@ export default (props: E.Either<NegativeTeamsFetchOutcome, ITeamsProps>) =>
           ({
             repoListAndThunk,
             allTeams,
+            router,
             teamsFromClientSideFetch,
             importProjectIsExecuting,
             toast,
@@ -699,6 +709,7 @@ export default (props: E.Either<NegativeTeamsFetchOutcome, ITeamsProps>) =>
                                           // also does not allow multiple teams
                                           teamName: allTeams[0].name,
                                           setTeams: teamsFromClientSideFetch[2],
+                                          router,
                                         })(session)}
                                       />
                                     )
