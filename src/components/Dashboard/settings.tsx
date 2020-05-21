@@ -6,9 +6,14 @@ import Link from "next/link";
 type SettingsProps = {
   repositoryName: String;
   organizationName: String;
+  configured: Boolean;
 };
 
-const Settings = ({ repositoryName, organizationName }: SettingsProps) => {
+const Settings = ({
+  repositoryName,
+  organizationName,
+  configured,
+}: SettingsProps) => {
   const { colorMode } = useColorMode();
   return (
     <Card
@@ -31,9 +36,9 @@ const Settings = ({ repositoryName, organizationName }: SettingsProps) => {
       </Stack>
 
       <Stack isInline my={2}>
-        <Text color={`mode.${colorMode}.text`}>Configuration:</Text>
+        <Text color={`mode.${colorMode}.text`}>Configured:</Text>
         <Text color={`mode.${colorMode}.title`} fontWeight={600}>
-          Finished
+          {configured.toString()}
         </Text>
       </Stack>
     </Card>
