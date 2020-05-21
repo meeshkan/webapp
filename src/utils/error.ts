@@ -67,6 +67,11 @@ export const defaultGQLErrorHandler = (ctx: string) => (
         error,
       };
 
+export interface LENS_ACCESSOR_ERROR {
+  type: "LENS_ACCESSOR_ERROR",
+  msg: string;
+}
+
 export interface GET_SERVER_SIDE_PROPS_ERROR {
   type: "GET_SERVER_SIDE_PROPS_ERROR"
 }

@@ -20,11 +20,8 @@ const NavLink = ({ children, href, ...props }) => {
   );
 };
 
-export const stringToUrl = (str) => {
-  let router = useRouter();
-  const path = router.asPath;
-  return `${path}#${str.toLowerCase().split(" ").join("-")}/`;
-};
+export const stringToUrl = (str) =>
+  `#${str.toLowerCase().split(" ").join("-")}`;
 
 type SideNavLinkProps = {
   children: Object;
@@ -63,8 +60,6 @@ export const ItemLink = forwardRef(
   ({ href, children, ...props }: LinkProps, ref) => {
     const { colorMode } = useColorMode();
 
-    const hoverColor = { light: "gray.900", dark: "white" };
-
     return (
       <NavLink href={href}>
         {(isActive) => (
@@ -73,7 +68,7 @@ export const ItemLink = forwardRef(
             aria-current={isActive ? "page" : undefined}
             color={`mode.${colorMode}.text`}
             _hover={{
-              color: hoverColor.dark,
+              color: colorMode === "light" ? "gray.900" : "white",
               transform: "translateX(2px)",
             }}
             {...(isActive && {

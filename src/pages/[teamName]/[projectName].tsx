@@ -19,7 +19,6 @@ import * as _E from "../../fp-ts/Either";
 import * as _RTE from "../../fp-ts/ReaderTaskEither";
 import * as _TE from "../../fp-ts/TaskEither";
 // cards
-import auth0 from "../../utils/auth0";
 import { confirmOrCreateUser } from "../../utils/user";
 import {
   defaultGQLErrorHandler,
@@ -43,6 +42,7 @@ type NegativeProjectFetchOutcome =
 
 const Project = t.type({
   name: t.string,
+  configured: t.boolean,
   tests: t.type({
     items: t.array(
       t.type({
@@ -117,6 +117,7 @@ const getProject = (teamName: string, projectName: string) => async (
                   }) {
                     items {
                       name
+                      configured
                       tests {
                         items {
                           location
@@ -235,6 +236,7 @@ export default (
             <Settings
               organizationName={projectProps.teamName}
               repositoryName={projectProps.name}
+              configured={projectProps.configured}
             />
             <Production
               tests={projectProps.tests.items.filter(

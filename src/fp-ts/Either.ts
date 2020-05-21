@@ -1,21 +1,26 @@
-import { Either, isLeft, chain, mapLeft } from "fp-ts/lib/Either";
+import * as E from "fp-ts/lib/Either";
 import { identity, constNull } from "fp-ts/lib/function";
 import { NextApiResponse } from "next";
+import logger from "pino";
+import * as I from "fp-ts/lib/Identity";
 import { pipe } from "fp-ts/lib/pipeable";
+import { PathReporter } from "io-ts/lib/PathReporter";
+import { incorrectTypeSafetyHack } from "../utils/safeApi";
 import { GET_SERVER_SIDE_PROPS_ERROR } from "../utils/error";
+const Logger = logger();
 
 export const eitherAsPromiseWithReject = <E, A, B>(f: (e: E) => B) => (
-  v: Either<E, A>
+  v: E.Either<E, A>
 ): Promise<A> =>
   new Promise((resolve, reject) =>
-    isLeft(v) ? reject(f(v.left)) : resolve(v.right)
+    E.isLeft(v) ? reject(f(v.left)) : resolve(v.right)
   );
 
 export const eitherAsPromiseWithRedirect = <E, A>(res: NextApiResponse) => (
   defaultTo: A
-) => (v: Either<E, A>): Promise<A> =>
+) => (v: E.Either<E, A>): Promise<A> =>
   new Promise<A>((resolve, _) =>
-    isLeft(v)
+    E.isLeft(v)
       ? resolve(
           pipe(
             res.writeHead(301, { Location: "/" }),
@@ -26,17 +31,35 @@ export const eitherAsPromiseWithRedirect = <E, A>(res: NextApiResponse) => (
       : resolve(v.right)
   );
 
-export const eitherSanitizedWithGenericError = <E, A>(v: Either<E, A>) => pipe(
-  v,
-  mapLeft((_) => GET_SERVER_SIDE_PROPS_ERROR),
-  (props) => ({ props })
-)
+export const eitherSanitizedWithGenericError = <E extends object, A>(
+  v: E.Either<E, A>
+) =>
+  pipe(
+    v,
+    E.mapLeft((e) =>
+      pipe(
+        GET_SERVER_SIDE_PROPS_ERROR,
+        I.chainFirst(() =>
+          Logger.error(
+            incorrectTypeSafetyHack(e)
+              ? {
+                  type: e.type,
+                  msg: e.msg,
+                  errors: PathReporter.report(E.left(e.errors)),
+                }
+              : e
+          )
+        )
+      )
+    ),
+    (props) => ({ props })
+  );
 
 export const eitherAsPromiseWithSwallowedError = <E, A>(defaultTo: A) => (
-  v: Either<E, A>
+  v: E.Either<E, A>
 ): Promise<A> =>
   new Promise<A>((resolve, _) =>
-    isLeft(v)
+    E.isLeft(v)
       ? pipe(
           process.env.PRINT_CLIENT_SIDE_ERROR_MESSAGES === "yes"
             ? console.error(v.left)
@@ -46,9 +69,9 @@ export const eitherAsPromiseWithSwallowedError = <E, A>(defaultTo: A) => (
       : resolve(v.right)
   );
 
-export const eitherAsPromise = <E, A>(v: Either<E, A>): Promise<A> =>
+export const eitherAsPromise = <E, A>(v: E.Either<E, A>): Promise<A> =>
   eitherAsPromiseWithReject<E, A, E>(identity)(v);
 
 export const voidChain = <E, A, B>(
-  v: Either<E, B>
-): ((ma: Either<E, A>) => Either<E, B>) => chain((_) => v);
+  v: E.Either<E, B>
+): ((ma: E.Either<E, A>) => E.Either<E, B>) => E.chain((_) => v);
