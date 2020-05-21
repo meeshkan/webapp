@@ -6,9 +6,9 @@ import endpoint from "../../../../../src/pages/api/gh/repos";
 import * as E from "fp-ts/lib/Either";
 
 mockAuth0WithSession();
-mock8BaseWithResult({ this: "is", incorrectly: "typed" });
+mock8BaseWithResult({ user: { id: "my-id", githubInfo: null } });
 
-test("endpoint returns INCORRECT_TYPE_SAFETY when 8base returns incorrectly-typed data", () =>
+test("endpoint returns NO_TOKEN_YET when 8base returns a user that does not have a token", () =>
   expect(
     endpoint(mockRequest(), mockResponse()).then(E.mapLeft(({ type }) => type))
-  ).resolves.toEqual(E.left("INCORRECT_TYPE_SAFETY")));
+  ).resolves.toEqual(E.left("NO_TOKEN_YET")));

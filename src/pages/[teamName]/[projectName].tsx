@@ -62,9 +62,12 @@ const ProjectWithTeamName = t.intersection([
 type IProjectWithTeamName = t.TypeOf<typeof ProjectWithTeamName>;
 
 const Team = t.type({
-  image: t.type({
-    downloadUrl: t.string,
-  }),
+  image: t.union([
+    t.null,
+    t.type({
+      downloadUrl: t.string,
+    }),
+  ]),
   name: t.string,
   project: t.type({
     items: t.array(Project),
