@@ -98,48 +98,6 @@ const queryTp = t.type({
 
 type QueryTp = t.TypeOf<typeof queryTp>;
 
-const v = LensTaskEither.fromPath<NegativeTestFetchOutcome, QueryTp>()([
-  "user",
-  "team",
-  "items",
-])
-  .compose(
-    lensTaskEitherHead<NegativeTestFetchOutcome, ITeam>(
-      TE.left({
-        type: "TEAM_DOES_NOT_EXIST",
-        msg: `Could not find team for: `,
-      })
-    )
-  )
-  .compose(
-    LensTaskEither.fromPath<NegativeTestFetchOutcome, ITeam>()([
-      "project",
-      "items",
-    ])
-  )
-  .compose(
-    lensTaskEitherHead<NegativeTestFetchOutcome, IProject>(
-      TE.left({
-        type: "PROJECT_DOES_NOT_EXIST",
-        msg: `Could not find project for: `,
-      })
-    )
-  )
-  .compose(
-    LensTaskEither.fromPath<NegativeTestFetchOutcome, IProject>()([
-      "tests",
-      "items",
-    ])
-  )
-  .compose(
-    lensTaskEitherHead<NegativeTestFetchOutcome, ITestT>(
-      TE.left({
-        type: "TEST_DOES_NOT_EXIST",
-        msg: `Could not find test for: `,
-      })
-    )
-  ).get;
-
 const getTest = (
   teamName: string,
   projectName: string,
