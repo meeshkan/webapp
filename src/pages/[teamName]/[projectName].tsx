@@ -1,40 +1,30 @@
-import React from "react";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import { Grid } from "@chakra-ui/core";
-import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
-import ErrorComponent from "../../components/molecules/error";
-import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as TE from "fp-ts/lib/TaskEither";
 import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
-import { Lens } from "monocle-ts";
-import {
-  LensM2,
-  lensM2Head,
-  lensTaskEitherHead,
-  LensTaskEither,
-} from "../../monocle-ts";
 import React from "react";
 import Branch from "../../components/Dashboard/branch";
 import Chart from "../../components/Dashboard/chart";
 import Production from "../../components/Dashboard/production";
 import Settings from "../../components/Dashboard/settings";
+import ErrorComponent from "../../components/molecules/error";
 import * as _E from "../../fp-ts/Either";
 import * as _RTE from "../../fp-ts/ReaderTaskEither";
-import * as _TE from "../../fp-ts/TaskEither";
-import { confirmOrCreateUser } from "../../utils/user";
+import { LensTaskEither, lensTaskEitherHead } from "../../monocle-ts";
 import {
   defaultGQLErrorHandler,
-  INCORRECT_TYPE_SAFETY,
-  NOT_LOGGED_IN,
-  TEAM_DOES_NOT_EXIST,
-  PROJECT_DOES_NOT_EXIST,
-  UNDEFINED_ERROR,
-  INVALID_TOKEN_ERROR,
   GET_SERVER_SIDE_PROPS_ERROR,
+  INCORRECT_TYPE_SAFETY,
+  INVALID_TOKEN_ERROR,
+  NOT_LOGGED_IN,
+  PROJECT_DOES_NOT_EXIST,
+  TEAM_DOES_NOT_EXIST,
+  UNDEFINED_ERROR,
 } from "../../utils/error";
+import { confirmOrCreateUser } from "../../utils/user";
 import { retrieveSession } from "../api/session";
 
 type NegativeProjectFetchOutcome =

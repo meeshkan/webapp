@@ -38,6 +38,7 @@ import { confirmOrCreateUser } from "../../../utils/user";
 import ErrorComponent from "../../../components/molecules/error";
 import LogItem from "../../../components/molecules/logItem";
 import FailureMessage from "../../../components/molecules/failureMessage";
+import { LensTaskEither, lensTaskEitherHead } from "../../../monocle-ts";
 
 type NegativeTestFetchOutcome =
   | NOT_LOGGED_IN
@@ -96,6 +97,49 @@ const queryTp = t.type({
 });
 
 type QueryTp = t.TypeOf<typeof queryTp>;
+
+const v = LensTaskEither.fromPath<NegativeTestFetchOutcome, QueryTp>()([
+  "user",
+  "team",
+  "items",
+])
+  .compose(
+    lensTaskEitherHead<NegativeTestFetchOutcome, ITeam>(
+      TE.left({
+        type: "TEAM_DOES_NOT_EXIST",
+        msg: `Could not find team for: `,
+      })
+    )
+  )
+  .compose(
+    LensTaskEither.fromPath<NegativeTestFetchOutcome, ITeam>()([
+      "project",
+      "items",
+    ])
+  )
+  .compose(
+    lensTaskEitherHead<NegativeTestFetchOutcome, IProject>(
+      TE.left({
+        type: "PROJECT_DOES_NOT_EXIST",
+        msg: `Could not find project for: `,
+      })
+    )
+  )
+  .compose(
+    LensTaskEither.fromPath<NegativeTestFetchOutcome, IProject>()([
+      "tests",
+      "items",
+    ])
+  )
+  .compose(
+    lensTaskEitherHead<NegativeTestFetchOutcome, ITestT>(
+      TE.left({
+        type: "TEST_DOES_NOT_EXIST",
+        msg: `Could not find test for: `,
+      })
+    )
+  ).get;
+
 const getTest = (
   teamName: string,
   projectName: string,
@@ -157,56 +201,47 @@ const getTest = (
       (error): NegativeTestFetchOutcome =>
         defaultGQLErrorHandler("getTest query")(error)
     ),
-    TE.chainEitherK<NegativeTestFetchOutcome, any, QueryTp>(
-      flow(
-        queryTp.decode,
-        E.mapLeft(
-          (errors): NegativeTestFetchOutcome => ({
-            type: "INCORRECT_TYPE_SAFETY",
-            msg: "Could not decode team name query",
-            errors,
-          })
-        )
-      )
-    ),
-    TE.chainEitherK<NegativeTestFetchOutcome, QueryTp, ITestT>(
-      flow(
-        Lens.fromPath<QueryTp>()(["user", "team", "items"]).get,
-        A.head,
-        E.fromOption(
-          (): NegativeTestFetchOutcome => ({
+    LensTaskEither.fromPath<NegativeTestFetchOutcome, QueryTp>()([
+      "user",
+      "team",
+      "items",
+    ])
+      .compose(
+        lensTaskEitherHead<NegativeTestFetchOutcome, ITeam>(
+          TE.left({
             type: "TEAM_DOES_NOT_EXIST",
             msg: `Could not find team for: ${teamName} ${projectName} ${testID}`,
           })
-        ),
-        E.chain((team) =>
-          pipe(
-            team,
-            Lens.fromPath<ITeam>()(["project", "items"]).get,
-            A.head,
-            E.fromOption(
-              (): NegativeTestFetchOutcome => ({
-                type: "PROJECT_DOES_NOT_EXIST",
-                msg: `Could not find project for: ${teamName} ${projectName} ${testID}`,
-              })
-            ),
-            E.chain((project) =>
-              pipe(
-                project,
-                Lens.fromPath<IProject>()(["tests", "items"]).get,
-                A.head,
-                E.fromOption(
-                  (): NegativeTestFetchOutcome => ({
-                    type: "TEST_DOES_NOT_EXIST",
-                    msg: `Could not find test for: ${teamName} ${projectName} ${testID}`,
-                  })
-                )
-              )
-            )
-          )
         )
       )
-    )
+      .compose(
+        LensTaskEither.fromPath<NegativeTestFetchOutcome, ITeam>()([
+          "project",
+          "items",
+        ])
+      )
+      .compose(
+        lensTaskEitherHead<NegativeTestFetchOutcome, IProject>(
+          TE.left({
+            type: "PROJECT_DOES_NOT_EXIST",
+            msg: `Could not find project for: ${teamName} ${projectName} ${testID}`,
+          })
+        )
+      )
+      .compose(
+        LensTaskEither.fromPath<NegativeTestFetchOutcome, IProject>()([
+          "tests",
+          "items",
+        ])
+      )
+      .compose(
+        lensTaskEitherHead<NegativeTestFetchOutcome, ITestT>(
+          TE.left({
+            type: "TEST_DOES_NOT_EXIST",
+            msg: `Could not find test for: ${teamName} ${projectName} ${testID}`,
+          })
+        )
+      ).get
   )();
 
 const userType = t.type({ id: t.string });
