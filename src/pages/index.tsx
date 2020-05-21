@@ -581,14 +581,13 @@ export default (props: E.Either<NegativeTeamsFetchOutcome, ITeamsProps>) =>
                           E.isLeft(repoListAndThunk[0].right) ? (
                           <Flex h="100%" justify="center" align="center">
                             <Button
+                              as={"a"}
                               rounded="sm"
                               fontWeight={900}
                               px={4}
                               variantColor="red"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                authorizeGithub();
-                              }}
+                              // @ts-ignore
+                              href={`https://github.com/apps/meeshkan/installations/new?state=${stateForLogin}`}
                             >
                               <Icon name="github" mr={2} />
                               Import from GitHub
@@ -714,21 +713,22 @@ export default (props: E.Either<NegativeTeamsFetchOutcome, ITeamsProps>) =>
                         justifyContent="center"
                         fontSize="sm"
                       >
-                        {E.isRight(repoListAndThunk[0]) && (
-                          <>
-                            <Text mr={2} color={`mode.${colorMode}.text`}>
-                              Not seeing the repository you want?
-                            </Text>
-                            <ChakraLink
-                              href={`https://github.com/apps/meeshkan/installations/new?state=${stateForLogin}`}
-                              color={
-                                colorMode == "light" ? "red.500" : "red.200"
-                              }
-                            >
-                              Configure on GitHub.
-                            </ChakraLink>
-                          </>
-                        )}
+                        {E.isRight(repoListAndThunk[0]) &&
+                          !E.isLeft(repoListAndThunk[0].right) && (
+                            <>
+                              <Text mr={2} color={`mode.${colorMode}.text`}>
+                                Not seeing the repository you want?
+                              </Text>
+                              <ChakraLink
+                                href={`https://github.com/apps/meeshkan/installations/new?state=${stateForLogin}`}
+                                color={
+                                  colorMode == "light" ? "red.500" : "red.200"
+                                }
+                              >
+                                Configure on GitHub.
+                              </ChakraLink>
+                            </>
+                          )}
                       </ModalFooter>
                     </ModalContent>
                   </Skeleton>
