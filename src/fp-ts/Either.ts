@@ -1,13 +1,10 @@
 import * as E from "fp-ts/lib/Either";
-import { identity, constNull } from "fp-ts/lib/function";
+import { identity, constNull, flow } from "fp-ts/lib/function";
 import { NextApiResponse } from "next";
 import logger from "pino";
-import * as I from "fp-ts/lib/Identity";
 import { pipe } from "fp-ts/lib/pipeable";
-import { PathReporter } from "io-ts/lib/PathReporter";
-import { incorrectTypeSafetyHack } from "../utils/safeApi";
+import { logchain } from "../utils/safeApi";
 import { GET_SERVER_SIDE_PROPS_ERROR } from "../utils/error";
-const Logger = logger();
 
 export const eitherAsPromiseWithReject = <E, A, B>(f: (e: E) => B) => (
   v: E.Either<E, A>
@@ -36,22 +33,7 @@ export const eitherSanitizedWithGenericError = <E extends object, A>(
 ) =>
   pipe(
     v,
-    E.mapLeft((e) =>
-      pipe(
-        GET_SERVER_SIDE_PROPS_ERROR,
-        I.chainFirst(() =>
-          Logger.error(
-            incorrectTypeSafetyHack(e)
-              ? {
-                  type: e.type,
-                  msg: e.msg,
-                  errors: PathReporter.report(E.left(e.errors)),
-                }
-              : e
-          )
-        )
-      )
-    ),
+    E.mapLeft(flow(logchain, () => GET_SERVER_SIDE_PROPS_ERROR)),
     (props) => ({ props })
   );
 
