@@ -46,9 +46,12 @@ type NegativeTeamFetchOutcome =
   | INCORRECT_TYPE_SAFETY;
 
 const Team = t.type({
-  image: t.type({
-    downloadUrl: t.string,
-  }),
+  image: t.union([
+    t.null,
+    t.type({
+      downloadUrl: t.string,
+    }),
+  ]),
   name: t.string,
   project: t.type({
     items: t.array(
@@ -168,55 +171,80 @@ export const getServerSideProps = ({
   )().then(_E.eitherSanitizedWithGenericError);
 
 export default (props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>) =>
-pipe(props, E.fold(() => <ErrorComponent errorMessage={"Uh oh. Looks like this resource does not exist. If you suspect it should, reach out to us using the Intercom below."} />, ({ team, session }) =>   pipe(useColorMode(), ({ colorMode }) => (
-  <>
-    <Grid templateColumns="repeat(4, 1fr)" gap={6}>
-      {team.project.items.map(({ name }, index) => (
-        <Link key={name} href={`/${team.name}/${name}`}>
-          <a>
-            <Card key={index}>
-              <Stack spacing={4} isInline>
-                <Image
-                  size={10}
-                  src={team.image.downloadUrl}
-                  bg="gray.50"
-                  border="1px solid"
-                  borderColor={`mode.${colorMode}.icon`}
-                  rounded="sm"
-                />
-                <Stack spacing={2}>
-                  <Text color={`mode.${colorMode}.text`} lineHeight="none">
-                    {team.name}
-                  </Text>
+  pipe(
+    props,
+    E.fold(
+      () => (
+        <ErrorComponent
+          errorMessage={
+            "Uh oh. Looks like this resource does not exist. If you suspect it should, reach out to us using the Intercom below."
+          }
+        />
+      ),
+      ({ team, session }) =>
+        pipe(useColorMode(), ({ colorMode }) => (
+          <>
+            <Grid templateColumns="repeat(4, 1fr)" gap={6}>
+              {team.project.items.map(({ name }, index) => (
+                <Link key={name} href={`/${team.name}/${name}`}>
+                  <a>
+                    <Card key={index}>
+                      <Stack spacing={4} isInline>
+                        <Image
+                          size={10}
+                          src={
+                            team.image
+                              ? team.image.downloadUrl
+                              : "https://picsum.photos/200"
+                          }
+                          bg="gray.50"
+                          border="1px solid"
+                          borderColor={`mode.${colorMode}.icon`}
+                          rounded="sm"
+                        />
+                        <Stack spacing={2}>
+                          <Text
+                            color={`mode.${colorMode}.text`}
+                            lineHeight="none"
+                          >
+                            {team.name}
+                          </Text>
+                          <Heading
+                            as="h3"
+                            lineHeight="none"
+                            fontSize="md"
+                            fontWeight={900}
+                          >
+                            {name}
+                          </Heading>
+                        </Stack>
+                      </Stack>
+                    </Card>
+                  </a>
+                </Link>
+              ))}
+              <ChakraLink
+                href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`}
+                bg={`mode.${colorMode}.card`}
+                p={4}
+                rounded="sm"
+                color={`mode.${colorMode}.title`}
+                _hover={{ color: `mode.${colorMode}.titleHover` }}
+              >
+                <Stack spacing={4} align="center" isInline>
+                  <Icon h={10} w={10} name="add" stroke="2px" />
                   <Heading
                     as="h3"
                     lineHeight="none"
                     fontSize="md"
                     fontWeight={900}
                   >
-                    {name}
+                    Authorize a repository
                   </Heading>
                 </Stack>
-              </Stack>
-            </Card>
-          </a>
-        </Link>
-      ))}
-      <ChakraLink
-        href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`}
-        bg={`mode.${colorMode}.card`}
-        p={4}
-        rounded="sm"
-        color={`mode.${colorMode}.title`}
-        _hover={{ color: `mode.${colorMode}.titleHover` }}
-      >
-        <Stack spacing={4} align="center" isInline>
-          <Icon h={10} w={10} name="add" stroke="2px" />
-          <Heading as="h3" lineHeight="none" fontSize="md" fontWeight={900}>
-            Authorize a repository
-          </Heading>
-        </Stack>
-      </ChakraLink>
-    </Grid>
-  </>
-))));
+              </ChakraLink>
+            </Grid>
+          </>
+        ))
+    )
+  );

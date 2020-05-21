@@ -92,20 +92,27 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
             title="Project repo"
             color={`mode.${colorMode}.title`}
           >
-            {projects.map(
-              ({ teamImage: { downloadUrl }, teamName, name }, index) => (
-                <Link href={`/${teamName}/${name}`} key={index}>
-                  <MenuItem
-                    color={`mode.${colorMode}.text`}
-                    d="flex"
-                    alignContent="center"
-                  >
-                    <Image src={downloadUrl} h={4} w={4} mr={2} />
-                    {name}
-                  </MenuItem>
-                </Link>
-              )
-            )}
+            {projects.map(({ teamImage, teamName, name }, index) => (
+              <Link href={`/${teamName}/${name}`} key={index}>
+                <MenuItem
+                  color={`mode.${colorMode}.text`}
+                  d="flex"
+                  alignContent="center"
+                >
+                  <Image
+                    src={
+                      teamImage
+                        ? teamImage.downloadUrl
+                        : "https://picsum.photos/200"
+                    }
+                    h={4}
+                    w={4}
+                    mr={2}
+                  />
+                  {name}
+                </MenuItem>
+              </Link>
+            ))}
           </MenuGroup>
           <MenuItem color={`mode.${colorMode}.text`}>
             <ChakraLink
