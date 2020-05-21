@@ -325,6 +325,7 @@ const TestPage = (props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>) =>
                       method={item.method}
                       path={item.path}
                       headers={item.headers}
+                      query={item.query}
                     />
                   ))
                 ) : (

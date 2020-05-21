@@ -1,5 +1,5 @@
 import React from "react";
-import darkTheme from "prism-react-renderer/themes/nightOwl";
+import darkTheme from "prism-react-renderer/themes/dracula";
 import Highlight, { defaultProps } from "prism-react-renderer";
 
 const highlightStyle = {

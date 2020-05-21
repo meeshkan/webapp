@@ -14,10 +14,11 @@ import CodeBlock from "../molecules/codeBlock";
 type FailureProps = {
   method: string;
   path: string;
-  headers: string;
+  headers?: string;
+  query?: string;
 };
 
-const FailureMessage = ({ method, path, headers }: FailureProps) => {
+const FailureMessage = ({ method, path, headers, query }: FailureProps) => {
   const { colorMode } = useColorMode();
   return (
     <AccordionItem
@@ -48,15 +49,19 @@ const FailureMessage = ({ method, path, headers }: FailureProps) => {
         <AccordionIcon />
       </AccordionHeader>
       <AccordionPanel py={4}>
-        <Text mb={2} color={`mode.${colorMode}.text`}>
-          {headers}
-        </Text>
-        <Text mb={2} color={`mode.${colorMode}.text`}>
-          This bug was found while issuing the following command:
-        </Text>
-        <CodeBlock className="bash">
-          curl -v "http://localhost:7070/descriptorstore/descriptors
-        </CodeBlock>
+        {headers && (
+          <Text mb={2} color={`mode.${colorMode}.text`}>
+            {headers}
+          </Text>
+        )}
+        {query && (
+          <>
+            <Text mb={2} color={`mode.${colorMode}.text`}>
+              This bug was found while issuing the following command:
+            </Text>
+            <CodeBlock className="bash">{query}</CodeBlock>
+          </>
+        )}
       </AccordionPanel>
     </AccordionItem>
   );
