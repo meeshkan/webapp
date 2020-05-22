@@ -4,6 +4,7 @@ import { withX } from "./with";
 import { GraphQLClient } from "graphql-request";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/pipeable";
+import { getTokenFromSessionOrEnv } from "../pages/api/session";
 
 export const errors = t.type({
   errors: t.array(
@@ -20,7 +21,7 @@ export const gqlRequestError = t.type({
 export const eightBaseClient = (session: ISession) =>
   new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
     headers: {
-      authorization: `Bearer ${session.idToken}`,
+      authorization: `Bearer ${getTokenFromSessionOrEnv(session)}`,
     },
   });
 

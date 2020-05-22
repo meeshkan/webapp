@@ -14,6 +14,8 @@ module.exports = nextSourceMaps({
     GH_OAUTH_APP_CLIENT_ID: process.env.GH_OAUTH_APP_CLIENT_ID,
     PRINT_CLIENT_SIDE_ERROR_MESSAGES: process.env.PRINT_CLIENT_SIDE_ERROR_MESSAGES,
     SENTRY_DSN: process.env.SENTRY_DSN,
+    MEESHKAN_ALTERNATIVE_TOKEN: process.env.MEESHKAN_ALTERNATIVE_TOKEN,
+    MEESHKAN_ALTERNATIVE_ID: process.env.MEESHKAN_ALTERNATIVE_ID
   },
   webpack: (config, { isServer, buildId }) => {
     config.plugins.push(

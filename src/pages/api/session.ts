@@ -11,6 +11,10 @@ import { withX } from "../../utils/with";
 
 export type NegativeSessionFetchOutcome = UNDEFINED_ERROR | NOT_LOGGED_IN;
 
+export const getTokenFromSessionOrEnv = (session: ISession) =>
+  process.env.MEESHKAN_ALTERNATIVE_TOKEN
+    ? process.env.MEESHKAN_ALTERNATIVE_TOKEN
+    : session.idToken;
 export const withSession = <E, A>(req: NextApiRequest, ctx: string) =>
   withX<
     NegativeSessionFetchOutcome,
