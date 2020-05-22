@@ -197,7 +197,7 @@ const TestPage = (props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>) =>
       ({ test: { log, location, commitHash } }) => {
         const { colorMode } = useColorMode();
         const logs = JSON.parse(log);
-        var failures = logs.commands.filter((a) => a.success === false);
+        const failures = logs.commands.filter((a) => a.success === false);
         return (
           <Grid
             templateColumns="repeat(3, 1fr)"

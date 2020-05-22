@@ -389,12 +389,6 @@ const ConfigurationPage = (
               getConfiguration(teamName, projectName)(session)
             ),
             useNotifications: useState(false),
-            slackClick: (e) => {
-              e.preventDefault();
-              useRouter().push(
-                `https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_OAUTH_APP_CLIENT_ID}&scope=incoming-webhook&state=${session.user.sub}&redirect_uri=${process.env.SLACK_OAUTH_REDIRECT_URI}`
-              );
-            },
           },
           (p) => ({
             ...p,
@@ -425,7 +419,6 @@ const ConfigurationPage = (
             useColorMode: { colorMode },
             useForm: { handleSubmit, formState, register },
             useNotifications: [notifications, setNotificaitons],
-            slackClick,
             onSubmit,
           }) => (
             <Grid
@@ -591,7 +584,7 @@ const ConfigurationPage = (
                   </Flex>
                   <Link
                     color={colorMode === "light" ? "blue.500" : "blue.200"}
-                    onClick={slackClick}
+                    href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_OAUTH_APP_CLIENT_ID}&scope=incoming-webhook&state={"id":"${session.user.sub}","teamName":"${teamName}","projectName":"${projectName}"}&redirect_uri=${process.env.SLACK_OAUTH_REDIRECT_URI}`}
                     aria-label="Link to slack to authorize posting notifications from Meeshkan"
                     verticalAlign="middle"
                   >

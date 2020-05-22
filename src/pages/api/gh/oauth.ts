@@ -19,6 +19,7 @@ import {
 import safeApi, { _400ErrorHandler } from "../../../utils/safeApi";
 import { confirmOrCreateUser } from "../../../utils/user";
 import { withSession } from "../session";
+import * as Oauth from "../../../utils/oauth";
 
 type NegativeGHOAuthOutcome =
   | ID_NOT_IN_STATE
@@ -35,24 +36,8 @@ export const fromQueryParam = (p: string | string[]) =>
 export default safeApi<NegativeGHOAuthOutcome, void>(
   (req, res) =>
     pipe(
-      t
-        .type({ id: t.string })
-        .decode(JSON.parse(fromQueryParam(req.query.state))),
-      (v) => RTE.fromEither<ISession, t.Errors, { id: string }>(v),
-      RTE.mapLeft((errors) => ({
-        type: "INCORRECT_TYPE_SAFETY",
-        msg: "Could not parse state from query: " + req.query.state,
-        errors,
-      })),
-      RTE.chain(({ id }) => (session) =>
-        session.user.sub !== id
-          ? TE.left({
-              type: "ID_NOT_IN_STATE",
-              msg: "Cannot find ID in the state",
-            })
-          : TE.right(session)
-      ),
-      RTE.chain((_) => confirmOrCreateUser("id", userType)),
+      Oauth.Oauth(req, t.type({ id: t.string })),
+      RTE.chain(() => confirmOrCreateUser("id", userType)),
       RTE.chain(({ id }) =>
         authenticateAppWithGithub(
           id,
@@ -65,14 +50,7 @@ export default safeApi<NegativeGHOAuthOutcome, void>(
           })
         )
       ),
-      RTE.chain((_) =>
-        RTE.right(
-          res.writeHead(301, {
-            Location: "/",
-          })
-        )
-      ),
-      RTE.chain((_) => RTE.right(constVoid())),
+      RTE.chain((_) => Oauth.Redirect(res)),
       withSession(req, "oauth.ts default export")
     ),
   _400ErrorHandler

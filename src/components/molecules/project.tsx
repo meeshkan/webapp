@@ -75,18 +75,6 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
               <Icon name={colorMode === "light" ? "moon" : "sun"} mr={3} />
               {colorMode === "light" ? "Dark mode" : "Light mode"}
             </MenuItem>
-            <MenuItem color={`mode.${colorMode}.text`}>
-              <ChakraLink
-                href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_OAUTH_APP_CLIENT_ID}&scope=incoming-webhook&state=${session.user.sub}&redirect_uri=${process.env.SLACK_OAUTH_REDIRECT_URI}`}
-                aria-label="Link to install the slack app"
-                isExternal
-                color={`mode.${colorMode}.text`}
-                _hover={{ textDecor: "none" }}
-                verticalAlign="middle"
-              >
-                <Icon name="slack" mr={2} /> Install Slack app
-              </ChakraLink>
-            </MenuItem>
           </MenuGroup>
           <MenuDivider />
           <MenuGroup
