@@ -389,13 +389,16 @@ export const authenticateAppWithGithub = (
       NegativeGithubFetchOutcome,
       ParsedUrlQuery,
       GithubTokenType
-    >(
-      flow(
+    >((fromGh) =>
+      pipe(
+        fromGh,
         githubTokenType.decode,
         E.mapLeft(
           (errors): NegativeGithubFetchOutcome => ({
             type: "INCORRECT_TYPE_SAFETY",
-            msg: "Could not decode the github token information",
+            msg: `Could not decode the github token information: got ${JSON.stringify(
+              fromGh
+            )} ::: when using ${params.toString()}`,
             errors,
           })
         )
