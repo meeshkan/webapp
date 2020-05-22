@@ -31,8 +31,7 @@ const assertUserHasNoTeams = <Session extends ISession>(
   pipe(
     TE.tryCatch(
       () => eightBaseClient(session).request(GET_TEAM_COUNT),
-      (error): NegativeDefaultTeamHookOutcome =>
-        defaultGQLErrorHandler("getTeamName")(error)
+      defaultGQLErrorHandler("getTeamName")
     ),
     // todo - add type safety for the query
     TE.chain(({ user: { team: { count } } }) =>
@@ -55,8 +54,7 @@ const createTeamFromUserName = (userId: string) => (
           teamName: session.user.nickname,
           userId,
         }),
-      (error): NegativeDefaultTeamHookOutcome =>
-        defaultGQLErrorHandler("mutation to insert default team")(error)
+      defaultGQLErrorHandler("mutation to insert default team")
     ),
     // todo - add type safety for the query
     TE.chain(({ userUpdate: { team: { items: [{ id }] } } }) => TE.right(id))
@@ -77,8 +75,7 @@ const uploadPhotoForTeam = (userId: string, teamId: string) => (
         path
       }
     }`),
-        (error): NegativeDefaultTeamHookOutcome =>
-          defaultGQLErrorHandler("query to get file upload information")(error)
+        defaultGQLErrorHandler("query to get file upload information")
       ),
     // todo, add type safety to GQL request
     RTE.chain(
@@ -128,8 +125,7 @@ const uploadPhotoForTeam = (userId: string, teamId: string) => (
             fileId: url.split("/").slice(-1)[0],
             filename,
           }),
-        (error): NegativeDefaultTeamHookOutcome =>
-          defaultGQLErrorHandler("file upload graphql mutation")(error)
+        defaultGQLErrorHandler("file upload graphql mutation")
       )
     ),
     RTE.chain((_) => RTE.right(constVoid())),

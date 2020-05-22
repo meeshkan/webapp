@@ -464,8 +464,7 @@ export const authenticateAppWithGithub = (
               githubSyncNonce: saltedEncryptedData.iv,
             })
             .then(() => githubToken),
-        (error): NegativeGithubFetchOutcome =>
-          defaultGQLErrorHandler("insert github token mutation")(error)
+        defaultGQLErrorHandler("insert github token mutation")
       )
     ),
     TE.chain(({ access_token }) => TE.right(access_token))

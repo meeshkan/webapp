@@ -107,8 +107,7 @@ const getTest = (teamName: string, projectName: string, testID: string) => (
           projectName,
           testID,
         }),
-      (error): NegativeTestFetchOutcome =>
-        defaultGQLErrorHandler("getTest query")(error)
+      defaultGQLErrorHandler("getTest query")
     ),
     LensTaskEither.fromPath<NegativeTestFetchOutcome, QueryTp>()([
       "user",

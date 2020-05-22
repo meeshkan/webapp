@@ -120,8 +120,7 @@ const getConfiguration = (teamName: string, projectName: string) => (
           teamName,
           projectName,
         }),
-      (error): NegativeConfigurationFetchOutcome =>
-        defaultGQLErrorHandler("getConfiguration query")(error)
+      defaultGQLErrorHandler("getConfiguration query")
     ),
     TE.chainEitherK<NegativeConfigurationFetchOutcome, any, QueryTp>(
       flow(

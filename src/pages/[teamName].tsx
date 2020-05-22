@@ -77,7 +77,7 @@ const getTeam = (teamName: string) => (
   pipe(
     TE.tryCatch(
       () => eightBaseClient(session).request(GET_TEAM_QUERY, { teamName }),
-      (error) => defaultGQLErrorHandler("get team query")(error)
+      defaultGQLErrorHandler("get team query")
     ),
     TE.chainEitherK(
       flow(

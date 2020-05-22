@@ -62,8 +62,7 @@ export const getTeams = (
   pipe(
     TE.tryCatch(
       () => eightBaseClient(session).request(GET_TEAMS_QUERY),
-      (error): NegativeTeamsFetchOutcome =>
-        defaultGQLErrorHandler("teams query")(error)
+      defaultGQLErrorHandler("teams query")
     ),
     TE.chainEitherK(
       flow(

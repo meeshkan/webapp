@@ -97,8 +97,7 @@ const getProject = (teamName: string, projectName: string) => (
           teamName,
           projectName,
         }),
-      (error): NegativeProjectFetchOutcome =>
-        defaultGQLErrorHandler("getProject query")(error)
+      defaultGQLErrorHandler("getProject query")
     ),
     LensTaskEither.fromPath<NegativeProjectFetchOutcome, QueryTp>()([
       "user",
