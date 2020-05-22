@@ -20,7 +20,7 @@ export const GET_PROJECT_QUERY = `query(
         }) {
           items {
             name
-            configured
+            configuration { id }
             tests {
               items {
                 id

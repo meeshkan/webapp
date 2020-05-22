@@ -39,7 +39,7 @@ type NegativeProjectFetchOutcome =
 
 const Project = t.type({
   name: t.string,
-  configured: t.boolean,
+  configuration: t.union([t.null, t.any]),
   tests: t.type({
     items: t.array(
       t.type({
@@ -171,7 +171,7 @@ export default (
             <Settings
               organizationName={projectProps.teamName}
               repositoryName={projectProps.name}
-              configured={projectProps.configured}
+              configured={projectProps.configuration ? true : false}
             />
             <Production
               teamName={projectProps.teamName}
