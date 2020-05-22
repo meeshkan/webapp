@@ -53,7 +53,3 @@ export const eitherAsPromiseWithSwallowedError = <E, A>(defaultTo: A) => (
 
 export const eitherAsPromise = <E, A>(v: E.Either<E, A>): Promise<A> =>
   eitherAsPromiseWithReject<E, A, E>(identity)(v);
-
-export const voidChain = <E, A, B>(
-  v: E.Either<E, B>
-): ((ma: E.Either<E, A>) => E.Either<E, B>) => E.chain((_) => v);

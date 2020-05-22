@@ -2,18 +2,27 @@ import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as TE from "fp-ts/lib/TaskEither";
 import { NextApiRequest, NextApiResponse } from "next";
-import * as _TE from "../../fp-ts/TaskEither";
 import auth0 from "../../utils/auth0";
 import safeApi from "../../utils/safeApi";
 import { UNDEFINED_ERROR, NOT_LOGGED_IN } from "../../utils/error";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
+import { ReaderTaskEither } from "fp-ts/lib/ReaderTaskEither";
+import { withX } from "../../utils/with";
 
 export type NegativeSessionFetchOutcome = UNDEFINED_ERROR | NOT_LOGGED_IN;
+
+export const withSession = <E, A>(req: NextApiRequest, ctx: string) =>
+  withX<
+    NegativeSessionFetchOutcome,
+    ISession,
+    E | NegativeSessionFetchOutcome,
+    A
+  >(retrieveSession(req, ctx));
 
 export const retrieveSession = (
   req: NextApiRequest,
   ctx: string
-): TE.TaskEither<UNDEFINED_ERROR | NOT_LOGGED_IN, ISession> =>
+): TE.TaskEither<NegativeSessionFetchOutcome, ISession> =>
   pipe(
     TE.tryCatch(
       () => auth0().getSession(req),
@@ -23,11 +32,13 @@ export const retrieveSession = (
         error,
       })
     ),
-    TE.chain(
-      _TE.fromNullable({
-        type: "NOT_LOGGED_IN",
-        msg: `Session is null in: ${ctx}`,
-      })
+    TE.chain((session) =>
+      session
+        ? TE.right(session)
+        : TE.left({
+            type: "NOT_LOGGED_IN",
+            msg: `Session is null in: ${ctx}`,
+          })
     )
   );
 

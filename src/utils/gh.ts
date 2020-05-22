@@ -15,8 +15,6 @@ import * as t from "io-ts";
 import fetch from "isomorphic-unfetch";
 import parseLinkHeader from "parse-link-header";
 import querystring, { ParsedUrlQuery } from "querystring";
-import * as _RTE from "../fp-ts/ReaderTaskEither";
-import * as _TE from "../fp-ts/TaskEither";
 import {
   defaultGQLErrorHandler,
   INCORRECT_TYPE_SAFETY,
@@ -93,24 +91,18 @@ const githubAccessTokenType = t.type({
     }),
   ]),
 });
-export const fetchGithubAccessToken = async (
+export const fetchGithubAccessToken = (
   session: ISession
-): Promise<Either<NegativeGithubFetchOutcome, string>> =>
+): TE.TaskEither<NegativeGithubFetchOutcome, string> =>
   pipe(
-    _TE.tryToEitherCatch(
-      confirmOrCreateUser(
-        `id
+    session,
+    confirmOrCreateUser(
+      `id
     githubInfo {
       githubSyncChecksum
       githubSyncNonce
     }`,
-        githubAccessTokenType
-      )(session),
-      (error): NegativeGithubFetchOutcome => ({
-        type: "UNDEFINED_ERROR",
-        msg: "Could not fetch access token from gql endpoint",
-        error,
-      })
+      githubAccessTokenType
     ),
     TE.chain((githubAccessToken) =>
       githubAccessToken.githubInfo === null
@@ -157,25 +149,18 @@ export const fetchGithubAccessToken = async (
             new Date().getTime() / MS_IN_SEC <
           TWENTY_SECONDS
           ? TE.left({ type: "NEEDS_REAUTH", msg: "Refresh token expires soon" })
-          : _TE.tryToEitherCatch(
-              authenticateAppWithGithub(
-                id,
-                new URLSearchParams({
-                  client_id: process.env.GH_OAUTH_APP_CLIENT_ID,
-                  client_secret: process.env.GH_OAUTH_APP_CLIENT_SECRET,
-                  grant_type: "refresh_token",
-                  refresh_token: githubAccessToken.refreshToken,
-                })
-              )(session),
-              (error): NegativeGithubFetchOutcome => ({
-                type: "UNDEFINED_ERROR",
-                msg: "Unexpected error when renewing token from access token",
-                error,
+          : authenticateAppWithGithub(
+              id,
+              new URLSearchParams({
+                client_id: process.env.GH_OAUTH_APP_CLIENT_ID,
+                client_secret: process.env.GH_OAUTH_APP_CLIENT_SECRET,
+                grant_type: "refresh_token",
+                refresh_token: githubAccessToken.refreshToken,
               })
-            )
+            )(session)
         : TE.right(githubAccessToken.accessToken)
     )
-  )();
+  );
 
 const getRepositories = (
   accessToken: string
@@ -210,14 +195,15 @@ const getRepositories = (
         ),
         TE.chain<NegativeGithubFetchOutcome, Response, IRepository[]>(
           pipe(
-            _RTE.tryCatch<Response, NegativeGithubFetchOutcome, any>(
-              (res) => () => res.json(),
-              (error) => ({
-                type: "UNDEFINED_ERROR",
-                msg: "Conversion of json response from github API failed",
-                error,
-              })
-            ),
+            (res) =>
+              TE.tryCatch<NegativeGithubFetchOutcome, any>(
+                () => res.json(),
+                (error) => ({
+                  type: "UNDEFINED_ERROR",
+                  msg: "Conversion of json response from github API failed",
+                  error,
+                })
+              ),
             RTE.chain<
               Response,
               NegativeGithubFetchOutcome,
@@ -236,21 +222,16 @@ const getRepositories = (
                 RTE.fromEither
               )
             ),
-            _RTE.chainWithAsk<
+            RTE.chain<
               Response,
               NegativeGithubFetchOutcome,
               { repositories: IRepository[] },
               IRepository[]
             >(({ repositories }) => (res) =>
-              RTE.getApplySemigroup<
-                Response,
-                NegativeGithubFetchOutcome,
-                IRepository[]
-              >(A.getMonoid<IRepository>()).concat(
-                RTE.right(repositories),
-                RTE.fromTaskEither(() =>
-                  getRepositories(accessToken)(nextFromResponse(res))
-                )
+              TE.getApplySemigroup<NegativeGithubFetchOutcome, IRepository[]>(
+                A.getMonoid<IRepository>()
+              ).concat(TE.right(repositories), () =>
+                getRepositories(accessToken)(nextFromResponse(res))
               )
             )
           )
@@ -291,14 +272,15 @@ const getInstallationRepositories = (
         ),
         TE.chain(
           pipe(
-            _RTE.tryCatch<Response, NegativeGithubFetchOutcome, any>(
-              (res) => () => res.json(),
-              (error) => ({
-                type: "UNDEFINED_ERROR",
-                msg: "Conversion of json response from github API failed",
-                error,
-              })
-            ),
+            (res) =>
+              TE.tryCatch<NegativeGithubFetchOutcome, any>(
+                () => res.json(),
+                (error) => ({
+                  type: "UNDEFINED_ERROR",
+                  msg: "Conversion of json response from github API failed",
+                  error,
+                })
+              ),
             RTE.chain(
               flow(
                 t.type({ installations: t.array(t.type({ id: t.number })) })
@@ -313,18 +295,16 @@ const getInstallationRepositories = (
                 RTE.fromEither
               )
             ),
-            _RTE.chainWithAsk<
+            RTE.chain<
               Response,
               NegativeGithubFetchOutcome,
               { installations: { id: number }[] },
               IRepository[]
             >(({ installations }) => (res) =>
-              RTE.getApplySemigroup<
-                Response,
-                NegativeGithubFetchOutcome,
-                IRepository[]
-              >(A.getMonoid<IRepository>()).concat(
-                RTE.fromTaskEither(() =>
+              TE.getApplySemigroup<NegativeGithubFetchOutcome, IRepository[]>(
+                A.getMonoid<IRepository>()
+              ).concat(
+                () =>
                   Promise.all(
                     installations.map(({ id }) =>
                       getRepositories(accessToken)(
@@ -333,13 +313,11 @@ const getInstallationRepositories = (
                         )
                       )
                     )
-                  ).then(M.fold(E.getApplyMonoid(A.getMonoid<IRepository>())))
-                ),
-                RTE.fromTaskEither(() =>
+                  ).then(M.fold(E.getApplyMonoid(A.getMonoid<IRepository>()))),
+                () =>
                   getInstallationRepositories(accessToken)(
                     nextFromResponse(res)
                   )
-                )
               )
             )
           )
@@ -353,22 +331,15 @@ const nextFromResponse = (res: Response): O.Option<string> =>
 
 export const getAllGhRepos = (
   session: ISession
-): Promise<Either<NegativeGithubFetchOutcome, IRepository[]>> =>
+): TE.TaskEither<NegativeGithubFetchOutcome, IRepository[]> =>
   pipe(
-    _TE.tryToEitherCatch(
-      () => fetchGithubAccessToken(session),
-      (error): NegativeGithubFetchOutcome => ({
-        type: "UNDEFINED_ERROR",
-        msg: "Unexpected Error returning access token",
-        error,
-      })
-    ),
+    fetchGithubAccessToken(session),
     TE.chain((accessToken) => () =>
       getInstallationRepositories(accessToken)(
         O.some("https://api.github.com/user/installations")
       )
     )
-  )();
+  );
 
 const githubTokenType = t.type({
   refresh_token: t.string,

@@ -1,14 +1,14 @@
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import * as E from "fp-ts/lib/Either";
+import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as TE from "fp-ts/lib/TaskEither";
 import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
 import fetch from "isomorphic-unfetch";
-import { hookNeedingFetch } from "./hookNeedingFetch";
-import { flow } from "fp-ts/lib/function";
 import { Lens } from "monocle-ts";
 import { INCORRECT_TYPE_SAFETY, UNDEFINED_ERROR } from "./error";
+import { hookNeedingFetch } from "./hookNeedingFetch";
 
 export type NotAuthorized = "NotAuthorized";
 export const NotAuthorized: NotAuthorized = "NotAuthorized";

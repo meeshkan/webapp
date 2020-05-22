@@ -1,57 +1,55 @@
-import React, { useState } from "react";
+import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import {
   Box,
-  useColorMode,
-  Grid,
-  Stack,
-  FormControl,
-  Input,
-  FormLabel,
   Button,
-  Icon,
-  Tooltip,
   Flex,
-  Switch,
+  FormControl,
+  FormLabel,
+  Grid,
+  Icon,
+  Input,
   LightMode,
   Link,
-  useToastOptions,
+  Stack,
+  Switch,
+  Tooltip,
+  useColorMode,
   useToast,
+  useToastOptions,
 } from "@chakra-ui/core";
-import * as t from "io-ts";
-import * as E from "fp-ts/lib/Either";
 import * as A from "fp-ts/lib/Array";
+import * as E from "fp-ts/lib/Either";
+import { constant, constNull, constVoid, flow } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/pipeable";
-import * as _E from "../../../fp-ts/Either";
-import * as _RTE from "../../../fp-ts/ReaderTaskEither";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { GraphQLClient } from "graphql-request";
+import * as t from "io-ts";
+import { Lens } from "monocle-ts";
+import { useRouter } from "next/router";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import Card from "../../../components/molecules/card";
-import { ItemLink, stringToUrl } from "../../../components/molecules/navLink";
-import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
-import { useForm, Controller } from "react-hook-form";
 import ErrorComponent from "../../../components/molecules/error";
+import { ItemLink, stringToUrl } from "../../../components/molecules/navLink";
+import * as _E from "../../../fp-ts/Either";
+import { optionalHead } from "../../../monocle-ts";
 import {
   defaultGQLErrorHandler,
-  INCORRECT_TYPE_SAFETY,
-  NOT_LOGGED_IN,
-  TEAM_DOES_NOT_EXIST,
-  PROJECT_DOES_NOT_EXIST,
-  UNDEFINED_ERROR,
-  INVALID_TOKEN_ERROR,
   GET_SERVER_SIDE_PROPS_ERROR,
+  INCORRECT_TYPE_SAFETY,
+  INVALID_TOKEN_ERROR,
   LENS_ACCESSOR_ERROR,
+  NOT_LOGGED_IN,
+  PROJECT_DOES_NOT_EXIST,
+  TEAM_DOES_NOT_EXIST,
+  UNDEFINED_ERROR,
 } from "../../../utils/error";
-import { retrieveSession } from "../../api/session";
-import { flow, constNull, constVoid, constant } from "fp-ts/lib/function";
-import { Lens } from "monocle-ts";
-import { confirmOrCreateUser } from "../../../utils/user";
-import { Loading, hookNeedingFetch } from "../../../utils/hookNeedingFetch";
-import { useRouter } from "next/router";
-import { optionalHead } from "../../../monocle-ts";
+import { hookNeedingFetch, Loading } from "../../../utils/hookNeedingFetch";
 import { SEPARATOR } from "../../../utils/separator";
-import { thunk } from "../../../fp-ts/function";
+import { confirmOrCreateUser } from "../../../utils/user";
+import { withSession } from "../../api/session";
 
 type NegativeConfigurationFetchOutcome =
   | NOT_LOGGED_IN
@@ -207,7 +205,6 @@ const getConfiguration = (teamName: string, projectName: string) => (
   );
 
 const userType = t.type({ id: t.string });
-type UserType = t.TypeOf<typeof userType>;
 
 export const getServerSideProps = ({
   params: { teamName, projectName },
@@ -216,59 +213,25 @@ export const getServerSideProps = ({
   props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, IConfigurationProps>;
 }> =>
   pipe(
-    retrieveSession(req, "configuration.tsx getServerSideProps"),
-    TE.chain(
-      pipe(
-        _RTE.tryToEitherCatch<
-          ISession,
-          NegativeConfigurationFetchOutcome,
-          UserType
-        >(
-          confirmOrCreateUser("id", userType),
-          (error): NegativeConfigurationFetchOutcome => ({
-            type: "UNDEFINED_ERROR",
-            msg:
-              "Unanticipated confirm or create user error in configuration.tsx",
-            error,
-          })
-        ),
-        RTE.chain<
-          ISession,
-          NegativeConfigurationFetchOutcome,
-          UserType,
-          { id: string; configuration: IConfiguration }
-        >(({ id }) =>
-          _RTE.tryToEitherCatch<
-            ISession,
-            NegativeConfigurationFetchOutcome,
-            { id: string; configuration: IConfiguration }
-          >(
-            flow(
-              getConfiguration(teamName, projectName),
-              TE.chain((configuration) => TE.right({ configuration, id }))
-            ),
-            (error): NegativeConfigurationFetchOutcome => ({
-              type: "UNDEFINED_ERROR",
-              msg: "Unanticipated getTeam error",
-              error,
-            })
-          )
-        ),
-        _RTE.chainEitherKWithAsk<
-          ISession,
-          NegativeConfigurationFetchOutcome,
-          { id: string; configuration: IConfiguration },
-          IConfigurationProps
-        >(({ id, configuration }) => (session) =>
-          E.right<NegativeConfigurationFetchOutcome, IConfigurationProps>({
-            session,
-            id,
-            configuration,
-            teamName,
-            projectName,
-          })
-        )
+    confirmOrCreateUser("id", userType),
+    RTE.chain(({ id }) =>
+      flow(
+        getConfiguration(teamName, projectName),
+        TE.chain((configuration) => TE.right({ configuration, id }))
       )
+    ),
+    RTE.chain(({ id, configuration }) => (session) =>
+      TE.right({
+        session,
+        id,
+        configuration,
+        teamName,
+        projectName,
+      })
+    ),
+    withSession<NegativeConfigurationFetchOutcome, IConfigurationProps>(
+      req,
+      "configuration.tsx getServerSideProps"
     )
   )().then(_E.eitherSanitizedWithGenericError);
 

@@ -43,8 +43,8 @@ export interface TEST_DOES_NOT_EXIST {
   type: "TEST_DOES_NOT_EXIST";
   msg: string;
 }
-export interface USER_HAS_NO_TEAMS {
-  type: "USER_HAS_NO_TEAMS";
+export interface USER_HAS_TEAMS {
+  type: "USER_HAS_TEAMS";
   msg: string;
 }
 export interface ID_NOT_IN_STATE {
@@ -72,7 +72,7 @@ export const defaultGQLErrorHandler = (ctx: string) => (
       };
 
 export interface LENS_ACCESSOR_ERROR {
-  type: "LENS_ACCESSOR_ERROR",
+  type: "LENS_ACCESSOR_ERROR";
   msg: string;
 }
 

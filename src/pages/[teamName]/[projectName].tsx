@@ -12,7 +12,7 @@ import Production from "../../components/Dashboard/production";
 import Settings from "../../components/Dashboard/settings";
 import ErrorComponent from "../../components/molecules/error";
 import * as _E from "../../fp-ts/Either";
-import * as _RTE from "../../fp-ts/ReaderTaskEither";
+import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import { LensTaskEither, lensTaskEitherHead } from "../../monocle-ts";
 import {
   defaultGQLErrorHandler,
@@ -182,25 +182,8 @@ export const getServerSideProps = ({
     retrieveSession(req, "[projecName].tsx getServerSideProps"),
     TE.chain(
       pipe(
-        _RTE.tryToEitherCatch(
-          confirmOrCreateUser("id", userType),
-          (error): NegativeProjectFetchOutcome => ({
-            type: "UNDEFINED_ERROR",
-            msg:
-              "Unanticipated confirm or create user error in [projectName].tsx",
-            error,
-          })
-        ),
-        _RTE.voidChain(
-          _RTE.tryToEitherCatch(
-            getProject(teamName, projectName),
-            (error): NegativeProjectFetchOutcome => ({
-              type: "UNDEFINED_ERROR",
-              msg: "Unanticipated getProject error",
-              error,
-            })
-          )
-        )
+        confirmOrCreateUser("id", userType),
+        RTE.chain(() => getProject(teamName, projectName))
       )
     )
   )().then(_E.eitherSanitizedWithGenericError);

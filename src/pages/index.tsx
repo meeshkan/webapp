@@ -1,4 +1,6 @@
+import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import {
+  Box,
   Button,
   Flex,
   Grid,
@@ -19,35 +21,36 @@ import {
   ModalHeader,
   ModalOverlay,
   Skeleton,
+  Spinner,
   Stack,
   Text,
   useColorMode,
   useDisclosure,
   useToast,
-  Spinner,
   useToastOptions,
-  Box,
 } from "@chakra-ui/core";
-import { GraphQLClient } from "graphql-request";
-import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
-import * as O from "fp-ts/lib/Option";
-import { flow, constant, constVoid } from "fp-ts/lib/function";
+import { constant, constVoid, flow } from "fp-ts/lib/function";
 import { groupSort, NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
+import * as O from "fp-ts/lib/Option";
 import * as Ord from "fp-ts/lib/Ord";
 import { pipe } from "fp-ts/lib/pipeable";
+import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as NEA from "fp-ts/lib/ReadonlyNonEmptyArray";
 import * as TE from "fp-ts/lib/TaskEither";
+import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
-import * as RTE from "fp-ts/lib/ReaderTaskEither";
+import { NextRouter, useRouter } from "next/router";
 import React, { useState } from "react";
-import VerifyLogin from "../components/Dashboard/verify-login";
 import Card from "../components/molecules/card";
+import ErrorComponent from "../components/molecules/error";
 import * as _E from "../fp-ts/Either";
-import * as _RTE from "../fp-ts/ReaderTaskEither";
-import * as _TE from "../fp-ts/TaskEither";
-import auth0 from "../utils/auth0";
+import {
+  GET_SERVER_SIDE_PROPS_ERROR,
+  INCORRECT_TYPE_SAFETY,
+  UNDEFINED_ERROR,
+} from "../utils/error";
 import {
   IOwner,
   IRepository,
@@ -56,26 +59,20 @@ import {
 } from "../utils/gh";
 import {
   hookNeedingFetch,
-  Loading,
   InitialLoading,
+  Loading,
 } from "../utils/hookNeedingFetch";
+import { SEPARATOR } from "../utils/separator";
 import {
   getTeams,
-  teamsToProjects,
-  useTeams,
   ITeam,
   NegativeTeamsFetchOutcome,
   Team,
+  teamsToProjects,
+  useTeams,
 } from "../utils/teams";
-import ErrorComponent from "../components/molecules/error";
 import { confirmOrCreateUser } from "../utils/user";
-import {
-  UNDEFINED_ERROR,
-  INCORRECT_TYPE_SAFETY,
-  GET_SERVER_SIDE_PROPS_ERROR,
-} from "../utils/error";
-import { SEPARATOR } from "../utils/separator";
-import { useRouter, NextRouter } from "next/router";
+import { withSession } from "./api/session";
 
 interface ImportProjectVariables {
   userId: string;
@@ -236,51 +233,19 @@ const createProject = ({
 const userType = t.type({ id: t.string });
 export const getServerSideProps = ({
   req,
-}): Promise<{ props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps> }> =>
+}): Promise<{
+  props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>;
+}> =>
   pipe(
-    TE.tryCatch(
-      () => auth0().getSession(req),
-      (error) => ({
-        type: "UNDEFINED_ERROR",
-        msg: "Could not get session in server side props",
-        error,
-      })
-    ),
-    TE.chain(
-      _TE.fromNullable({
-        type: "NOT_LOGGED_IN",
-        msg: "Not logged in in server side props for index.tsx",
-      })
-    ),
-    TE.chain(
+    confirmOrCreateUser("id", userType),
+    RTE.chain(({ id }) =>
       pipe(
-        _RTE.tryToEitherCatch(
-          confirmOrCreateUser("id", userType),
-          (error): NegativeTeamsFetchOutcome => ({
-            type: "UNDEFINED_ERROR",
-            msg: "Could not get session in index.tsx server side props",
-            error,
-          })
-        ),
-        RTE.chain(({ id }) =>
-          pipe(
-            _RTE.tryToEitherCatch(
-              getTeams,
-              (error): NegativeTeamsFetchOutcome => ({
-                type: "UNDEFINED_ERROR",
-                msg:
-                  "Could not confirm or create user in index.tsx server side props",
-                error,
-              })
-            ),
-            RTE.chain((teams) => RTE.right({ teams, id }))
-          )
-        ),
-        _RTE.chainEitherKWithAsk(({ teams, id }) => (session) =>
-          E.right({ session, teams, id })
-        )
+        getTeams,
+        RTE.chain((teams) => RTE.right({ teams, id }))
       )
-    )
+    ),
+    RTE.chain(({ teams, id }) => (session) => TE.right({ session, teams, id })),
+    withSession(req, "index.tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
 
 type IRepositoriesGroupedByOwner = NonEmptyArray<IRepository>[];

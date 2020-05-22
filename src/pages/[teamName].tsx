@@ -9,11 +9,11 @@ import {
   Text,
   useColorMode,
 } from "@chakra-ui/core";
-import ErrorComponent from "../components/molecules/error";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
+import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
@@ -21,21 +21,20 @@ import { Lens } from "monocle-ts";
 import Link from "next/link";
 import React from "react";
 import Card from "../components/molecules/card";
+import ErrorComponent from "../components/molecules/error";
 import * as _E from "../fp-ts/Either";
-import * as _RTE from "../fp-ts/ReaderTaskEither";
-import * as _TE from "../fp-ts/TaskEither";
-import auth0 from "../utils/auth0";
-import { confirmOrCreateUser } from "../utils/user";
 import {
-  INCORRECT_TYPE_SAFETY,
-  TEAM_DOES_NOT_EXIST,
-  INVALID_TOKEN_ERROR,
-  UNDEFINED_ERROR,
-  NOT_LOGGED_IN,
   defaultGQLErrorHandler,
   GET_SERVER_SIDE_PROPS_ERROR,
+  INCORRECT_TYPE_SAFETY,
+  INVALID_TOKEN_ERROR,
+  NOT_LOGGED_IN,
+  TEAM_DOES_NOT_EXIST,
+  UNDEFINED_ERROR,
 } from "../utils/error";
-import { retrieveSession } from "./api/session";
+import { confirmOrCreateUser } from "../utils/user";
+import { withSession } from "./api/session";
+import { LensTaskEither, lensTaskEitherHead } from "../monocle-ts";
 
 type NegativeTeamFetchOutcome =
   | NOT_LOGGED_IN
@@ -121,16 +120,18 @@ const getTeam = (teamName: string) => (
         )
       )
     ),
-    TE.chainEitherK(
-      flow(
-        Lens.fromPath<QueryTp>()(["user", "team", "items"]).get,
-        A.head,
-        E.fromOption<NegativeTeamFetchOutcome>(() => ({
+    LensTaskEither.fromPath<NegativeTeamFetchOutcome, QueryTp>()([
+      "user",
+      "team",
+      "items",
+    ]).compose(
+      lensTaskEitherHead<NegativeTeamFetchOutcome, ITeam>(
+        TE.left({
           type: "TEAM_DOES_NOT_EXIST",
-          msg: "The requested team does not exist",
-        }))
+          msg: `Could not find team for: ${teamName}`,
+        })
       )
-    )
+    ).get
   );
 
 type ITeamProps = { team: ITeam; session: ISession };
@@ -140,34 +141,14 @@ const userType = t.type({ id: t.string });
 export const getServerSideProps = ({
   params: { teamName },
   req,
-}): Promise<{ props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps> }> =>
+}): Promise<{
+  props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>;
+}> =>
   pipe(
-    retrieveSession(req, "[teamName].tsx getServerSideProps"),
-    TE.chain(
-      pipe(
-        _RTE.tryToEitherCatch(
-          confirmOrCreateUser("id", userType),
-          (error): NegativeTeamFetchOutcome => ({
-            type: "UNDEFINED_ERROR",
-            msg: "Unanticipated confirm or create user error in [teamName].tsx",
-            error,
-          })
-        ),
-        _RTE.voidChain(
-          _RTE.tryToEitherCatch(
-            getTeam(teamName),
-            (error): NegativeTeamFetchOutcome => ({
-              type: "UNDEFINED_ERROR",
-              msg: "Unanticipated getTeam error",
-              error,
-            })
-          )
-        ),
-        _RTE.chainEitherKWithAsk((team) => (session) =>
-          E.right({ session, team })
-        )
-      )
-    )
+    confirmOrCreateUser("id", userType),
+    RTE.chain((_) => getTeam(teamName)),
+    RTE.chain((team) => (session) => TE.right({ session, team })),
+    withSession(req, "[teamName].tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
 
 export default (props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>) =>

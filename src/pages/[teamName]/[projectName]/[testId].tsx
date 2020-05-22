@@ -9,7 +9,7 @@ import {
   useColorMode,
 } from "@chakra-ui/core";
 import * as E from "fp-ts/lib/Either";
-import { constant, flow } from "fp-ts/lib/function";
+import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -21,9 +21,8 @@ import ErrorComponent from "../../../components/molecules/error";
 import FailureMessage from "../../../components/molecules/failureMessage";
 import LogItem from "../../../components/molecules/logItem";
 import * as _E from "../../../fp-ts/Either";
-import * as _RTE from "../../../fp-ts/ReaderTaskEither";
 import { LensTaskEither, lensTaskEitherHead } from "../../../monocle-ts";
-import { retrieveSession } from "../../../pages/api/session";
+import { withSession } from "../../../pages/api/session";
 import {
   defaultGQLErrorHandler,
   GET_SERVER_SIDE_PROPS_ERROR,
@@ -205,56 +204,26 @@ export const getServerSideProps = ({
   props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>;
 }> =>
   pipe(
-    retrieveSession(req, "configuration.tsx getServerSideProps"),
-    TE.chain(
-      pipe(
-        _RTE.tryToEitherCatch<ISession, NegativeTestFetchOutcome, UserType>(
-          confirmOrCreateUser("id", userType),
-          (error): NegativeTestFetchOutcome => ({
-            type: "UNDEFINED_ERROR",
-            msg:
-              "Unanticipated confirm or create user error in configuration.tsx",
-            error,
-          })
-        ),
-        RTE.chain<
-          ISession,
-          NegativeTestFetchOutcome,
-          UserType,
-          { id: string; test: ITestT }
-        >(({ id }) =>
-          _RTE.tryToEitherCatch<
-            ISession,
-            NegativeTestFetchOutcome,
-            { id: string; test: ITestT }
-          >(
-            flow(
-              getTest(teamName, projectName, testId),
-              TE.chain((test) => TE.right({ test, id }))
-            ),
-            (error): NegativeTestFetchOutcome => ({
-              type: "UNDEFINED_ERROR",
-              msg: "Unanticipated getTeam error",
-              error,
-            })
-          )
-        ),
-        _RTE.chainEitherKWithAsk<
-          ISession,
-          NegativeTestFetchOutcome,
-          { id: string; test: ITestT },
-          ITestProps
-        >(({ id, test }) => (session) =>
-          E.right<NegativeTestFetchOutcome, ITestProps>({
-            session,
-            id,
-            test,
-            teamName,
-            testID: testId,
-            projectName,
-          })
-        )
+    confirmOrCreateUser("id", userType),
+    RTE.chain(({ id }) =>
+      flow(
+        getTest(teamName, projectName, testId),
+        TE.chain((test) => TE.right({ test, id }))
       )
+    ),
+    RTE.chain(({ id, test }) => (session) =>
+      TE.right<NegativeTestFetchOutcome, ITestProps>({
+        session,
+        id,
+        test,
+        teamName,
+        testID: testId,
+        projectName,
+      })
+    ),
+    withSession<NegativeTestFetchOutcome, ITestProps>(
+      req,
+      "configuration.tsx getServerSideProps"
     )
   )().then(_E.eitherSanitizedWithGenericError);
 
