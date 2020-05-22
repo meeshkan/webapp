@@ -178,7 +178,6 @@ const createProject = ({
         .then((_) =>
           E.right({ _: closeModal(), __: importProjectIsExecuting(false) }._)
         )
-        .then((_) => E.right(constVoid()))
   );
 
 const userType = t.type({ id: t.string });
