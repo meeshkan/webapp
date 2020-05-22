@@ -9,20 +9,19 @@ import {
   Text,
   useColorMode,
 } from "@chakra-ui/core";
-import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
-import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
-import { Lens } from "monocle-ts";
 import Link from "next/link";
 import React from "react";
 import Card from "../components/molecules/card";
 import ErrorComponent from "../components/molecules/error";
 import * as _E from "../fp-ts/Either";
+import { GET_TEAM_QUERY } from "../gql/pages/[teamName]";
+import { LensTaskEither, lensTaskEitherHead } from "../monocle-ts";
 import {
   defaultGQLErrorHandler,
   GET_SERVER_SIDE_PROPS_ERROR,
@@ -32,10 +31,9 @@ import {
   TEAM_DOES_NOT_EXIST,
   UNDEFINED_ERROR,
 } from "../utils/error";
+import { eightBaseClient } from "../utils/graphql";
 import { confirmOrCreateUser } from "../utils/user";
 import { withSession } from "./api/session";
-import { LensTaskEither, lensTaskEitherHead } from "../monocle-ts";
-import { GET_TEAM_QUERY } from "../gql/pages/[teamName]";
 
 type NegativeTeamFetchOutcome =
   | NOT_LOGGED_IN
@@ -78,12 +76,7 @@ const getTeam = (teamName: string) => (
 ): TE.TaskEither<NegativeTeamFetchOutcome, ITeam> =>
   pipe(
     TE.tryCatch(
-      () =>
-        new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-          headers: {
-            authorization: `Bearer ${session.idToken}`,
-          },
-        }).request(GET_TEAM_QUERY, { teamName }),
+      () => eightBaseClient(session).request(GET_TEAM_QUERY, { teamName }),
       (error) => defaultGQLErrorHandler("get team query")(error)
     ),
     TE.chainEitherK(

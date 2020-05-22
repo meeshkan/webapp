@@ -36,6 +36,7 @@ import {
 } from "../../../utils/error";
 import { confirmOrCreateUser } from "../../../utils/user";
 import { GET_TEST_QUERY } from "../../../gql/pages/[teamName]/[projectName]/[testId]";
+import { eightBaseClient } from "../../../utils/graphql";
 
 type NegativeTestFetchOutcome =
   | NOT_LOGGED_IN
@@ -101,11 +102,11 @@ const getTest = (teamName: string, projectName: string, testID: string) => (
   pipe(
     TE.tryCatch<NegativeTestFetchOutcome, any>(
       () =>
-        new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-          headers: {
-            authorization: `Bearer ${session.idToken}`,
-          },
-        }).request(GET_TEST_QUERY, { teamName, projectName, testID }),
+        eightBaseClient(session).request(GET_TEST_QUERY, {
+          teamName,
+          projectName,
+          testID,
+        }),
       (error): NegativeTestFetchOutcome =>
         defaultGQLErrorHandler("getTest query")(error)
     ),

@@ -31,7 +31,7 @@ import {
 } from "@chakra-ui/core";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
-import { constant, constVoid, flow } from "fp-ts/lib/function";
+import { constant, flow } from "fp-ts/lib/function";
 import { groupSort, NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import * as O from "fp-ts/lib/Option";
 import * as Ord from "fp-ts/lib/Ord";
@@ -39,13 +39,13 @@ import { pipe } from "fp-ts/lib/pipeable";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as NEA from "fp-ts/lib/ReadonlyNonEmptyArray";
 import * as TE from "fp-ts/lib/TaskEither";
-import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
 import { NextRouter, useRouter } from "next/router";
 import React, { useState } from "react";
 import Card from "../components/molecules/card";
 import ErrorComponent from "../components/molecules/error";
 import * as _E from "../fp-ts/Either";
+import { CREATE_PROJECT_MUTATION } from "../gql/pages";
 import {
   GET_SERVER_SIDE_PROPS_ERROR,
   INCORRECT_TYPE_SAFETY,
@@ -57,6 +57,7 @@ import {
   NegativeGithubFetchOutcome,
   Repository,
 } from "../utils/gh";
+import { eightBaseClient } from "../utils/graphql";
 import {
   hookNeedingFetch,
   InitialLoading,
@@ -73,7 +74,6 @@ import {
 } from "../utils/teams";
 import { confirmOrCreateUser } from "../utils/user";
 import { withSession } from "./api/session";
-import { CREATE_PROJECT_MUTATION } from "../gql/pages";
 
 interface ImportProjectVariables {
   userId: string;
@@ -128,11 +128,10 @@ const createProject = ({
       pipe(
         TE.tryCatch(
           () =>
-            new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-              headers: {
-                authorization: `Bearer ${session.idToken}`,
-              },
-            }).request(CREATE_PROJECT_MUTATION, importProjectVariables),
+            eightBaseClient(session).request(
+              CREATE_PROJECT_MUTATION,
+              importProjectVariables
+            ),
           (error): NegativeImportProjectOutcome => ({
             type: "UNDEFINED_ERROR",
             msg: "Could not make import project mutation",

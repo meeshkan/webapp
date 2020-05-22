@@ -32,6 +32,7 @@ import {
   UPDATE_GITHUB_INFO_MUTATION,
   GITHUB_VIEWER_QUERY,
 } from "../gql/utils/gh";
+import { eightBaseClient } from "./graphql";
 
 const Owner = t.type({
   login: t.string,
@@ -456,11 +457,7 @@ export const authenticateAppWithGithub = (
     TE.chain(({ githubToken, saltedEncryptedData }) =>
       TE.tryCatch(
         () =>
-          new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-            headers: {
-              authorization: `Bearer ${session.idToken}`,
-            },
-          })
+          eightBaseClient(session)
             .request(UPDATE_GITHUB_INFO_MUTATION, {
               userId,
               githubSyncChecksum: saltedEncryptedData.encryptedData,

@@ -27,6 +27,7 @@ import {
 import { confirmOrCreateUser } from "../../utils/user";
 import { retrieveSession } from "../api/session";
 import { GET_PROJECT_QUERY } from "../../gql/pages/[teamName]/[projectName]";
+import { eightBaseClient } from "../../utils/graphql";
 
 type NegativeProjectFetchOutcome =
   | NOT_LOGGED_IN
@@ -92,11 +93,10 @@ const getProject = (teamName: string, projectName: string) => (
   pipe(
     TE.tryCatch(
       () =>
-        new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-          headers: {
-            authorization: `Bearer ${session.idToken}`,
-          },
-        }).request(GET_PROJECT_QUERY, { teamName, projectName }),
+        eightBaseClient(session).request(GET_PROJECT_QUERY, {
+          teamName,
+          projectName,
+        }),
       (error): NegativeProjectFetchOutcome =>
         defaultGQLErrorHandler("getProject query")(error)
     ),

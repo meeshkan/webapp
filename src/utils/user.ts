@@ -3,11 +3,11 @@ import * as E from "fp-ts/lib/Either";
 import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as TE from "fp-ts/lib/TaskEither";
-import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
 import fetch from "isomorphic-unfetch";
 import { Lens } from "monocle-ts";
 import { INCORRECT_TYPE_SAFETY, UNDEFINED_ERROR } from "./error";
+import { eightBaseClient } from "./graphql";
 import { hookNeedingFetch } from "./hookNeedingFetch";
 
 export type NotAuthorized = "NotAuthorized";
@@ -35,12 +35,7 @@ const __confirmOrCreateUser = <A, B, Session extends ISession>(
   pipe(
     // attempt graphql operation
     TE.tryCatch(
-      () =>
-        new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-          headers: {
-            authorization: `Bearer ${session.idToken}`,
-          },
-        }).request(query, vars),
+      () => eightBaseClient(session).request(query, vars),
       (error): NegativeConfirmOrCreateUserOutcome => ({
         type: "UNDEFINED_ERROR",
         msg: `Could not ${isConfirm ? "confirm" : "create"} user`,

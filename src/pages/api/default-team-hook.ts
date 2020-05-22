@@ -1,6 +1,5 @@
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
-import * as E from "fp-ts/lib/Either";
-import { constant, constNull, constVoid } from "fp-ts/lib/function";
+import { constNull, constVoid } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -9,34 +8,29 @@ import * as t from "io-ts";
 import fetch from "isomorphic-unfetch";
 import { NextApiRequest, NextApiResponse } from "next";
 import {
+  ASSOCIATE_PHOTO_WITH_TEAM,
+  CREATE_TEAM_FROM_USER_NAME,
+  GET_TEAM_COUNT,
+} from "../../gql/pages/api/default-team-hook";
+import {
   defaultGQLErrorHandler,
   INVALID_TOKEN_ERROR,
   USER_HAS_TEAMS,
 } from "../../utils/error";
-import { withClient } from "../../utils/graphql";
+import { eightBaseClient, withClient } from "../../utils/graphql";
 import { logchain } from "../../utils/safeApi";
 import {
   confirmOrCreateUser,
   NegativeConfirmOrCreateUserOutcome,
 } from "../../utils/user";
 import { NegativeSessionFetchOutcome, withSession } from "./session";
-import {
-  CREATE_TEAM_FROM_USER_NAME,
-  ASSOCIATE_PHOTO_WITH_TEAM,
-  GET_TEAM_COUNT,
-} from "../../gql/pages/api/default-team-hook";
 
 const assertUserHasNoTeams = <Session extends ISession>(
   session: Session
 ): TE.TaskEither<NegativeDefaultTeamHookOutcome, void> =>
   pipe(
     TE.tryCatch(
-      () =>
-        new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-          headers: {
-            authorization: `Bearer ${session.idToken}`,
-          },
-        }).request(GET_TEAM_COUNT),
+      () => eightBaseClient(session).request(GET_TEAM_COUNT),
       (error): NegativeDefaultTeamHookOutcome =>
         defaultGQLErrorHandler("getTeamName")(error)
     ),
@@ -51,19 +45,14 @@ const assertUserHasNoTeams = <Session extends ISession>(
     )
   );
 
-const createTeamFromUserName = (userId: string) => ({
-  idToken,
-  user,
-}: ISession): TE.TaskEither<NegativeDefaultTeamHookOutcome, string> =>
+const createTeamFromUserName = (userId: string) => (
+  session: ISession
+): TE.TaskEither<NegativeDefaultTeamHookOutcome, string> =>
   pipe(
     TE.tryCatch(
       () =>
-        new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-          headers: {
-            authorization: `Bearer ${idToken}`,
-          },
-        }).request(CREATE_TEAM_FROM_USER_NAME, {
-          teamName: user.nickname,
+        eightBaseClient(session).request(CREATE_TEAM_FROM_USER_NAME, {
+          teamName: session.user.nickname,
           userId,
         }),
       (error): NegativeDefaultTeamHookOutcome =>

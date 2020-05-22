@@ -17,14 +17,12 @@ import {
   useToast,
   useToastOptions,
 } from "@chakra-ui/core";
-import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import { constant, constNull, constVoid, flow } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
-import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
 import { Lens } from "monocle-ts";
 import { useRouter } from "next/router";
@@ -35,9 +33,13 @@ import ErrorComponent from "../../../components/molecules/error";
 import { ItemLink, stringToUrl } from "../../../components/molecules/navLink";
 import * as _E from "../../../fp-ts/Either";
 import {
-  optionalHead,
+  CREATE_OR_UPDATE_CONFIGURATION,
+  GET_CONFIGURATION_QUERY,
+} from "../../../gql/pages/[teamName]/[projectName]/configuration";
+import {
   LensTaskEither,
   lensTaskEitherHead,
+  optionalHead,
 } from "../../../monocle-ts";
 import {
   defaultGQLErrorHandler,
@@ -50,14 +52,11 @@ import {
   TEAM_DOES_NOT_EXIST,
   UNDEFINED_ERROR,
 } from "../../../utils/error";
+import { eightBaseClient } from "../../../utils/graphql";
 import { hookNeedingFetch, Loading } from "../../../utils/hookNeedingFetch";
 import { SEPARATOR } from "../../../utils/separator";
 import { confirmOrCreateUser } from "../../../utils/user";
 import { withSession } from "../../api/session";
-import {
-  GET_CONFIGURATION_QUERY,
-  CREATE_OR_UPDATE_CONFIGURATION,
-} from "../../../gql/pages/[teamName]/[projectName]/configuration";
 
 type NegativeConfigurationFetchOutcome =
   | NOT_LOGGED_IN
@@ -117,11 +116,10 @@ const getConfiguration = (teamName: string, projectName: string) => (
   pipe(
     TE.tryCatch<NegativeConfigurationFetchOutcome, any>(
       () =>
-        new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-          headers: {
-            authorization: `Bearer ${session.idToken}`,
-          },
-        }).request(GET_CONFIGURATION_QUERY, { teamName, projectName }),
+        eightBaseClient(session).request(GET_CONFIGURATION_QUERY, {
+          teamName,
+          projectName,
+        }),
       (error): NegativeConfigurationFetchOutcome =>
         defaultGQLErrorHandler("getConfiguration query")(error)
     ),
@@ -293,11 +291,7 @@ const updateConfiguration = ({
       pipe(
         TE.tryCatch(
           () =>
-            new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-              headers: {
-                authorization: `Bearer ${session.idToken}`,
-              },
-            }).request(
+            eightBaseClient(session).request(
               CREATE_OR_UPDATE_CONFIGURATION,
               updateConfigurationVariables
             ),

@@ -1,12 +1,12 @@
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
+import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as TE from "fp-ts/lib/TaskEither";
-import * as A from "fp-ts/lib/Array";
-import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
 import { Lens } from "monocle-ts";
+import { GET_TEAMS_QUERY } from "../gql/utils/teams";
 import {
   defaultGQLErrorHandler,
   INCORRECT_TYPE_SAFETY,
@@ -14,8 +14,8 @@ import {
   NOT_LOGGED_IN,
   UNDEFINED_ERROR,
 } from "./error";
+import { eightBaseClient } from "./graphql";
 import { hookNeedingFetch } from "./hookNeedingFetch";
-import { GET_TEAMS_QUERY } from "../gql/utils/teams";
 
 export type NegativeTeamsFetchOutcome =
   | NOT_LOGGED_IN
@@ -61,12 +61,7 @@ export const getTeams = (
 ): TE.TaskEither<NegativeTeamsFetchOutcome, ITeam[]> =>
   pipe(
     TE.tryCatch(
-      () =>
-        new GraphQLClient(process.env.EIGHT_BASE_ENDPOINT, {
-          headers: {
-            authorization: `Bearer ${session.idToken}`,
-          },
-        }).request(GET_TEAMS_QUERY),
+      () => eightBaseClient(session).request(GET_TEAMS_QUERY),
       (error): NegativeTeamsFetchOutcome =>
         defaultGQLErrorHandler("teams query")(error)
     ),
