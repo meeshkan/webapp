@@ -27,6 +27,11 @@ import {
 } from "./error";
 import { decrypt, encrypt } from "./sec";
 import { confirmOrCreateUser } from "./user";
+import {
+  GITHUB_INFO_QUERY_OR_MUTATION,
+  UPDATE_GITHUB_INFO_MUTATION,
+  GITHUB_VIEWER_QUERY,
+} from "../gql/utils/gh";
 
 const Owner = t.type({
   login: t.string,
@@ -96,14 +101,7 @@ export const fetchGithubAccessToken = (
 ): TE.TaskEither<NegativeGithubFetchOutcome, string> =>
   pipe(
     session,
-    confirmOrCreateUser(
-      `id
-    githubInfo {
-      githubSyncChecksum
-      githubSyncNonce
-    }`,
-      githubAccessTokenType
-    ),
+    confirmOrCreateUser(GITHUB_INFO_QUERY_OR_MUTATION, githubAccessTokenType),
     TE.chain((githubAccessToken) =>
       githubAccessToken.githubInfo === null
         ? TE.left({ type: "NO_TOKEN_YET", msg: "No token currently in db" })
@@ -410,13 +408,7 @@ export const authenticateAppWithGithub = (
               authorization: `Bearer ${githubToken.access_token}`,
             },
           })
-            .request(
-              `query {
-      viewer {
-        id
-      }
-    }`
-            )
+            .request(GITHUB_VIEWER_QUERY)
             .then((viewerResult) => ({ githubToken, viewerResult })),
         (error): NegativeGithubFetchOutcome => ({
           type: "UNDEFINED_ERROR",
@@ -469,35 +461,11 @@ export const authenticateAppWithGithub = (
               authorization: `Bearer ${session.idToken}`,
             },
           })
-            .request(
-              `mutation(
-    $userId:ID!
-    $githubSyncChecksum:String!
-    $githubSyncNonce:String!
-  ) {
-    userUpdate(
-      filter: {
-        id:$userId
-      }
-      force: true
-      data:{
-        githubInfo: {
-          create: {
-            githubSyncChecksum:$githubSyncChecksum
-            githubSyncNonce:$githubSyncNonce
-          }
-        }
-      }
-    ) {
-      id
-    }
-  }`,
-              {
-                userId,
-                githubSyncChecksum: saltedEncryptedData.encryptedData,
-                githubSyncNonce: saltedEncryptedData.iv,
-              }
-            )
+            .request(UPDATE_GITHUB_INFO_MUTATION, {
+              userId,
+              githubSyncChecksum: saltedEncryptedData.encryptedData,
+              githubSyncNonce: saltedEncryptedData.iv,
+            })
             .then(() => githubToken),
         (error): NegativeGithubFetchOutcome =>
           defaultGQLErrorHandler("insert github token mutation")(error)

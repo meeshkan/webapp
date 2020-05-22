@@ -35,6 +35,7 @@ import {
   UNDEFINED_ERROR,
 } from "../../../utils/error";
 import { confirmOrCreateUser } from "../../../utils/user";
+import { GET_TEST_QUERY } from "../../../gql/pages/[teamName]/[projectName]/[testId]";
 
 type NegativeTestFetchOutcome =
   | NOT_LOGGED_IN
@@ -104,50 +105,7 @@ const getTest = (teamName: string, projectName: string, testID: string) => (
           headers: {
             authorization: `Bearer ${session.idToken}`,
           },
-        }).request(
-          `query(
-            $teamName: String!
-            $projectName:String!
-            $testID:ID!
-            ) {
-              user {
-                team(filter:{
-                  name: {
-                    equals: $teamName
-                  }
-                }) {
-                  items{
-                    image {
-                      downloadUrl
-                    }
-                    name
-                    project(filter:{
-                      name: {
-                        equals: $projectName
-                      }
-                    }) {
-                      items {
-                        name
-                        tests(filter:{
-                          id: {
-                            equals:$testID
-                          }
-                        }) {
-                          items{
-                            commitHash
-                            status
-                            location
-                            log
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }`,
-          { teamName, projectName, testID }
-        ),
+        }).request(GET_TEST_QUERY, { teamName, projectName, testID }),
       (error): NegativeTestFetchOutcome =>
         defaultGQLErrorHandler("getTest query")(error)
     ),

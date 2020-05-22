@@ -20,6 +20,11 @@ import {
   NegativeConfirmOrCreateUserOutcome,
 } from "../../utils/user";
 import { NegativeSessionFetchOutcome, withSession } from "./session";
+import {
+  CREATE_TEAM_FROM_USER_NAME,
+  ASSOCIATE_PHOTO_WITH_TEAM,
+  GET_TEAM_COUNT,
+} from "../../gql/pages/api/default-team-hook";
 
 const assertUserHasNoTeams = <Session extends ISession>(
   session: Session
@@ -31,13 +36,7 @@ const assertUserHasNoTeams = <Session extends ISession>(
           headers: {
             authorization: `Bearer ${session.idToken}`,
           },
-        }).request(`query {
-    user {
-        team {
-            count
-        }
-    }
-}`),
+        }).request(GET_TEAM_COUNT),
       (error): NegativeDefaultTeamHookOutcome =>
         defaultGQLErrorHandler("getTeamName")(error)
     ),
@@ -63,35 +62,10 @@ const createTeamFromUserName = (userId: string) => ({
           headers: {
             authorization: `Bearer ${idToken}`,
           },
-        }).request(
-          `mutation(
-        $userId:ID!
-        $teamName:String!
-      ) {
-        userUpdate(
-          filter: {
-            id: $userId
-          }
-          data:{
-            team: {
-              create: {
-                name: $teamName
-              }
-            }
-        }) {
-          team(filter: {
-            name: {
-              equals: $teamName
-            }
-          }){
-            items {
-              id
-            }
-          }
-        }
-      }`,
-          { teamName: user.nickname, userId }
-        ),
+        }).request(CREATE_TEAM_FROM_USER_NAME, {
+          teamName: user.nickname,
+          userId,
+        }),
       (error): NegativeDefaultTeamHookOutcome =>
         defaultGQLErrorHandler("mutation to insert default team")(error)
     ),
@@ -159,45 +133,12 @@ const uploadPhotoForTeam = (userId: string, teamId: string) => (
     RTE.chain(({ url, filename }) => (client) =>
       TE.tryCatch(
         () =>
-          client.request(
-            `mutation(
-      $userId:ID!
-      $teamId:ID!
-      $fileId:String!
-      $filename:String!
-    ) {
-      userUpdate(
-        filter: {
-          id:$userId
-        }
-        data:{
-          team: {
-            update:{
-              filter:{
-                id:$teamId
-              }
-              data:{
-                image:{
-                  create:{
-                    fileId:$fileId
-                    filename:$filename
-                  }
-                }
-              }
-            }
-          }
-        }
-      ) {
-        id
-      }
-    }`,
-            {
-              teamId,
-              userId,
-              fileId: url.split("/").slice(-1)[0],
-              filename,
-            }
-          ),
+          client.request(ASSOCIATE_PHOTO_WITH_TEAM, {
+            teamId,
+            userId,
+            fileId: url.split("/").slice(-1)[0],
+            filename,
+          }),
         (error): NegativeDefaultTeamHookOutcome =>
           defaultGQLErrorHandler("file upload graphql mutation")(error)
       )

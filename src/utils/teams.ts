@@ -15,6 +15,7 @@ import {
   UNDEFINED_ERROR,
 } from "./error";
 import { hookNeedingFetch } from "./hookNeedingFetch";
+import { GET_TEAMS_QUERY } from "../gql/utils/teams";
 
 export type NegativeTeamsFetchOutcome =
   | NOT_LOGGED_IN
@@ -65,29 +66,7 @@ export const getTeams = (
           headers: {
             authorization: `Bearer ${session.idToken}`,
           },
-        }).request(
-          `query {
-            user {
-              team {
-                items{
-                  name
-                  id
-                  image {
-                    downloadUrl
-                  }
-                  project {
-                    items {
-                      name
-                      repository {
-                          nodeId
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }`
-        ),
+        }).request(GET_TEAMS_QUERY),
       (error): NegativeTeamsFetchOutcome =>
         defaultGQLErrorHandler("teams query")(error)
     ),

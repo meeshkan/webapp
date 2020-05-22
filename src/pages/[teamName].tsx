@@ -35,6 +35,7 @@ import {
 import { confirmOrCreateUser } from "../utils/user";
 import { withSession } from "./api/session";
 import { LensTaskEither, lensTaskEitherHead } from "../monocle-ts";
+import { GET_TEAM_QUERY } from "../gql/pages/[teamName]";
 
 type NegativeTeamFetchOutcome =
   | NOT_LOGGED_IN
@@ -82,30 +83,7 @@ const getTeam = (teamName: string) => (
           headers: {
             authorization: `Bearer ${session.idToken}`,
           },
-        }).request(
-          `query($teamName: String!) {
-      user {
-        team(filter:{
-          name: {
-            equals: $teamName
-          }
-        }) {
-          items{
-            name
-            image {
-              downloadUrl
-            }
-            project {
-              items {
-                name
-              }
-            }
-          }
-        }
-      }
-    }`,
-          { teamName }
-        ),
+        }).request(GET_TEAM_QUERY, { teamName }),
       (error) => defaultGQLErrorHandler("get team query")(error)
     ),
     TE.chainEitherK(

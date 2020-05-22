@@ -26,6 +26,7 @@ import {
 } from "../../utils/error";
 import { confirmOrCreateUser } from "../../utils/user";
 import { retrieveSession } from "../api/session";
+import { GET_PROJECT_QUERY } from "../../gql/pages/[teamName]/[projectName]";
 
 type NegativeProjectFetchOutcome =
   | NOT_LOGGED_IN
@@ -95,47 +96,7 @@ const getProject = (teamName: string, projectName: string) => (
           headers: {
             authorization: `Bearer ${session.idToken}`,
           },
-        }).request(
-          `query(
-            $teamName: String!
-            $projectName:String!
-          ) {
-            user {
-              team(filter:{
-                name: {
-                  equals: $teamName
-                }
-              }) {
-                items{
-                  image {
-                    downloadUrl
-                  }
-                  name
-                  project(filter:{
-                    name: {
-                      equals: $projectName
-                    }
-                  }) {
-                    items {
-                      name
-                      configured
-                      tests {
-                        items {
-                          id
-                          location
-                          status
-                          createdAt
-                          commitHash
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }`,
-          { teamName, projectName }
-        ),
+        }).request(GET_PROJECT_QUERY, { teamName, projectName }),
       (error): NegativeProjectFetchOutcome =>
         defaultGQLErrorHandler("getProject query")(error)
     ),

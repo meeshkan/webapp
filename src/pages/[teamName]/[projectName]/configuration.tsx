@@ -34,7 +34,11 @@ import Card from "../../../components/molecules/card";
 import ErrorComponent from "../../../components/molecules/error";
 import { ItemLink, stringToUrl } from "../../../components/molecules/navLink";
 import * as _E from "../../../fp-ts/Either";
-import { optionalHead } from "../../../monocle-ts";
+import {
+  optionalHead,
+  LensTaskEither,
+  lensTaskEitherHead,
+} from "../../../monocle-ts";
 import {
   defaultGQLErrorHandler,
   GET_SERVER_SIDE_PROPS_ERROR,
@@ -50,6 +54,10 @@ import { hookNeedingFetch, Loading } from "../../../utils/hookNeedingFetch";
 import { SEPARATOR } from "../../../utils/separator";
 import { confirmOrCreateUser } from "../../../utils/user";
 import { withSession } from "../../api/session";
+import {
+  GET_CONFIGURATION_QUERY,
+  CREATE_OR_UPDATE_CONFIGURATION,
+} from "../../../gql/pages/[teamName]/[projectName]/configuration";
 
 type NegativeConfigurationFetchOutcome =
   | NOT_LOGGED_IN
@@ -113,42 +121,7 @@ const getConfiguration = (teamName: string, projectName: string) => (
           headers: {
             authorization: `Bearer ${session.idToken}`,
           },
-        }).request(
-          `query(
-            $teamName: String!
-            $projectName:String!
-          ) {
-            user {
-              team(filter:{
-                name: {
-                  equals: $teamName
-                }
-              }) {
-                items{
-                  image {
-                    downloadUrl
-                  }
-                  name
-                  project(filter:{
-                    name: {
-                      equals: $projectName
-                    }
-                  }) {
-                    items {
-                      name
-                      configuration{
-                        buildCommand
-                        openAPISpec
-                        directory
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }`,
-          { teamName, projectName }
-        ),
+        }).request(GET_CONFIGURATION_QUERY, { teamName, projectName }),
       (error): NegativeConfigurationFetchOutcome =>
         defaultGQLErrorHandler("getConfiguration query")(error)
     ),
@@ -164,42 +137,45 @@ const getConfiguration = (teamName: string, projectName: string) => (
         )
       )
     ),
-    TE.chainEitherK<NegativeConfigurationFetchOutcome, QueryTp, IConfiguration>(
-      flow(
-        Lens.fromPath<QueryTp>()(["user", "team", "items"]).get,
-        A.head,
-        E.fromOption(
-          (): NegativeConfigurationFetchOutcome => ({
+    LensTaskEither.fromPath<NegativeConfigurationFetchOutcome, QueryTp>()([
+      "user",
+      "team",
+      "items",
+    ])
+      .compose(
+        lensTaskEitherHead<NegativeConfigurationFetchOutcome, ITeam>(
+          TE.left({
             type: "TEAM_DOES_NOT_EXIST",
             msg: `Could not find team for: ${teamName} ${projectName}`,
           })
-        ),
-        E.chain((team) =>
-          pipe(
-            team,
-            Lens.fromPath<ITeam>()(["project", "items"]).get,
-            A.head,
-            E.fromOption(
-              (): NegativeConfigurationFetchOutcome => ({
-                type: "PROJECT_DOES_NOT_EXIST",
-                msg: `Could not find project for: ${teamName} ${projectName}`,
-              })
-            ),
-            E.chain((project) =>
-              pipe(
-                project,
-                Lens.fromPath<IProject>()(["configuration"]).get,
-                O.fromNullable,
-                O.getOrElse<IConfiguration>(() => ({
-                  buildCommand: null,
-                  openAPISpec: null,
-                  directory: null,
-                })),
-                (configuration) => E.right(configuration)
-              )
-            )
-          )
         )
+      )
+      .compose(
+        LensTaskEither.fromPath<NegativeConfigurationFetchOutcome, ITeam>()([
+          "project",
+          "items",
+        ])
+      )
+      .compose(
+        lensTaskEitherHead<NegativeConfigurationFetchOutcome, IProject>(
+          TE.left({
+            type: "PROJECT_DOES_NOT_EXIST",
+            msg: `Could not find project for: ${teamName} ${projectName}`,
+          })
+        )
+      )
+      .compose(
+        LensTaskEither.fromProp<NegativeConfigurationFetchOutcome, IProject>()(
+          "configuration"
+        )
+      ).get,
+    TE.chain((configuration) =>
+      TE.right(
+        configuration || {
+          openAPISpec: null,
+          buildCommand: null,
+          directory: null,
+        }
       )
     )
   );
@@ -322,69 +298,7 @@ const updateConfiguration = ({
                 authorization: `Bearer ${session.idToken}`,
               },
             }).request(
-              `mutation CREATE_CONFIGURATION(
-              $userId:ID!,
-              $teamName: String!,
-              $namePlusTeamName:String!,
-              $buildCommand:String!,
-              $openAPISpec:String!,
-              $directory:String!,
-              $teamNameAsPredicate:StringPredicate!
-              $projectNameAsPredicate:StringPredicate!) {
-                    userUpdate(filter: {
-                      id: $userId
-                    }
-                    force: true
-                    data:{
-                      team: {
-                        update: {
-                          filter:{
-                            name:$teamName
-                          }
-                          data:{
-                            project: {
-                              update: {
-                                filter: {
-                                  namePlusTeamName: $namePlusTeamName
-                                }
-                                data:{
-                                  configuration:{
-                                    create:{
-                                      buildCommand:$buildCommand
-                                      openAPISpec:$openAPISpec
-                                      directory:$directory
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }) {
-                      id
-                      team(filter:{
-                        name:$teamNameAsPredicate
-                      }) {
-                        items{
-                          name
-                          id
-                          project(filter:{
-                            name:$projectNameAsPredicate
-                          }) {
-                            items {
-                              name
-                              configuration {
-                                  buildCommand
-                                  directory
-                                  openAPISpec
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }`,
+              CREATE_OR_UPDATE_CONFIGURATION,
               updateConfigurationVariables
             ),
           (error): NegativeUpdateConfigurationOutcome => ({

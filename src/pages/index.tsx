@@ -73,6 +73,7 @@ import {
 } from "../utils/teams";
 import { confirmOrCreateUser } from "../utils/user";
 import { withSession } from "./api/session";
+import { CREATE_PROJECT_MUTATION } from "../gql/pages";
 
 interface ImportProjectVariables {
   userId: string;
@@ -131,57 +132,7 @@ const createProject = ({
               headers: {
                 authorization: `Bearer ${session.idToken}`,
               },
-            }).request(
-              `mutation CREATE_PROJECT($userId:ID!, $teamName:String!, $repositoryName: String!, $namePlusTeam: String!, $nodePlusTeam: String!, $nodeID: String!) {
-        userUpdate(filter: {
-          id: $userId
-        },
-        data:{
-          team: {
-            update: {
-              filter:{
-                name:$teamName
-              }
-              data:{
-                project: {
-                  create: {
-                    name: $repositoryName
-                    namePlusTeamName: $namePlusTeam
-                    repository: {
-                      create:{
-                        name: $repositoryName
-                        nodeId: $nodeID
-                        nodeIdPlusTeamId:$nodePlusTeam
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }) {
-          id
-          team {
-            items{
-              name
-              id
-              image {
-                downloadUrl
-              }
-              project {
-                items {
-                  name
-                  repository {
-                      nodeId
-                  }
-                }
-              }
-            }
-          }
-        }
-      }`,
-              importProjectVariables
-            ),
+            }).request(CREATE_PROJECT_MUTATION, importProjectVariables),
           (error): NegativeImportProjectOutcome => ({
             type: "UNDEFINED_ERROR",
             msg: "Could not make import project mutation",
