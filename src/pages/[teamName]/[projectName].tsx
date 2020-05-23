@@ -148,48 +148,46 @@ export const getServerSideProps = ({
     )
   )().then(_E.eitherSanitizedWithGenericError);
 
-export default (
-  props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, IProjectWithTeamName>
-) =>
-  pipe(
-    props,
-    E.fold(
-      () => (
-        <ErrorComponent
-          errorMessage={
-            "Uh oh. It looks like this resource does not exist! If you suspect it should, please reach out using the Intercom below."
-          }
+export default E.fold<
+  GET_SERVER_SIDE_PROPS_ERROR,
+  IProjectWithTeamName,
+  JSX.Element
+>(
+  () => (
+    <ErrorComponent
+      errorMessage={
+        "Uh oh. It looks like this resource does not exist! If you suspect it should, please reach out using the Intercom below."
+      }
+    />
+  ),
+  (projectProps) => (
+    <>
+      <Grid
+        templateColumns="repeat(3, 1fr)"
+        templateRows="repeat(2, minmax(204px, 45%))"
+        gap={8}
+      >
+        <Settings
+          organizationName={projectProps.teamName}
+          repositoryName={projectProps.name}
+          configured={projectProps.configuration ? true : false}
         />
-      ),
-      (projectProps) => (
-        <>
-          <Grid
-            templateColumns="repeat(3, 1fr)"
-            templateRows="repeat(2, minmax(204px, 45%))"
-            gap={8}
-          >
-            <Settings
-              organizationName={projectProps.teamName}
-              repositoryName={projectProps.name}
-              configured={projectProps.configuration ? true : false}
-            />
-            <Production
-              teamName={projectProps.teamName}
-              projectName={projectProps.name}
-              tests={projectProps.tests.items.filter(
-                (test) => test.location === "master"
-              )}
-            />
-            <Branch
-              teamName={projectProps.teamName}
-              projectName={projectProps.name}
-              tests={projectProps.tests.items.filter(
-                (test) => test.location === "branch"
-              )}
-            />
-            <Chart />
-          </Grid>
-        </>
-      )
-    )
-  );
+        <Production
+          teamName={projectProps.teamName}
+          projectName={projectProps.name}
+          tests={projectProps.tests.items.filter(
+            (test) => test.location === "master"
+          )}
+        />
+        <Branch
+          teamName={projectProps.teamName}
+          projectName={projectProps.name}
+          tests={projectProps.tests.items.filter(
+            (test) => test.location === "branch"
+          )}
+        />
+        <Chart />
+      </Grid>
+    </>
+  )
+);

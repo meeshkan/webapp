@@ -185,71 +185,65 @@ export const getServerSideProps = ({
     )
   )().then(_E.eitherSanitizedWithGenericError);
 
-const TestPage = (props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>) =>
-  pipe(
-    props,
-    E.fold(
-      () => (
-        <ErrorComponent
-          errorMessage={"Could not find this test resource."}
-        ></ErrorComponent>
-      ),
-      ({ test: { log, location, commitHash } }) => {
-        const { colorMode } = useColorMode();
-        const logs = JSON.parse(log);
-        const failures = logs.commands.filter((a) => a.success === false);
-        return (
-          <Grid
-            templateColumns="repeat(3, 1fr)"
-            templateRows="repeat(2, minmax(204px, 45%))"
-            gap={8}
+const TestPage = E.fold<GET_SERVER_SIDE_PROPS_ERROR, ITestProps, JSX.Element>(
+  () => (
+    <ErrorComponent
+      errorMessage={"Could not find this test resource."}
+    ></ErrorComponent>
+  ),
+  ({ test: { log, location, commitHash } }) => {
+    const { colorMode } = useColorMode();
+    const logs = JSON.parse(log);
+    const failures = logs.commands.filter((a) => a.success === false);
+    return (
+      <Grid
+        templateColumns="repeat(3, 1fr)"
+        templateRows="repeat(2, minmax(204px, 45%))"
+        gap={8}
+      >
+        <Card gridArea="1 / 2 / 4 / 1" heading="Tests">
+          {logs.commands.map((item, index) => (
+            <LogItem
+              key={index}
+              success={item.success}
+              path={item.path}
+              method={item.method}
+            />
+          ))}
+        </Card>
+        <Box gridArea="1 / 4 / 4 / 2">
+          <Heading
+            mb={4}
+            color={`mode.${colorMode}.title`}
+            fontWeight={900}
+            fontSize="xl"
           >
-            <Card gridArea="1 / 2 / 4 / 1" heading="Tests">
-              {logs.commands.map((item, index) => (
-                <LogItem
+            Test Failures
+            <Code
+              ml={2}
+              fontSize="inherit"
+              variantColor="red"
+            >{`${location}@${commitHash}`}</Code>
+          </Heading>
+          <Accordion w="full" defaultIndex={[0]} allowMultiple>
+            {failures.length > 0 ? (
+              failures.map((item, index) => (
+                <FailureMessage
                   key={index}
-                  success={item.success}
-                  path={item.path}
                   method={item.method}
+                  path={item.path}
+                  headers={item.headers}
+                  query={item.query}
                 />
-              ))}
-            </Card>
-            <Box gridArea="1 / 4 / 4 / 2">
-              <Heading
-                mb={4}
-                color={`mode.${colorMode}.title`}
-                fontWeight={900}
-                fontSize="xl"
-              >
-                Test Failures
-                <Code
-                  ml={2}
-                  fontSize="inherit"
-                  variantColor="red"
-                >{`${location}@${commitHash}`}</Code>
-              </Heading>
-              <Accordion w="full" defaultIndex={[0]} allowMultiple>
-                {failures.length > 0 ? (
-                  failures.map((item, index) => (
-                    <FailureMessage
-                      key={index}
-                      method={item.method}
-                      path={item.path}
-                      headers={item.headers}
-                      query={item.query}
-                    />
-                  ))
-                ) : (
-                  <Text color={`mode.${colorMode}.text`}>
-                    No bugs found here!
-                  </Text>
-                )}
-              </Accordion>
-            </Box>
-          </Grid>
-        );
-      }
-    )
-  );
+              ))
+            ) : (
+              <Text color={`mode.${colorMode}.text`}>No bugs found here!</Text>
+            )}
+          </Accordion>
+        </Box>
+      </Grid>
+    );
+  }
+);
 
 export default TestPage;

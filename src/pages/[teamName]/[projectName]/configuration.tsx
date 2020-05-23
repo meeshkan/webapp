@@ -358,245 +358,242 @@ const updateConfiguration = ({
 
 const items = ["Build settings", "Slack integration"];
 
-const ConfigurationPage = (
-  props: E.Either<NegativeConfigurationFetchOutcome, IConfigurationProps>
-) =>
-  pipe(
-    props,
-    E.fold(
-      () => (
-        <ErrorComponent
-          errorMessage={
-            "Meeshkan is temporarily offline. We are aware of the problem and are working hard to resolve it. For online support, please contact us using the Itercom icon below."
-          }
-        />
-      ),
+const ConfigurationPage = E.fold<
+  NegativeConfigurationFetchOutcome,
+  IConfigurationProps,
+  JSX.Element
+>(
+  () => (
+    <ErrorComponent
+      errorMessage={
+        "Meeshkan is temporarily offline. We are aware of the problem and are working hard to resolve it. For online support, please contact us using the Itercom icon below."
+      }
+    />
+  ),
+  ({
+    session,
+    configuration,
+    teamName,
+    projectName,
+    id,
+  }: IConfigurationProps) =>
+    pipe(
+      {
+        useColorMode: useColorMode(),
+        toast: useToast(),
+        useForm: useForm({
+          ...(configuration ? { defaultValues: configuration } : {}),
+        }),
+        useGetConfiguration: hookNeedingFetch(
+          getConfiguration(teamName, projectName)(session)
+        ),
+        useNotifications: useState(false),
+      },
+      (p) => ({
+        ...p,
+        onSubmit: (values: IConfiguration) =>
+          updateConfiguration({
+            toast: p.toast,
+            setConfiguration: p.useGetConfiguration[2],
+            ...values,
+            teamName,
+            projectNameAsPredicate: {
+              equals: projectName,
+            },
+            teamNameAsPredicate: {
+              equals: teamName,
+            },
+            userId: id,
+            namePlusTeamName: `${projectName}${SEPARATOR}${teamName}`,
+          })(session)().then(constNull),
+        configuration:
+          E.isRight(p.useGetConfiguration[0]) &&
+          E.isRight(p.useGetConfiguration[0].right)
+            ? p.useGetConfiguration[0].right.right
+            : configuration
+            ? configuration
+            : { openAPISpec: null, buildCommand: null, directory: null },
+      }),
       ({
-        session,
-        configuration,
-        teamName,
-        projectName,
-        id,
-      }: IConfigurationProps) =>
-        pipe(
-          {
-            useColorMode: useColorMode(),
-            toast: useToast(),
-            useForm: useForm({
-              ...(configuration ? { defaultValues: configuration } : {}),
-            }),
-            useGetConfiguration: hookNeedingFetch(
-              getConfiguration(teamName, projectName)(session)
-            ),
-            useNotifications: useState(false),
-          },
-          (p) => ({
-            ...p,
-            onSubmit: (values: IConfiguration) =>
-              updateConfiguration({
-                toast: p.toast,
-                setConfiguration: p.useGetConfiguration[2],
-                ...values,
-                teamName,
-                projectNameAsPredicate: {
-                  equals: projectName,
-                },
-                teamNameAsPredicate: {
-                  equals: teamName,
-                },
-                userId: id,
-                namePlusTeamName: `${projectName}${SEPARATOR}${teamName}`,
-              })(session)().then(constNull),
-            configuration:
-              E.isRight(p.useGetConfiguration[0]) &&
-              E.isRight(p.useGetConfiguration[0].right)
-                ? p.useGetConfiguration[0].right.right
-                : configuration
-                ? configuration
-                : { openAPISpec: null, buildCommand: null, directory: null },
-          }),
-          ({
-            useColorMode: { colorMode },
-            useForm: { handleSubmit, formState, register },
-            useNotifications: [notifications, setNotificaitons],
-            onSubmit,
-          }) => (
-            <Grid
-              templateColumns={[
-                "repeat(auto-fit, 1fr)",
-                "repeat(2, 1fr)",
-                "repeat(3, 1fr)",
-                "repeat(4, 1fr)",
-              ]}
-              gap={20}
-            >
-              <Box
-                bg={`mode.${colorMode}.card`}
-                rounded="sm"
-                pos="sticky"
-                top={136}
-                p={4}
-                gridArea="1 / 1 / 2 / 2"
-              >
-                {items.map((link, i) => (
-                  <ItemLink key={i} href={stringToUrl(link)}>
-                    {link}
-                  </ItemLink>
-                ))}
-              </Box>
-              <Stack
-                as="form"
-                onSubmit={handleSubmit(onSubmit)}
-                w="100%"
-                spacing={8}
-                gridArea="1 / 2 / 4 / 4"
-                overflow="auto"
-              >
-                <Card heading="Build settings" id={`build-settings`}>
-                  <FormControl d="flex" alignItems="center" mt={4}>
-                    <FormLabel
-                      fontWeight={500}
-                      color={`mode.${colorMode}.title`}
-                      minW="160px"
-                      mr={4}
-                      p={0}
-                    >
-                      Root directory
-                      <Tooltip
-                        hasArrow
-                        label="Where is your app located in this repository?"
-                        aria-label="Where is your app located in this repository?"
-                        placement="right"
-                      >
-                        <Icon
-                          name="info"
-                          size="12px"
-                          ml={2}
-                          color={`mode.${colorMode}.text`}
-                        />
-                      </Tooltip>
-                    </FormLabel>
-                    <Input
-                      borderColor={`mode.${colorMode}.icon`}
-                      color={`mode.${colorMode}.text`}
-                      rounded="sm"
-                      size="sm"
-                      name="directory"
-                      ref={register}
-                    />
-                  </FormControl>
-
-                  <FormControl d="flex" alignItems="center" mt={4}>
-                    <FormLabel
-                      fontWeight={500}
-                      color={`mode.${colorMode}.title`}
-                      minW="160px"
-                      mr={4}
-                      p={0}
-                    >
-                      Build command
-                      <Tooltip
-                        hasArrow
-                        label="The command(s) your app framework provides for compiling your code."
-                        aria-label="The command(s) your app framework provides for compiling your code."
-                        placement="right"
-                      >
-                        <Icon
-                          name="info"
-                          size="12px"
-                          ml={2}
-                          color={`mode.${colorMode}.text`}
-                        />
-                      </Tooltip>
-                    </FormLabel>
-                    <Input
-                      borderColor={`mode.${colorMode}.icon`}
-                      color={`mode.${colorMode}.text`}
-                      rounded="sm"
-                      size="sm"
-                      name="buildCommand"
-                      ref={register}
-                    />
-                  </FormControl>
-
-                  <FormControl d="flex" alignItems="center" my={4}>
-                    <FormLabel
-                      fontWeight={500}
-                      color={`mode.${colorMode}.title`}
-                      minW="160px"
-                      mr={4}
-                      p={0}
-                    >
-                      OpenAPI location
-                      <Tooltip
-                        hasArrow
-                        label="Where is your OpenAPI spec located in this repository?"
-                        aria-label="Where is your OpenAPI spec located in this repository?"
-                        placement="right"
-                      >
-                        <Icon
-                          name="info"
-                          size="12px"
-                          ml={2}
-                          color={`mode.${colorMode}.text`}
-                        />
-                      </Tooltip>
-                    </FormLabel>
-                    <Input
-                      borderColor={`mode.${colorMode}.icon`}
-                      color={`mode.${colorMode}.text`}
-                      rounded="sm"
-                      size="sm"
-                      name="openAPISpec"
-                      ref={register}
-                    />
-                  </FormControl>
-
-                  <Flex justifyContent="flex-end">
-                    <LightMode>
-                      <Button
-                        size="sm"
-                        px={4}
-                        rounded="sm"
-                        fontWeight={900}
-                        variantColor="blue"
-                        type="submit"
-                        isLoading={formState.isSubmitting}
-                      >
-                        Save
-                      </Button>
-                    </LightMode>
-                  </Flex>
-                </Card>
-
-                <Box h={4} />
-
-                <Card heading="Slack integration" id={`slack-integration`}>
-                  <Flex justifyContent="space-between" my={4}>
-                    <FormLabel color={`mode.${colorMode}.text`}>
-                      Global notifications{" "}
-                      {notifications == true ? "on" : "off"}
-                    </FormLabel>
-                    <Switch
-                      isChecked={notifications}
-                      onChange={() => setNotificaitons(!notifications)}
-                    />
-                  </Flex>
-                  <Link
-                    color={colorMode === "light" ? "blue.500" : "blue.200"}
-                    href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_OAUTH_APP_CLIENT_ID}&scope=incoming-webhook&state={"id":"${session.user.sub}","teamName":"${teamName}","projectName":"${projectName}"}&redirect_uri=${process.env.SLACK_OAUTH_REDIRECT_URI}`}
-                    aria-label="Link to slack to authorize posting notifications from Meeshkan"
-                    verticalAlign="middle"
+        useColorMode: { colorMode },
+        useForm: { handleSubmit, formState, register },
+        useNotifications: [notifications, setNotificaitons],
+        onSubmit,
+      }) => (
+        <Grid
+          templateColumns={[
+            "repeat(auto-fit, 1fr)",
+            "repeat(2, 1fr)",
+            "repeat(3, 1fr)",
+            "repeat(4, 1fr)",
+          ]}
+          gap={20}
+        >
+          <Box
+            bg={`mode.${colorMode}.card`}
+            rounded="sm"
+            pos="sticky"
+            top={136}
+            p={4}
+            gridArea="1 / 1 / 2 / 2"
+          >
+            {items.map((link, i) => (
+              <ItemLink key={i} href={stringToUrl(link)}>
+                {link}
+              </ItemLink>
+            ))}
+          </Box>
+          <Stack
+            as="form"
+            onSubmit={handleSubmit(onSubmit)}
+            w="100%"
+            spacing={8}
+            gridArea="1 / 2 / 4 / 4"
+            overflow="auto"
+          >
+            <Card heading="Build settings" id={`build-settings`}>
+              <FormControl d="flex" alignItems="center" mt={4}>
+                <FormLabel
+                  fontWeight={500}
+                  color={`mode.${colorMode}.title`}
+                  minW="160px"
+                  mr={4}
+                  p={0}
+                >
+                  Root directory
+                  <Tooltip
+                    hasArrow
+                    label="Where is your app located in this repository?"
+                    aria-label="Where is your app located in this repository?"
+                    placement="right"
                   >
-                    <Icon name="slack" mr={2} />
-                    Install the slack app here
-                  </Link>
-                </Card>
-              </Stack>
-            </Grid>
-          )
-        )
+                    <Icon
+                      name="info"
+                      size="12px"
+                      ml={2}
+                      color={`mode.${colorMode}.text`}
+                    />
+                  </Tooltip>
+                </FormLabel>
+                <Input
+                  borderColor={`mode.${colorMode}.icon`}
+                  color={`mode.${colorMode}.text`}
+                  rounded="sm"
+                  size="sm"
+                  name="directory"
+                  ref={register}
+                />
+              </FormControl>
+
+              <FormControl d="flex" alignItems="center" mt={4}>
+                <FormLabel
+                  fontWeight={500}
+                  color={`mode.${colorMode}.title`}
+                  minW="160px"
+                  mr={4}
+                  p={0}
+                >
+                  Build command
+                  <Tooltip
+                    hasArrow
+                    label="The command(s) your app framework provides for compiling your code."
+                    aria-label="The command(s) your app framework provides for compiling your code."
+                    placement="right"
+                  >
+                    <Icon
+                      name="info"
+                      size="12px"
+                      ml={2}
+                      color={`mode.${colorMode}.text`}
+                    />
+                  </Tooltip>
+                </FormLabel>
+                <Input
+                  borderColor={`mode.${colorMode}.icon`}
+                  color={`mode.${colorMode}.text`}
+                  rounded="sm"
+                  size="sm"
+                  name="buildCommand"
+                  ref={register}
+                />
+              </FormControl>
+
+              <FormControl d="flex" alignItems="center" my={4}>
+                <FormLabel
+                  fontWeight={500}
+                  color={`mode.${colorMode}.title`}
+                  minW="160px"
+                  mr={4}
+                  p={0}
+                >
+                  OpenAPI location
+                  <Tooltip
+                    hasArrow
+                    label="Where is your OpenAPI spec located in this repository?"
+                    aria-label="Where is your OpenAPI spec located in this repository?"
+                    placement="right"
+                  >
+                    <Icon
+                      name="info"
+                      size="12px"
+                      ml={2}
+                      color={`mode.${colorMode}.text`}
+                    />
+                  </Tooltip>
+                </FormLabel>
+                <Input
+                  borderColor={`mode.${colorMode}.icon`}
+                  color={`mode.${colorMode}.text`}
+                  rounded="sm"
+                  size="sm"
+                  name="openAPISpec"
+                  ref={register}
+                />
+              </FormControl>
+
+              <Flex justifyContent="flex-end">
+                <LightMode>
+                  <Button
+                    size="sm"
+                    px={4}
+                    rounded="sm"
+                    fontWeight={900}
+                    variantColor="blue"
+                    type="submit"
+                    isLoading={formState.isSubmitting}
+                  >
+                    Save
+                  </Button>
+                </LightMode>
+              </Flex>
+            </Card>
+
+            <Box h={4} />
+
+            <Card heading="Slack integration" id={`slack-integration`}>
+              <Flex justifyContent="space-between" my={4}>
+                <FormLabel color={`mode.${colorMode}.text`}>
+                  Global notifications {notifications == true ? "on" : "off"}
+                </FormLabel>
+                <Switch
+                  isChecked={notifications}
+                  onChange={() => setNotificaitons(!notifications)}
+                />
+              </Flex>
+              <Link
+                color={colorMode === "light" ? "blue.500" : "blue.200"}
+                href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_OAUTH_APP_CLIENT_ID}&scope=incoming-webhook&state={"id":"${session.user.sub}","teamName":"${teamName}","projectName":"${projectName}"}&redirect_uri=${process.env.SLACK_OAUTH_REDIRECT_URI}`}
+                aria-label="Link to slack to authorize posting notifications from Meeshkan"
+                verticalAlign="middle"
+              >
+                <Icon name="slack" mr={2} />
+                Install the slack app here
+              </Link>
+            </Card>
+          </Stack>
+        </Grid>
+      )
     )
-  );
+);
 
 export default ConfigurationPage;
