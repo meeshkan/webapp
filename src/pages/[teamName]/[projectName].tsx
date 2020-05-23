@@ -10,7 +10,7 @@ import Branch from "../../components/Dashboard/branch";
 import Chart from "../../components/Dashboard/chart";
 import Production from "../../components/Dashboard/production";
 import Settings from "../../components/Dashboard/settings";
-import ErrorComponent from "../../components/molecules/error";
+import { withError } from "../../components/molecules/error";
 import * as _E from "../../fp-ts/Either";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import { LensTaskEither, lensTaskEitherHead } from "../../monocle-ts";
@@ -148,18 +148,8 @@ export const getServerSideProps = ({
     )
   )().then(_E.eitherSanitizedWithGenericError);
 
-export default E.fold<
-  GET_SERVER_SIDE_PROPS_ERROR,
-  IProjectWithTeamName,
-  JSX.Element
->(
-  () => (
-    <ErrorComponent
-      errorMessage={
-        "Uh oh. It looks like this resource does not exist! If you suspect it should, please reach out using the Intercom below."
-      }
-    />
-  ),
+export default withError<GET_SERVER_SIDE_PROPS_ERROR, IProjectWithTeamName>(
+  "Uh oh. It looks like this resource does not exist! If you suspect it should, please reach out using the Intercom below.",
   (projectProps) => (
     <>
       <Grid

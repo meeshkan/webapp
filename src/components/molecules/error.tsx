@@ -9,6 +9,7 @@ import {
   Flex,
   Link,
 } from "@chakra-ui/core";
+import * as E from "fp-ts/lib/Either";
 import NextLink from "next/link";
 
 type ErrorProps = {
@@ -68,5 +69,8 @@ const ErrorComponent = ({ errorMessage }: ErrorProps) => {
     </Box>
   );
 };
+
+export const withError = <E, A>(m: string, f: (a: A) => JSX.Element) =>
+  E.fold<E, A, JSX.Element>(() => <ErrorComponent errorMessage={m} />, f);
 
 export default ErrorComponent;

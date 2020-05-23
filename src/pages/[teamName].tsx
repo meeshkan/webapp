@@ -18,7 +18,7 @@ import * as t from "io-ts";
 import Link from "next/link";
 import React from "react";
 import Card from "../components/molecules/card";
-import ErrorComponent from "../components/molecules/error";
+import { withError } from "../components/molecules/error";
 import * as _E from "../fp-ts/Either";
 import { GET_TEAM_QUERY } from "../gql/pages/[teamName]";
 import { LensTaskEither, lensTaskEitherHead } from "../monocle-ts";
@@ -122,14 +122,8 @@ export const getServerSideProps = ({
     withSession(req, "[teamName].tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
 
-export default E.fold<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps, JSX.Element>(
-  () => (
-    <ErrorComponent
-      errorMessage={
-        "Uh oh. Looks like this resource does not exist. If you suspect it should, reach out to us using the Intercom below."
-      }
-    />
-  ),
+export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
+  "Uh oh. Looks like this resource does not exist. If you suspect it should, reach out to us using the Intercom below.",
   ({ team, session }) =>
     pipe(useColorMode(), ({ colorMode }) => (
       <>

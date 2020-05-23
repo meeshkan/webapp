@@ -17,7 +17,7 @@ import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
 import React from "react";
 import Card from "../../../components/molecules/card";
-import ErrorComponent from "../../../components/molecules/error";
+import { withError } from "../../../components/molecules/error";
 import FailureMessage from "../../../components/molecules/failureMessage";
 import LogItem from "../../../components/molecules/logItem";
 import * as _E from "../../../fp-ts/Either";
@@ -185,12 +185,8 @@ export const getServerSideProps = ({
     )
   )().then(_E.eitherSanitizedWithGenericError);
 
-const TestPage = E.fold<GET_SERVER_SIDE_PROPS_ERROR, ITestProps, JSX.Element>(
-  () => (
-    <ErrorComponent
-      errorMessage={"Could not find this test resource."}
-    ></ErrorComponent>
-  ),
+const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
+  "Could not find this test resource.",
   ({ test: { log, location, commitHash } }) => {
     const { colorMode } = useColorMode();
     const logs = JSON.parse(log);

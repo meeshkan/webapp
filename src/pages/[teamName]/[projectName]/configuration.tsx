@@ -29,7 +29,7 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import Card from "../../../components/molecules/card";
-import ErrorComponent from "../../../components/molecules/error";
+import { withError } from "../../../components/molecules/error";
 import { ItemLink, stringToUrl } from "../../../components/molecules/navLink";
 import * as _E from "../../../fp-ts/Either";
 import {
@@ -358,18 +358,11 @@ const updateConfiguration = ({
 
 const items = ["Build settings", "Slack integration"];
 
-const ConfigurationPage = E.fold<
+const ConfigurationPage = withError<
   NegativeConfigurationFetchOutcome,
-  IConfigurationProps,
-  JSX.Element
+  IConfigurationProps
 >(
-  () => (
-    <ErrorComponent
-      errorMessage={
-        "Meeshkan is temporarily offline. We are aware of the problem and are working hard to resolve it. For online support, please contact us using the Itercom icon below."
-      }
-    />
-  ),
+  "Meeshkan is temporarily offline. We are aware of the problem and are working hard to resolve it. For online support, please contact us using the Itercom icon below.",
   ({
     session,
     configuration,

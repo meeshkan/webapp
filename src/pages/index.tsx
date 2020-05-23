@@ -43,7 +43,7 @@ import * as t from "io-ts";
 import { NextRouter, useRouter } from "next/router";
 import React, { useState } from "react";
 import Card from "../components/molecules/card";
-import ErrorComponent from "../components/molecules/error";
+import { withError } from "../components/molecules/error";
 import * as _E from "../fp-ts/Either";
 import { CREATE_PROJECT_MUTATION } from "../gql/pages";
 import {
@@ -318,14 +318,8 @@ const useRepoList = (
     )
   );
 
-export default E.fold<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps, JSX.Element>(
-  () => (
-    <ErrorComponent
-      errorMessage={
-        "Meeshkan is temporarily offline. We are aware of the problem and are working hard to resolve it. For online support, please contact us using the Itercom icon below."
-      }
-    />
-  ),
+export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
+  "Meeshkan is temporarily offline. We are aware of the problem and are working hard to resolve it. For online support, please contact us using the Itercom icon below.",
   ({ session, teams, id }) =>
     pipe(
       {
