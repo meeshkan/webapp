@@ -24,6 +24,7 @@ import {
   OAUTH_FLOW_ERROR,
   REST_ENDPOINT_ERROR,
   UNDEFINED_ERROR,
+  UNKNOWN_GRAPHQL_ERROR,
 } from "./error";
 import { decrypt, encrypt } from "./sec";
 import { confirmOrCreateUser } from "./user";
@@ -75,6 +76,7 @@ export type NegativeGithubFetchOutcome =
   | NO_TOKEN_YET
   | OAUTH_FLOW_ERROR
   | UNDEFINED_ERROR
+  | UNKNOWN_GRAPHQL_ERROR
   | INVALID_TOKEN_ERROR
   | REST_ENDPOINT_ERROR
   | INCORRECT_TYPE_SAFETY;
@@ -180,7 +182,7 @@ const getRepositories = (
             }),
           (error): NegativeGithubFetchOutcome => ({
             type: "UNDEFINED_ERROR",
-            msg: "Call to github repo fetch failedfailed",
+            msg: "Call to github repo fetch failed",
             error,
           })
         ),
@@ -257,7 +259,7 @@ const getInstallationRepositories = (
             }),
           (error): NegativeGithubFetchOutcome => ({
             type: "UNDEFINED_ERROR",
-            msg: "Call to github repo fetch failedfailed",
+            msg: "Call to github installation fetch failed",
             error,
           })
         ),

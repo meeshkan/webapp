@@ -13,6 +13,7 @@ import {
   INVALID_TOKEN_ERROR,
   NOT_LOGGED_IN,
   UNDEFINED_ERROR,
+  UNKNOWN_GRAPHQL_ERROR,
 } from "./error";
 import { eightBaseClient } from "./graphql";
 import { hookNeedingFetch } from "./hookNeedingFetch";
@@ -21,6 +22,7 @@ export type NegativeTeamsFetchOutcome =
   | NOT_LOGGED_IN
   | INVALID_TOKEN_ERROR
   | UNDEFINED_ERROR
+  | UNKNOWN_GRAPHQL_ERROR
   | INCORRECT_TYPE_SAFETY;
 
 export const Team = t.type({

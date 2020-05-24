@@ -6,7 +6,13 @@ import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import fetch from "isomorphic-unfetch";
 import { Lens } from "monocle-ts";
-import { INCORRECT_TYPE_SAFETY, UNDEFINED_ERROR } from "./error";
+import {
+  INCORRECT_TYPE_SAFETY,
+  UNDEFINED_ERROR,
+  UNKNOWN_GRAPHQL_ERROR,
+  defaultGQLErrorHandler,
+  INVALID_TOKEN_ERROR,
+} from "./error";
 import { eightBaseClient } from "./graphql";
 import { hookNeedingFetch } from "./hookNeedingFetch";
 
@@ -22,6 +28,8 @@ export const useFetchSession = () => hookNeedingFetch(fetchSession);
 
 export type NegativeConfirmOrCreateUserOutcome =
   | INCORRECT_TYPE_SAFETY
+  | UNKNOWN_GRAPHQL_ERROR
+  | INVALID_TOKEN_ERROR
   | UNDEFINED_ERROR;
 
 const __confirmOrCreateUser = <A, B, Session extends ISession>(
@@ -36,11 +44,7 @@ const __confirmOrCreateUser = <A, B, Session extends ISession>(
     // attempt graphql operation
     TE.tryCatch(
       () => eightBaseClient(session).request(query, vars),
-      (error): NegativeConfirmOrCreateUserOutcome => ({
-        type: "UNDEFINED_ERROR",
-        msg: `Could not ${isConfirm ? "confirm" : "create"} user`,
-        error,
-      })
+      defaultGQLErrorHandler("confirm or create user")
     ),
     TE.chainEitherK(
       // try to decode using the incoming type

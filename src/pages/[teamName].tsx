@@ -30,6 +30,7 @@ import {
   NOT_LOGGED_IN,
   TEAM_DOES_NOT_EXIST,
   UNDEFINED_ERROR,
+  UNKNOWN_GRAPHQL_ERROR,
 } from "../utils/error";
 import { eightBaseClient } from "../utils/graphql";
 import { confirmOrCreateUser } from "../utils/user";
@@ -40,6 +41,7 @@ type NegativeTeamFetchOutcome =
   | TEAM_DOES_NOT_EXIST
   | INVALID_TOKEN_ERROR
   | UNDEFINED_ERROR
+  | UNKNOWN_GRAPHQL_ERROR
   | INCORRECT_TYPE_SAFETY
   | INCORRECT_TYPE_SAFETY;
 

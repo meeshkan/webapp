@@ -33,6 +33,7 @@ import {
   TEAM_DOES_NOT_EXIST,
   TEST_DOES_NOT_EXIST,
   UNDEFINED_ERROR,
+  UNKNOWN_GRAPHQL_ERROR,
 } from "../../../utils/error";
 import { confirmOrCreateUser } from "../../../utils/user";
 import { GET_TEST_QUERY } from "../../../gql/pages/[teamName]/[projectName]/[testId]";
@@ -41,6 +42,7 @@ import { eightBaseClient } from "../../../utils/graphql";
 type NegativeTestFetchOutcome =
   | NOT_LOGGED_IN
   | TEAM_DOES_NOT_EXIST
+  | UNKNOWN_GRAPHQL_ERROR
   | PROJECT_DOES_NOT_EXIST
   | INVALID_TOKEN_ERROR
   | UNDEFINED_ERROR

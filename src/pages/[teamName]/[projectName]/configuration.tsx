@@ -51,6 +51,7 @@ import {
   PROJECT_DOES_NOT_EXIST,
   TEAM_DOES_NOT_EXIST,
   UNDEFINED_ERROR,
+  UNKNOWN_GRAPHQL_ERROR,
 } from "../../../utils/error";
 import { eightBaseClient } from "../../../utils/graphql";
 import { hookNeedingFetch, Loading } from "../../../utils/hookNeedingFetch";
@@ -63,6 +64,7 @@ type NegativeConfigurationFetchOutcome =
   | TEAM_DOES_NOT_EXIST
   | PROJECT_DOES_NOT_EXIST
   | INVALID_TOKEN_ERROR
+  | UNKNOWN_GRAPHQL_ERROR
   | UNDEFINED_ERROR
   | INCORRECT_TYPE_SAFETY;
 

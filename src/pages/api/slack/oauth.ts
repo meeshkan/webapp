@@ -17,6 +17,7 @@ import {
   INVALID_TOKEN_ERROR,
   NOT_LOGGED_IN,
   UNDEFINED_ERROR,
+  UNKNOWN_GRAPHQL_ERROR,
 } from "../../../utils/error";
 import { eightBaseClient } from "../../../utils/graphql";
 import * as Oauth from "../../../utils/oauth";
@@ -124,6 +125,7 @@ type NegativeOAuthOutcome =
   | INCORRECT_TYPE_SAFETY
   | UNDEFINED_ERROR
   | INVALID_TOKEN_ERROR
+  | UNKNOWN_GRAPHQL_ERROR
   | NOT_LOGGED_IN;
 
 export const fromQueryParam = (p: string | string[]) =>
