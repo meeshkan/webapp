@@ -221,7 +221,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
               ml={2}
               fontSize="inherit"
               variantColor="red"
-            >{`${location}@${commitHash}`}</Code>
+            >{`${location}@${commitHash.slice(0, 7)}`}</Code>
           </Heading>
           <Accordion w="full" defaultIndex={[0]} allowMultiple>
             {failures.length > 0 ? (
