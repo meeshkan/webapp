@@ -421,6 +421,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
             {/* Import a project | BUTTON */}
             <Button
               onClick={onOpen}
+              pos="unset"
               p={4}
               minH="72px"
               justifyContent="start"
@@ -435,210 +436,202 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
               <Icon h={10} w={10} mr={2} name="add" stroke="2px" />
               Import a project
             </Button>
+          </Grid>
 
-            {/* Import a project | MODAL */}
-            <Modal
-              onClose={onClose}
-              isOpen={isOpen}
-              isCentered
-              scrollBehavior="inside"
-              closeOnOverlayClick={true}
-              size="lg"
-            >
-              <Skeleton isLoaded={!E.isLeft(repoListAndThunk[0])}>
-                <ModalOverlay />
-                <ModalContent
-                  rounded="sm"
-                  backgroundColor={`mode.${colorMode}.card`}
+          {/* Import a project | MODAL */}
+          <Modal
+            onClose={onClose}
+            isOpen={isOpen}
+            isCentered
+            scrollBehavior="inside"
+            closeOnOverlayClick={true}
+            size="lg"
+          >
+            <Skeleton isLoaded={!E.isLeft(repoListAndThunk[0])}>
+              <ModalOverlay />
+              <ModalContent
+                rounded="sm"
+                backgroundColor={`mode.${colorMode}.card`}
+              >
+                <ModalHeader
+                  borderBottom="1px solid"
+                  borderColor={`mode.${colorMode}.icon`}
+                  mx={4}
+                  px={0}
+                  pt={4}
+                  pb={2}
+                  fontWeight={900}
+                  color={`mode.${colorMode}.title`}
                 >
-                  <ModalHeader
-                    borderBottom="1px solid"
-                    borderColor={`mode.${colorMode}.icon`}
-                    mx={4}
-                    px={0}
-                    pt={4}
-                    pb={2}
-                    fontWeight={900}
-                    color={`mode.${colorMode}.title`}
-                  >
-                    Import a project to {allTeams[0].name}'s Team
-                  </ModalHeader>
-                  <ModalCloseButton
-                    rounded="sm"
-                    size="sm"
-                    mt={2}
-                    mr={0}
-                    color={`mode.${colorMode}.text`}
-                  />
-                  <ModalBody px={2}>
-                    {importProjectIsExecuting[0] ? (
-                      <Box
-                        h="100%"
-                        w="100%"
-                        d="flex"
-                        justifyContent="center"
-                        alignItems="center"
+                  Import a project to {allTeams[0].name}'s Team
+                </ModalHeader>
+                <ModalCloseButton
+                  rounded="sm"
+                  size="sm"
+                  mt={2}
+                  mr={0}
+                  color={`mode.${colorMode}.text`}
+                />
+                <ModalBody px={2}>
+                  {importProjectIsExecuting[0] ? (
+                    <Box
+                      h="100%"
+                      w="100%"
+                      d="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                    >
+                      <Spinner
+                        color={colorMode === "light" ? "red.500" : "red.300"}
+                        size="xl"
+                        thickness="4px"
+                        emptyColor={`mode.${colorMode}.icon`}
+                      />
+                    </Box>
+                  ) : E.isRight(repoListAndThunk[0]) &&
+                    E.isLeft(repoListAndThunk[0].right) ? (
+                    <Flex h="100%" justify="center" align="center">
+                      <Button
+                        as={"a"}
+                        rounded="sm"
+                        fontWeight={900}
+                        px={4}
+                        variantColor="red"
+                        // @ts-ignore
+                        href={`https://github.com/apps/meeshkan/installations/new?state=${stateForLogin}`}
+                        aria-label="Link to GitHub to install meeshkan on a repository"
                       >
-                        <Spinner
-                          color={colorMode === "light" ? "red.500" : "red.300"}
-                          size="xl"
-                          thickness="4px"
-                          emptyColor={`mode.${colorMode}.icon`}
-                        />
-                      </Box>
-                    ) : E.isRight(repoListAndThunk[0]) &&
-                      E.isLeft(repoListAndThunk[0].right) ? (
-                      <Flex h="100%" justify="center" align="center">
-                        <Button
-                          as={"a"}
-                          rounded="sm"
-                          fontWeight={900}
-                          px={4}
-                          variantColor="red"
-                          // @ts-ignore
-                          href={`https://github.com/apps/meeshkan/installations/new?state=${stateForLogin}`}
-                          aria-label="Link to GitHub to install meeshkan on a repository"
-                        >
-                          <Icon name="github" mr={2} />
-                          Import from GitHub
-                        </Button>
-                      </Flex>
-                    ) : (
-                      E.isRight(repoListAndThunk[0]) &&
-                      E.isRight(repoListAndThunk[0].right) &&
-                      E.isRight(owner) &&
-                      E.isRight(owner.right) &&
-                      O.isSome(owner.right.right) && (
-                        <>
-                          <Menu closeOnSelect={true}>
-                            <MenuButton
-                              display="flex"
-                              alignItems="center"
-                              justifyContent="space-between"
-                              minWidth="204px"
-                              rounded="sm"
-                              ml={2}
-                              mb={4}
-                              border="1px solid"
-                              backgroundColor={`mode.${colorMode}.background`}
-                              borderColor={`mode.${colorMode}.icon`}
+                        <Icon name="github" mr={2} />
+                        Import from GitHub
+                      </Button>
+                    </Flex>
+                  ) : (
+                    E.isRight(repoListAndThunk[0]) &&
+                    E.isRight(repoListAndThunk[0].right) &&
+                    E.isRight(owner) &&
+                    E.isRight(owner.right) &&
+                    O.isSome(owner.right.right) && (
+                      <>
+                        <Menu closeOnSelect={true}>
+                          <MenuButton
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="space-between"
+                            minWidth="204px"
+                            rounded="sm"
+                            ml={2}
+                            mb={4}
+                            border="1px solid"
+                            backgroundColor={`mode.${colorMode}.background`}
+                            borderColor={`mode.${colorMode}.icon`}
+                          >
+                            <Image
+                              src={owner.right.right.value.avatar_url}
+                              size={8}
+                              roundedLeft="sm"
+                              borderColor={`mode.${colorMode}.background`}
+                            />
+                            <Text mr={8} color={`mode.${colorMode}.text`}>
+                              {owner.right.right.value.login}
+                            </Text>
+                            <Icon
+                              name="arrow-up-down"
+                              size="12px"
+                              color="gray.500"
+                              mr={2}
+                            />
+                          </MenuButton>
+                          <MenuList
+                            border="none"
+                            placement="bottom-start"
+                            backgroundColor={`mode.${colorMode}.card`}
+                            color={`mode.${colorMode}.text`}
+                          >
+                            <MenuOptionGroup
+                              defaultValue={owner.right.right.value.login}
+                              type="radio"
                             >
-                              <Image
-                                src={owner.right.right.value.avatar_url}
-                                size={8}
-                                roundedLeft="sm"
-                                borderColor={`mode.${colorMode}.background`}
-                              />
-                              <Text mr={8} color={`mode.${colorMode}.text`}>
-                                {owner.right.right.value.login}
-                              </Text>
-                              <Icon
-                                name="arrow-up-down"
-                                size="12px"
-                                color="gray.500"
-                                mr={2}
-                              />
-                            </MenuButton>
-                            <MenuList
-                              border="none"
-                              placement="bottom-start"
-                              backgroundColor={`mode.${colorMode}.card`}
-                              color={`mode.${colorMode}.text`}
-                            >
-                              <MenuOptionGroup
-                                defaultValue={owner.right.right.value.login}
-                                type="radio"
-                              >
-                                {repoListAndThunk[0].right.right.map(
-                                  (reposForOwner, index) => (
-                                    <MenuItemOption
-                                      key={index}
-                                      value={
-                                        NEA.head(reposForOwner).owner.login
-                                      }
-                                      onClick={() => {
-                                        setOwner(
+                              {repoListAndThunk[0].right.right.map(
+                                (reposForOwner, index) => (
+                                  <MenuItemOption
+                                    key={index}
+                                    value={NEA.head(reposForOwner).owner.login}
+                                    onClick={() => {
+                                      setOwner(
+                                        E.right(
                                           E.right(
-                                            E.right(
-                                              O.some(
-                                                NEA.head(reposForOwner).owner
-                                              )
+                                            O.some(
+                                              NEA.head(reposForOwner).owner
                                             )
                                           )
-                                        );
-                                        setOwnerRepos(
-                                          E.right(
-                                            E.right(O.some(reposForOwner))
-                                          )
-                                        );
-                                      }}
-                                    >
-                                      {NEA.head(reposForOwner).owner.login}
-                                    </MenuItemOption>
-                                  )
-                                )}
-                              </MenuOptionGroup>
-                            </MenuList>
-                          </Menu>
-                          <Stack>
-                            {E.isRight(ownerRepos) &&
-                              E.isRight(ownerRepos.right) &&
-                              O.isSome(ownerRepos.right.right) &&
-                              ownerRepos.right.right.value.map(
-                                (repo, index) => (
-                                  <ImportProject
-                                    key={index}
-                                    repoName={repo.name}
-                                    onClick={createProject({
-                                      importProjectIsExecuting:
-                                        importProjectIsExecuting[1],
-                                      closeModal: onClose,
-                                      toast,
-                                      userId: id,
-                                      namePlusTeam: `${repo.name}${SEPARATOR}${allTeams[0].name}`,
-                                      nodeID: repo.node_id,
-                                      nodePlusTeam:
-                                        repo.node_id +
-                                        SEPARATOR +
-                                        allTeams[0].id,
-                                      repositoryName: repo.name,
-                                      // this assumes that at least one team exist
-                                      // doesn't cover error case
-                                      // where team addition fails
-                                      // also does not allow multiple teams
-                                      teamName: allTeams[0].name,
-                                      setTeams: teamsFromClientSideFetch[2],
-                                      router,
-                                    })(session)}
-                                  />
+                                        )
+                                      );
+                                      setOwnerRepos(
+                                        E.right(E.right(O.some(reposForOwner)))
+                                      );
+                                    }}
+                                  >
+                                    {NEA.head(reposForOwner).owner.login}
+                                  </MenuItemOption>
                                 )
                               )}
-                          </Stack>
-                        </>
-                      )
+                            </MenuOptionGroup>
+                          </MenuList>
+                        </Menu>
+                        <Stack>
+                          {E.isRight(ownerRepos) &&
+                            E.isRight(ownerRepos.right) &&
+                            O.isSome(ownerRepos.right.right) &&
+                            ownerRepos.right.right.value.map((repo, index) => (
+                              <ImportProject
+                                key={index}
+                                repoName={repo.name}
+                                onClick={createProject({
+                                  importProjectIsExecuting:
+                                    importProjectIsExecuting[1],
+                                  closeModal: onClose,
+                                  toast,
+                                  userId: id,
+                                  namePlusTeam: `${repo.name}${SEPARATOR}${allTeams[0].name}`,
+                                  nodeID: repo.node_id,
+                                  nodePlusTeam:
+                                    repo.node_id + SEPARATOR + allTeams[0].id,
+                                  repositoryName: repo.name,
+                                  // this assumes that at least one team exist
+                                  // doesn't cover error case
+                                  // where team addition fails
+                                  // also does not allow multiple teams
+                                  teamName: allTeams[0].name,
+                                  setTeams: teamsFromClientSideFetch[2],
+                                  router,
+                                })(session)}
+                              />
+                            ))}
+                        </Stack>
+                      </>
+                    )
+                  )}
+                </ModalBody>
+                <ModalFooter d="flex" justifyContent="center" fontSize="sm">
+                  {E.isRight(repoListAndThunk[0]) &&
+                    !E.isLeft(repoListAndThunk[0].right) && (
+                      <>
+                        <Text mr={2} color={`mode.${colorMode}.text`}>
+                          Not seeing the repository you want?
+                        </Text>
+                        <ChakraLink
+                          href={`https://github.com/apps/meeshkan/installations/new?state=${stateForLogin}`}
+                          aria-label="Link to GitHub to install meeshkan on a repository"
+                          color={colorMode == "light" ? "red.500" : "red.200"}
+                        >
+                          Configure on GitHub.
+                        </ChakraLink>
+                      </>
                     )}
-                  </ModalBody>
-                  <ModalFooter d="flex" justifyContent="center" fontSize="sm">
-                    {E.isRight(repoListAndThunk[0]) &&
-                      !E.isLeft(repoListAndThunk[0].right) && (
-                        <>
-                          <Text mr={2} color={`mode.${colorMode}.text`}>
-                            Not seeing the repository you want?
-                          </Text>
-                          <ChakraLink
-                            href={`https://github.com/apps/meeshkan/installations/new?state=${stateForLogin}`}
-                            aria-label="Link to GitHub to install meeshkan on a repository"
-                            color={colorMode == "light" ? "red.500" : "red.200"}
-                          >
-                            Configure on GitHub.
-                          </ChakraLink>
-                        </>
-                      )}
-                  </ModalFooter>
-                </ModalContent>
-              </Skeleton>
-            </Modal>
-          </Grid>
+                </ModalFooter>
+              </ModalContent>
+            </Skeleton>
+          </Modal>
         </>
       )
     )
