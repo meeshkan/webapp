@@ -16,7 +16,8 @@ unmock
   .nock("https://api.github.com")
   .post("/oauth")
   .reply(200, u.string());
-unmock.on();
+beforeAll(() => unmock.on());
+afterAll(() => unmock.off());
 
 const token = encrypt(
   JSON.stringify({

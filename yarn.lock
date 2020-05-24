@@ -7216,10 +7216,10 @@ ono@^5.1.0:
   resolved "https://registry.yarnpkg.com/ono/-/ono-5.1.0.tgz#8cafa7e56afa2211ad63dd2eb798427e64f1a070"
   integrity sha512-GgqRIUWErLX4l9Up0khRtbrlH8Fyj59A0nKv8V6pWEto38aUgnOGOOF7UmgFFLzFnDSc8REzaTXOc0hqEe7yIw==
 
-openapi-refinements@^0.3.17:
-  version "0.3.17"
-  resolved "https://registry.yarnpkg.com/openapi-refinements/-/openapi-refinements-0.3.17.tgz#531f274e228abbcd6ade100857b3e0b65aca317a"
-  integrity sha512-3jeP4JbV+rQ3+6yQxOnSsdiGGZPOtvcHAScW8r3U0VMxv1IITRI9jl5HHWd09TTGGNYJNdNc9Rbr/Sc7u5FcQQ==
+openapi-refinements@^0.3.18:
+  version "0.3.18"
+  resolved "https://registry.yarnpkg.com/openapi-refinements/-/openapi-refinements-0.3.18.tgz#5df8176417311d77bfaf264486bbe5001deb255c"
+  integrity sha512-8/YabBzmbJuQ8AqEoY90bHvETBnTsRGqHpMaOwfBh43upUL4UeABg60VzXdksQVCd8dNGtDf0QG9kLalUb4qDQ==
   dependencies:
     "@meeshkanml/jsonschema" "^0.0.1"
 
@@ -9837,33 +9837,33 @@ unique-slug@^2.0.0:
   dependencies:
     imurmurhash "^0.1.4"
 
-unmock-browser@^0.3.17:
-  version "0.3.17"
-  resolved "https://registry.yarnpkg.com/unmock-browser/-/unmock-browser-0.3.17.tgz#0ba83d1894c4fc49e91a5a68c9b3435a7970cb2a"
-  integrity sha512-frpOa3BClk0I+2t2o33ubYwPFGo+hdQ3sv3egi4/Jdds+yBLJ7AHKrQ5w4JCT3Tqvd2CRIhSFUWK6zwBFy5UFQ==
+unmock-browser@^0.3.18:
+  version "0.3.18"
+  resolved "https://registry.yarnpkg.com/unmock-browser/-/unmock-browser-0.3.18.tgz#12b7ad1565481439b61a2d402d1dfc6e98bb7fb3"
+  integrity sha512-50eFhkCOAL2MfdHNqmuz+iYZG4fJvoROhW4qRk0tEDhKA3/fV78bnCVOcBCv/d7m797FEbkhZsSWEORbppWyiA==
   dependencies:
     buffer "^5.4.3"
-    unmock-core "^0.3.17"
-    unmock-fetch "^0.3.17"
-    unmock-xmlhttprequest "^0.3.17"
+    unmock-core "^0.3.18"
+    unmock-fetch "^0.3.18"
+    unmock-xmlhttprequest "^0.3.18"
 
-unmock-cli@^0.3.17:
-  version "0.3.17"
-  resolved "https://registry.yarnpkg.com/unmock-cli/-/unmock-cli-0.3.17.tgz#6b6e7d3325ce9f9887e107035103a7d715478820"
-  integrity sha512-idfv4xgNYtjkQS4NbV2GEdmn//0NK0Q9I0oyR1o6GPHmSRt1eX1hRtZUizLBbAtYj5eq5zRsNsbCOAXaGgTKFA==
+unmock-cli@^0.3.18:
+  version "0.3.18"
+  resolved "https://registry.yarnpkg.com/unmock-cli/-/unmock-cli-0.3.18.tgz#97253c97e1b64480cbffd10cff0343274d7177d9"
+  integrity sha512-EywFfVpIJLWmARw5Hv1eEVO0x0/vlXyZhE+qljsJP5ZBmjgvoWFMXY446Ui5kuAQRB8IH7BhYE3QOf4ZXW8QxQ==
   dependencies:
     "@types/readline-sync" "^1.4.3"
     chalk "^2.4.2"
     commander "^2.20.0"
     glob "^7.1.3"
     readline-sync "^1.4.10"
-    unmock-core "^0.3.17"
-    unmock-node "^0.3.17"
+    unmock-core "^0.3.18"
+    unmock-node "^0.3.18"
 
-unmock-core@^0.3.17:
-  version "0.3.17"
-  resolved "https://registry.yarnpkg.com/unmock-core/-/unmock-core-0.3.17.tgz#7f6344e2c8ee284d52998b1bcb00daf4fdd19b8d"
-  integrity sha512-1Os8dd5kor11bmKO0sV1Wh+FFHN7yO12zPtu82Q/jFeheba7r+NBx8HtNHtsU94Uaxt/ieRusk6/TTBEISNnag==
+unmock-core@^0.3.18:
+  version "0.3.18"
+  resolved "https://registry.yarnpkg.com/unmock-core/-/unmock-core-0.3.18.tgz#bf07597c198bfe85a56fa3e52bb5015b3dc132ec"
+  integrity sha512-syvyaoFVdVcwhGl2OGqaMR5phEg6oAbbtRRXtXD4TOaiLiEVLxX7jLlbIM+o/cHeyzGzwAAYT8mR126edXxz1w==
   dependencies:
     "@meeshkanml/json-schema-faker" "^0.0.2"
     "@meeshkanml/jsonschema" "^0.0.1"
@@ -9886,7 +9886,7 @@ unmock-core@^0.3.17:
     lodash "^4.17.14"
     minimatch "^3.0.4"
     monocle-ts "^2.0.0"
-    openapi-refinements "^0.3.17"
+    openapi-refinements "^0.3.18"
     query-string "^6.8.3"
     seedrandom "^3.0.3"
     sinon "^7.4.1"
@@ -9894,20 +9894,20 @@ unmock-core@^0.3.17:
     whatwg-url "^7.0.0"
     winston "^3.2.1"
 
-unmock-fetch@^0.3.17:
-  version "0.3.17"
-  resolved "https://registry.yarnpkg.com/unmock-fetch/-/unmock-fetch-0.3.17.tgz#277264df0a9c45a75f474ad17fbc68f2902e14b8"
-  integrity sha512-k2BxHv9B9DMV4so6LcsZ5xH+y7h5KDjy3f+1ZFKsZb1fsuFj8OhZtdIUDdlIA93l9U7iRYyXP19/qizMWtTlZw==
+unmock-fetch@^0.3.18:
+  version "0.3.18"
+  resolved "https://registry.yarnpkg.com/unmock-fetch/-/unmock-fetch-0.3.18.tgz#8ca4a9333205862096413c53a5eab1f981cacdac"
+  integrity sha512-mPGFzkzZJGtV7LkFUMSah+I8NnufoU+9qp4WsMMkROBStjaGQJVeN6t6uW8mVz7YX7AtxMEPXOAPqaQJ2MEdoQ==
   dependencies:
     cross-fetch "^3.0.4"
     debug "^4.1.1"
-    unmock-core "^0.3.17"
+    unmock-core "^0.3.18"
     url-parse "^1.4.7"
 
-unmock-node@^0.3.17:
-  version "0.3.17"
-  resolved "https://registry.yarnpkg.com/unmock-node/-/unmock-node-0.3.17.tgz#65c1a662495cb1bca8fe371ec46045a8ef0987a8"
-  integrity sha512-T6TyGa74AQdPs+YQaCyApKwI582LDBiiT64dHJfaFLyIorbARCT7EDXe0ITpjsCEhARJVPrfBbmcDyFyCyAJaQ==
+unmock-node@^0.3.18:
+  version "0.3.18"
+  resolved "https://registry.yarnpkg.com/unmock-node/-/unmock-node-0.3.18.tgz#8d160c705b9ce24ad8b96e4e0d0879e5e3aeda03"
+  integrity sha512-v4Cg4r6BMJ3dIeBj+z/zFk8XtX0fKdeZqtNv+Qj+QtYfxLPxZfY3EIE5s7VrR0TlslgD6XPDLUMogi6WYNHj7A==
   dependencies:
     "@types/node" "^12.7.8"
     "@types/node-fetch" "^2.5.2"
@@ -9920,28 +9920,28 @@ unmock-node@^0.3.17:
     node-fetch "^2.6.0"
     readable-stream "^3.4.0"
     shimmer "^1.2.1"
-    unmock-core "^0.3.17"
+    unmock-core "^0.3.18"
     uuid "^3.3.2"
     winston "^3.2.1"
 
-unmock-xmlhttprequest@^0.3.17:
-  version "0.3.17"
-  resolved "https://registry.yarnpkg.com/unmock-xmlhttprequest/-/unmock-xmlhttprequest-0.3.17.tgz#6f11fe5433e9e5b8e88c4167e134fa34e6e91471"
-  integrity sha512-vTTUY8TZAgx6K8V/63ezvU5PCexYASWALifJQHtM3q2wWpthV6mdRSetMmXs5jOAi+jczCKRURXVnUWLz3+boA==
+unmock-xmlhttprequest@^0.3.18:
+  version "0.3.18"
+  resolved "https://registry.yarnpkg.com/unmock-xmlhttprequest/-/unmock-xmlhttprequest-0.3.18.tgz#2cf06ab63a8ea37882453db03b6ee477bda771bd"
+  integrity sha512-qeuRpl5cPHjoA3NZz9BCh7dplMaxWVUHZdv6ANrZkznIm+VeFMVQs7cS05LBeQVZuXAGNWxXT/zaeM+h7pI/KQ==
   dependencies:
     debug "^4.1.1"
-    unmock-core "^0.3.17"
+    unmock-core "^0.3.18"
     url-parse "^1.4.7"
 
-unmock@^0.3.17:
-  version "0.3.17"
-  resolved "https://registry.yarnpkg.com/unmock/-/unmock-0.3.17.tgz#bbb91cff4ecc8d354c517d2139f12a77987f721f"
-  integrity sha512-QsYD9K/CdLLeamrku2ePO5iPcQS/uv182YN/V8qEHtCFeiMr9n2Evj63oUlAvixse54lMCXbgfYU3OvtJXfUFQ==
+unmock@^0.3.18:
+  version "0.3.18"
+  resolved "https://registry.yarnpkg.com/unmock/-/unmock-0.3.18.tgz#4f11a3dcde767f13ae11fb2999b2f34aeda24f49"
+  integrity sha512-vkzylDZwehawhzIlpKfCsaN4E0tEf9V1m5Owv+BKMw/KwX3iRGF5mtOD15KuyKDKDL59HrCZIL9G5kLZl4166g==
   dependencies:
-    unmock-browser "^0.3.17"
-    unmock-cli "^0.3.17"
-    unmock-core "^0.3.17"
-    unmock-node "^0.3.17"
+    unmock-browser "^0.3.18"
+    unmock-cli "^0.3.18"
+    unmock-core "^0.3.18"
+    unmock-node "^0.3.18"
 
 unpipe@1.0.0, unpipe@~1.0.0:
   version "1.0.0"

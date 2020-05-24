@@ -21,7 +21,8 @@ unmock
     200,
     "refresh_token=my-rt&access_token=my-at&expires_in=50&refresh_token_expires_in=50&token_type=bearer"
   );
-unmock.on();
+beforeAll(() => unmock.on());
+afterAll(() => unmock.off());
 const token = encrypt(
   JSON.stringify({
     accessToken: "my-access-token",
