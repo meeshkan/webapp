@@ -9,10 +9,11 @@ import { mockGraphqlRequestWithResolve } from "../../../../../../../../../../moc
 import { encrypt } from "../../../../../../../../../../src/utils/sec";
 import endpoint from "../../../../../../../../../../src/pages/api/gh/repos";
 import crypto from "crypto";
-import nock from "nock";
+import unmock, { u } from "unmock";
 import * as E from "fp-ts/lib/Either";
 
-nock("https://api.github.com").post("/oauth").reply(400, "error");
+unmock.nock("https://api.github.com").post("/oauth").reply(400, u.string());
+unmock.on();
 
 const token = encrypt(
   JSON.stringify({

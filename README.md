@@ -60,6 +60,5 @@ These libraries are, in no particualr order:
 
 ## Known issues
 
-### Slack webhooks
-
-We currently have no way to know if a user revokes an incoming webhook, nor do we have any way to select which webhook to use if a user registers multiple ones. Other potential models are to figure out how Slack behaves when a webhook is no longer valid (there's no documentation about this so we'd have to hack at it & assume it's stable), ask the user to create a Slack app (Netlify does this), to make a more sophisticated app with the `chat:write` scope which uses an `access_token` that will 401 if no longer valid (at which point we can delete the integration), or get rid of Slack integrations entirely and do what Github does where we just have a webhook that we spit events out to.
+- We currently have no way to know if a user revokes an incoming webhook.
+- Github often responds that a stored refresh token is invalid.

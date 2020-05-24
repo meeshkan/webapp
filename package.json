@@ -49,9 +49,9 @@
     "@types/pino": "^6.0.1",
     "@types/react": "^16.9.34",
     "jest": "^26.0.1",
-    "nock": "^12.0.3",
     "ts-jest": "^26.0.0",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "unmock": "^0.3.17"
   },
   "peerDependencies": {
     "prop-types": "^15.6.2"
