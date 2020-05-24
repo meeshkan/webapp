@@ -12,15 +12,16 @@ import {
 import { encrypt } from "../../../../../../../../../../../../src/utils/sec";
 import endpoint from "../../../../../../../../../../../../src/pages/api/gh/repos";
 import crypto from "crypto";
-import nock from "nock";
+import unmock from "unmock";
 import * as E from "fp-ts/lib/Either";
-nock("https://api.github.com")
+unmock
+  .nock("https://api.github.com")
   .post("/oauth")
   .reply(
     200,
     "refresh_token=my-rt&access_token=my-at&expires_in=50&refresh_token_expires_in=50&token_type=bearer"
   );
-
+unmock.on();
 const token = encrypt(
   JSON.stringify({
     accessToken: "my-access-token",
