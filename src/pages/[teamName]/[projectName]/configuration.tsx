@@ -33,7 +33,8 @@ import { withError } from "../../../components/molecules/error";
 import { ItemLink, stringToUrl } from "../../../components/molecules/navLink";
 import * as _E from "../../../fp-ts/Either";
 import {
-  CREATE_OR_UPDATE_CONFIGURATION,
+  CREATE_CONFIGURATION,
+  UPDATE_CONFIGURATION,
   GET_CONFIGURATION_QUERY,
 } from "../../../gql/pages/[teamName]/[projectName]/configuration";
 import {
@@ -53,7 +54,7 @@ import {
   UNDEFINED_ERROR,
   UNKNOWN_GRAPHQL_ERROR,
 } from "../../../utils/error";
-import { eightBaseClient } from "../../../utils/graphql";
+import { eightBaseClient, upsertHack } from "../../../utils/graphql";
 import { hookNeedingFetch, Loading } from "../../../utils/hookNeedingFetch";
 import { SEPARATOR } from "../../../utils/separator";
 import { confirmOrCreateUser } from "../../../utils/user";
@@ -303,8 +304,10 @@ const updateConfiguration = ({
       pipe(
         TE.tryCatch(
           () =>
-            eightBaseClient(session).request(
-              CREATE_OR_UPDATE_CONFIGURATION,
+            upsertHack(
+              session,
+              CREATE_CONFIGURATION,
+              UPDATE_CONFIGURATION,
               updateConfigurationVariables
             ),
           (error): NegativeUpdateConfigurationOutcome => ({

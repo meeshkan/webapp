@@ -32,7 +32,7 @@ export const GET_CONFIGURATION_QUERY = `query(
   }
 }`;
 
-export const CREATE_OR_UPDATE_CONFIGURATION = `mutation CREATE_CONFIGURATION(
+export const CREATE_CONFIGURATION = `mutation CREATE_CONFIGURATION(
   $userId:ID!
   $teamName: String!
   $namePlusTeamName:String!
@@ -45,7 +45,6 @@ export const CREATE_OR_UPDATE_CONFIGURATION = `mutation CREATE_CONFIGURATION(
   userUpdate(filter: {
     id: $userId
   }
-  force: true
   data:{
     team: {
       update: {
@@ -61,6 +60,70 @@ export const CREATE_OR_UPDATE_CONFIGURATION = `mutation CREATE_CONFIGURATION(
               data:{
                 configuration:{
                   create:{
+                    buildCommand:$buildCommand
+                    openAPISpec:$openAPISpec
+                    directory:$directory
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }) {
+    id
+    team(filter:{
+      name:$teamNameAsPredicate
+    }) {
+      items{
+        name
+        id
+        project(filter:{
+          name:$projectNameAsPredicate
+        }) {
+          items {
+            name
+            configuration {
+                buildCommand
+                directory
+                openAPISpec
+            }
+          }
+        }
+      }
+    }
+  }
+}`;
+
+export const UPDATE_CONFIGURATION = `mutation UPDATE_CONFIGURATION(
+  $userId:ID!
+  $teamName: String!
+  $namePlusTeamName:String!
+  $buildCommand:String!
+  $openAPISpec:String!
+  $directory:String!
+  $teamNameAsPredicate:StringPredicate!
+  $projectNameAsPredicate:StringPredicate!
+) {
+  userUpdate(filter: {
+    id: $userId
+  }
+  data:{
+    team: {
+      update: {
+        filter:{
+          name:$teamName
+        }
+        data:{
+          project: {
+            update: {
+              filter: {
+                namePlusTeamName: $namePlusTeamName
+              }
+              data:{
+                configuration:{
+                  update:{
                     buildCommand:$buildCommand
                     openAPISpec:$openAPISpec
                     directory:$directory

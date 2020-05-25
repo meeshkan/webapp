@@ -9,6 +9,27 @@ export const GITHUB_VIEWER_QUERY = `query {
     id
   }
 }`;
+export const CREATE_GITHUB_INFO_MUTATION = `mutation(
+  $userId:ID!
+  $githubSyncChecksum:String!
+  $githubSyncNonce:String!
+) {
+  userUpdate(
+    filter: {
+      id:$userId
+    }
+    data:{
+      githubInfo: {
+        create: {
+          githubSyncChecksum:$githubSyncChecksum
+          githubSyncNonce:$githubSyncNonce
+        }
+      }
+    }
+  ) {
+    id
+  }
+}`;
 export const UPDATE_GITHUB_INFO_MUTATION = `mutation(
   $userId:ID!
   $githubSyncChecksum:String!
@@ -18,10 +39,9 @@ export const UPDATE_GITHUB_INFO_MUTATION = `mutation(
     filter: {
       id:$userId
     }
-    force: true
     data:{
       githubInfo: {
-        create: {
+        update: {
           githubSyncChecksum:$githubSyncChecksum
           githubSyncNonce:$githubSyncNonce
         }

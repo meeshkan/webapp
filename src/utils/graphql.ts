@@ -25,5 +25,18 @@ export const eightBaseClient = (session: ISession) =>
     },
   });
 
+export const upsertHack = (
+  session: ISession,
+  createCmd: string,
+  updateCmd: string,
+  vars: any
+) =>
+  eightBaseClient(session)
+    .request(createCmd, vars)
+    .then(
+      (a) => a,
+      () => eightBaseClient(session).request(updateCmd, vars)
+    );
+
 export const withClient = <E, A>(session: ISession) =>
   withX<E, GraphQLClient, E, A>(pipe(session, eightBaseClient, TE.right));

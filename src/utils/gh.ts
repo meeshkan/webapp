@@ -32,8 +32,9 @@ import {
   GITHUB_INFO_QUERY_OR_MUTATION,
   UPDATE_GITHUB_INFO_MUTATION,
   GITHUB_VIEWER_QUERY,
+  CREATE_GITHUB_INFO_MUTATION,
 } from "../gql/utils/gh";
-import { eightBaseClient } from "./graphql";
+import { eightBaseClient, upsertHack } from "./graphql";
 
 const Owner = t.type({
   login: t.string,
@@ -472,13 +473,16 @@ export const authenticateAppWithGithub = (
     TE.chain(({ githubToken, saltedEncryptedData }) =>
       TE.tryCatch(
         () =>
-          eightBaseClient(session)
-            .request(UPDATE_GITHUB_INFO_MUTATION, {
+          upsertHack(
+            session,
+            CREATE_GITHUB_INFO_MUTATION,
+            UPDATE_GITHUB_INFO_MUTATION,
+            {
               userId,
               githubSyncChecksum: saltedEncryptedData.encryptedData,
               githubSyncNonce: saltedEncryptedData.iv,
-            })
-            .then(() => githubToken),
+            }
+          ).then(() => githubToken),
         defaultGQLErrorHandler("insert github token mutation")
       )
     ),

@@ -9,7 +9,10 @@ import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import fetch from "isomorphic-unfetch";
-import { UPDATE_SLACK_INFO_MUTATION } from "../../../gql/pages/api/slack/oauth";
+import {
+  UPDATE_SLACK_INFO_MUTATION,
+  CREATE_SLACK_INFO_MUTATION,
+} from "../../../gql/pages/api/slack/oauth";
 import {
   defaultGQLErrorHandler,
   ID_NOT_IN_STATE,
@@ -19,7 +22,7 @@ import {
   UNDEFINED_ERROR,
   UNKNOWN_GRAPHQL_ERROR,
 } from "../../../utils/error";
-import { eightBaseClient } from "../../../utils/graphql";
+import { eightBaseClient, upsertHack } from "../../../utils/graphql";
 import * as Oauth from "../../../utils/oauth";
 import safeApi, { _400ErrorHandler } from "../../../utils/safeApi";
 import { encrypt } from "../../../utils/sec";
@@ -101,15 +104,18 @@ const authenticateAppWithSlack = (
     TE.chain(({ encryptedData, iv }) =>
       TE.tryCatch(
         () =>
-          eightBaseClient(session)
-            .request(UPDATE_SLACK_INFO_MUTATION, {
+          upsertHack(
+            session,
+            CREATE_SLACK_INFO_MUTATION,
+            UPDATE_SLACK_INFO_MUTATION,
+            {
               userId,
               slackSyncCheckSum: encryptedData,
               slackSyncNonce: iv,
               teamName,
               namePlusTeamName: projectName + SEPARATOR + teamName,
-            })
-            .then(constVoid),
+            }
+          ).then(constVoid),
         defaultGQLErrorHandler("insert slack token mutation")
       )
     )
