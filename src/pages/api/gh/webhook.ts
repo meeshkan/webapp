@@ -22,7 +22,7 @@ type NegativeWebhookOutcome =
 export default safeApi(
   ({ body, method, headers }) =>
     pipe(
-      method === "POST" ? E.left({ type: "METHOD_NOT_POST" }) : E.right(body),
+      method === "POST" ? E.right(body) : E.left({ type: "METHOD_NOT_POST" }),
       E.chain<NegativeWebhookOutcome, string, void>((body) =>
         "sha1=" +
           crypto
