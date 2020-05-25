@@ -8,7 +8,9 @@
     "start": "node server.js",
     "test": "jest",
     "export": "next export",
-    "deploy": "npm run build && npm run export"
+    "deploy": "npm run build && npm run export",
+    "snyk-protect": "snyk protect",
+    "prepare": "yarn run snyk-protect"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^0.11.0",
@@ -42,7 +44,8 @@
     "react-hook-form": "^5.7.2",
     "ts-node": "^8.10.1",
     "unmock": "^0.3.18",
-    "uuid": "^8.0.0"
+    "uuid": "^8.0.0",
+    "snyk": "^1.327.0"
   },
   "devDependencies": {
     "@types/jest": "^25.2.3",
@@ -55,5 +58,6 @@
   },
   "peerDependencies": {
     "prop-types": "^15.6.2"
-  }
+  },
+  "snyk": true
 }
