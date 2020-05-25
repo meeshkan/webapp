@@ -1,45 +1,47 @@
-const next = require('next')
-const express = require('express')
-const cookieParser = require('cookie-parser')
-const uuid = require('uuid')
-const port = parseInt(process.env.PORT, 10) || 3000
-const dev = process.env.NODE_ENV !== 'production'
-const app = next({ dev })
-const handler = app.getRequestHandler()
+const next = require("next");
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const uuid = require("uuid");
+const port = parseInt(process.env.PORT, 10) || 3000;
+const dev = process.env.NODE_ENV !== "production";
+const app = next({ dev });
+const handler = app.getRequestHandler();
 
 function sessionCookie(req, res, next) {
   const htmlPage =
     !req.path.match(/^\/(_next|static)/) &&
     !req.path.match(/\.(js|map)$/) &&
-    req.accepts('text/html', 'text/css', 'image/png') === 'text/html'
+    req.accepts("text/html", "text/css", "image/png") === "text/html";
 
   if (!htmlPage) {
-    next()
-    return
+    next();
+    return;
   }
 
   if (!req.cookies.sid || req.cookies.sid.length === 0) {
-    req.cookies.sid = uuid.v4()
-    res.cookie('sid', req.cookies.sid)
+    req.cookies.sid = uuid.v4();
+    res.cookie("sid", req.cookies.sid);
   }
 
-  next()
+  next();
 }
 
-const sourcemapsForSentryOnly = token => (req, res, next) => {
+const sourcemapsForSentryOnly = (token) => (req, res, next) => {
   // In production we only want to serve source maps for Sentry
-  if (!dev && !!token && req.headers['x-sentry-token'] !== token) {
+  if (!dev && !!token && req.headers["x-sentry-token"] !== token) {
     res
       .status(401)
-      .send('Authentication access token is required to access the source map.')
-    return
+      .send(
+        "Authentication access token is required to access the source map."
+      );
+    return;
   }
-  next()
-}
+  next();
+};
 
 app.prepare().then(() => {
   // app.buildId is only available after app.prepare(), hence why we setup here
-  const { Sentry } = require('./sentry')(app.buildId)
+  const { Sentry } = require("./sentry")(app.buildId);
 
   express()
     // This attaches request information to Sentry errors
@@ -51,11 +53,11 @@ app.prepare().then(() => {
     .use(handler)
     // This handles errors if they are thrown before reaching the app
     .use(Sentry.Handlers.errorHandler())
-    .listen(port, err => {
+    .listen(port, (err) => {
       if (err) {
-        throw err
+        throw err;
       }
       // eslint-disable-next-line no-console
-      console.log(`> Ready on http://localhost:${port}`)
-    })
-})
+      console.log(`> Ready on http://localhost:${port}`);
+    });
+});

@@ -26,9 +26,9 @@ export const hookNeedingFetch = <T>(
       __(right(await fetchFunction()));
     })();
   };
-  
+
   ///....aaaaaadnnnnnnnnnnnnnnnnnnnndddddd
   React.useEffect(thunk, [0]);
 
-  return [_, thunk, __ ];
+  return [_, thunk, __];
 };

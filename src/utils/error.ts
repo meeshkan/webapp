@@ -61,20 +61,20 @@ export interface PROJECT_DOES_NOT_EXIST {
   msg: string;
 }
 export const defaultGQLErrorHandler = (ctx: string) => (
-         error: unknown
-       ): INVALID_TOKEN_ERROR | UNKNOWN_GRAPHQL_ERROR =>
-         gqlRequestError.is(error) &&
-         error.response.errors.filter((err) => err.code === "InvalidTokenError")
-           .length > 0
-           ? {
-               type: "INVALID_TOKEN_ERROR",
-               msg: `Incorrect token for the graphql api when in context: ${ctx}`,
-             }
-           : {
-               type: "UNKNOWN_GRAPHQL_ERROR",
-               msg: `Undefined error in graphql call when in context; ${ctx}`,
-               error,
-             };
+  error: unknown
+): INVALID_TOKEN_ERROR | UNKNOWN_GRAPHQL_ERROR =>
+  gqlRequestError.is(error) &&
+  error.response.errors.filter((err) => err.code === "InvalidTokenError")
+    .length > 0
+    ? {
+        type: "INVALID_TOKEN_ERROR",
+        msg: `Incorrect token for the graphql api when in context: ${ctx}`,
+      }
+    : {
+        type: "UNKNOWN_GRAPHQL_ERROR",
+        msg: `Undefined error in graphql call when in context; ${ctx}`,
+        error,
+      };
 
 export interface LENS_ACCESSOR_ERROR {
   type: "LENS_ACCESSOR_ERROR";
