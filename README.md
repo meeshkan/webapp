@@ -62,3 +62,9 @@ These libraries are, in no particualr order:
 
 - We currently have no way to know if a user revokes an incoming webhook.
 - Github often responds that a stored refresh token is invalid.
+
+## Contributing
+
+Thanks for wanting to contribute! Take a look at our [Contributing Guide](CONTRIBUTING.md) for notes on our commit message conventions and how to run tests.
+
+Please note that this project is governed by the [Meeshkan Community Code of Conduct](https://github.com/meeshkan/code-of-conduct). By participating in this project, you agree to abide by its terms.
