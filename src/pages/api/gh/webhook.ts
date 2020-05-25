@@ -46,7 +46,7 @@ export default safeApi(
             }),
           (error): NegativeWebhookOutcome => ({
             type: "UNDEFINED_ERROR",
-            msg: "Call to slack webhook failed",
+            msg: "Call to slack webhook for github app failed",
             error,
           })
         )
