@@ -81,6 +81,7 @@ interface ImportProjectVariables {
   teamName: string;
   closeModal: () => void;
   repositoryName: string;
+  owner: string;
   nodeID: string;
   nodePlusTeam: string;
   namePlusTeam: string;
@@ -608,6 +609,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                                   nodePlusTeam:
                                     repo.node_id + SEPARATOR + allTeams[0].id,
                                   repositoryName: repo.name,
+                                  owner: repo.owner.login,
                                   // this assumes that at least one team exist
                                   // doesn't cover error case
                                   // where team addition fails
