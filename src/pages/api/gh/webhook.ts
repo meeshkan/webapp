@@ -20,7 +20,7 @@ type NegativeWebhookOutcome =
   | UNDEFINED_ERROR;
 
 export default safeApi(
-  ({ body, method, headers }) =>
+  ({ body, method, headers }, res) =>
     pipe(
       method === "POST" ? E.right(body) : E.left({ type: "METHOD_NOT_POST" }),
       E.chain<NegativeWebhookOutcome, string, void>((body) =>
@@ -51,11 +51,12 @@ export default safeApi(
       TE.chain((res) =>
         res.ok
           ? TE.right(constNull())
-          : TE.left({
+          : TE.left<NegativeWebhookOutcome, void>({
               type: "REST_ENDPOINT_ERROR",
               msg: "Call to slack webhook failed",
             })
-      )
+      ),
+      TE.chain((_) => TE.right(res.status(200)))
     ),
   _400ErrorHandler
 );
