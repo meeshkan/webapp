@@ -6,13 +6,19 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { constVoid } from "fp-ts/lib/function";
 import { fromQueryParam } from "./oauth";
 import { INCORRECT_TYPE_SAFETY } from "../../../utils/error";
+import { decryptOAuthState } from "../../../utils/oauth";
 
 const envType = t.type({ env: t.string });
 
 export default safeApi(
   ({ query: { state, code } }, res) =>
     pipe(
-      envType.decode(JSON.parse(fromQueryParam(state))),
+      // TODO: refactor this using other gh file as most of the code is shared
+      state,
+      fromQueryParam,
+      decryptOAuthState(process.env.GH_OAUTH_FLOW_SIGNING_KEY),
+      JSON.parse,
+      envType.decode,
       E.mapLeft(
         (errors): INCORRECT_TYPE_SAFETY => ({
           type: "INCORRECT_TYPE_SAFETY",

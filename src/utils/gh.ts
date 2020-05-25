@@ -107,7 +107,10 @@ export const fetchGithubAccessToken = (
     confirmOrCreateUser(GITHUB_INFO_QUERY_OR_MUTATION, githubAccessTokenType),
     TE.chain((githubAccessToken) =>
       githubAccessToken.githubInfo === null
-        ? TE.left({ type: "NO_TOKEN_YET", msg: "No token currently in db" })
+        ? TE.left({
+            type: "NO_TOKEN_YET",
+            msg: "No token currently in db",
+          })
         : TE.right(githubAccessToken)
     ),
     // JSON.parse is an unsafe operation, we probably want an
@@ -116,10 +119,13 @@ export const fetchGithubAccessToken = (
       TE.right({
         id,
         githubAccessToken: JSON.parse(
-          decrypt({
-            iv: githubInfo.githubSyncNonce,
-            encryptedData: githubInfo.githubSyncChecksum,
-          })
+          decrypt(
+            {
+              iv: githubInfo.githubSyncNonce,
+              encryptedData: githubInfo.githubSyncChecksum,
+            },
+            process.env.GH_TOKEN_SIGNING_KEY
+          )
         ),
       })
     ),
@@ -149,7 +155,10 @@ export const fetchGithubAccessToken = (
         ? githubAccessToken.refreshTokenExpiresAt -
             new Date().getTime() / MS_IN_SEC <
           TWENTY_SECONDS
-          ? TE.left({ type: "NEEDS_REAUTH", msg: "Refresh token expires soon" })
+          ? TE.left({
+              type: "NEEDS_REAUTH",
+              msg: "Refresh token expires soon",
+            })
           : authenticateAppWithGithub(
               id,
               new URLSearchParams({
@@ -455,7 +464,8 @@ export const authenticateAppWithGithub = (
               parseInt(githubToken.refresh_token_expires_in),
             nodeId: viewerResult.viewer.id,
           }),
-          crypto.randomBytes(16)
+          crypto.randomBytes(16),
+          process.env.GH_TOKEN_SIGNING_KEY
         ),
       })
     ),

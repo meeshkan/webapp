@@ -58,6 +58,7 @@ import { hookNeedingFetch, Loading } from "../../../utils/hookNeedingFetch";
 import { SEPARATOR } from "../../../utils/separator";
 import { confirmOrCreateUser } from "../../../utils/user";
 import { withSession } from "../../api/session";
+import { getSlackOAuthState } from "../../../utils/oauth";
 
 type NegativeConfigurationFetchOutcome =
   | NOT_LOGGED_IN
@@ -82,6 +83,7 @@ type IConfigurationProps = {
   teamName: string;
   projectName: string;
   id: string;
+  slackOauthState: string;
 };
 
 const Project = t.type({
@@ -195,11 +197,20 @@ export const getServerSideProps = ({
         TE.chain((configuration) => TE.right({ configuration, id }))
       )
     ),
-    RTE.chain(({ id, configuration }) => (session) =>
+    RTE.chain((p) =>
+      pipe(
+        getSlackOAuthState<NegativeConfigurationFetchOutcome>(
+          teamName,
+          projectName
+        ),
+        RTE.fromReaderEither,
+        RTE.chain((slackOauthState) => RTE.right({ slackOauthState, ...p }))
+      )
+    ),
+    RTE.chain((p) => (session) =>
       TE.right({
+        ...p,
         session,
-        id,
-        configuration,
         teamName,
         projectName,
       })
@@ -370,6 +381,7 @@ const ConfigurationPage = withError<
     configuration,
     teamName,
     projectName,
+    slackOauthState,
     id,
   }: IConfigurationProps) =>
     pipe(
@@ -577,7 +589,7 @@ const ConfigurationPage = withError<
               </Flex>
               <Link
                 color={colorMode === "light" ? "blue.500" : "blue.200"}
-                href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_OAUTH_APP_CLIENT_ID}&scope=incoming-webhook&state={"id":"${session.user.sub}","teamName":"${teamName}","projectName":"${projectName}"}&redirect_uri=${process.env.SLACK_OAUTH_REDIRECT_URI}`}
+                href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_OAUTH_APP_CLIENT_ID}&scope=incoming-webhook&state=${slackOauthState}&redirect_uri=${process.env.SLACK_OAUTH_REDIRECT_URI}`}
                 aria-label="Link to slack to authorize posting notifications from Meeshkan"
                 verticalAlign="middle"
               >

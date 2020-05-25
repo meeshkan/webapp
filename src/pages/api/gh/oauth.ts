@@ -29,6 +29,9 @@ type NegativeGHOAuthOutcome =
   | NegativeGithubFetchOutcome;
 
 const userType = t.type({ id: t.string });
+type UserType = t.TypeOf<typeof userType>;
+const ghStateType = t.type({ id: t.string });
+type GHStateType = t.TypeOf<typeof ghStateType>;
 
 export const fromQueryParam = (p: string | string[]) =>
   t.string.is(p) ? p : pipe(A.head(p), O.getOrElse(constant("")));
@@ -36,8 +39,10 @@ export const fromQueryParam = (p: string | string[]) =>
 export default safeApi<NegativeGHOAuthOutcome, void>(
   (req, res) =>
     pipe(
-      Oauth.Oauth(req, t.type({ id: t.string })),
-      RTE.chain(() => confirmOrCreateUser("id", userType)),
+      Oauth.Oauth(req, process.env.GH_OAUTH_FLOW_SIGNING_KEY, ghStateType),
+      RTE.chain<ISession, NegativeGHOAuthOutcome, GHStateType, UserType>(() =>
+        confirmOrCreateUser("id", userType)
+      ),
       RTE.chain(({ id }) =>
         authenticateAppWithGithub(
           id,

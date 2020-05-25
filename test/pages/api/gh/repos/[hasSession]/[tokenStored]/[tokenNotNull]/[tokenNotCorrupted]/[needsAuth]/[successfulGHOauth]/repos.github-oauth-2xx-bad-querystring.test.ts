@@ -1,4 +1,4 @@
-process.env.GH_TOKEN_SIGNING_KEY = "this-token-is-32-characters-long";
+process.env.GH_TOKEN_SIGNING_KEY = "abcdabcdabcdabcdabcdabcdabcdabcd";
 process.env.GH_OAUTH_ACCESS_TOKEN_URL = "https://api.github.com/oauth";
 import { mockAuth0WithSession } from "../../../../../../../../../../../mocks/auth0";
 import {
@@ -28,7 +28,8 @@ const token = encrypt(
     refreshTokenExpiresAt: Math.floor(new Date().getTime() / 1000) + 1000,
     nodeId: "R2D2",
   }),
-  crypto.randomBytes(16)
+  crypto.randomBytes(16),
+  process.env.GH_TOKEN_SIGNING_KEY
 );
 
 mockAuth0WithSession();

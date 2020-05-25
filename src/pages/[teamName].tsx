@@ -35,6 +35,7 @@ import {
 import { eightBaseClient } from "../utils/graphql";
 import { confirmOrCreateUser } from "../utils/user";
 import { withSession } from "./api/session";
+import { getGHOAuthState } from "../utils/oauth";
 
 type NegativeTeamFetchOutcome =
   | NOT_LOGGED_IN
@@ -107,7 +108,7 @@ const getTeam = (teamName: string) => (
     ).get
   );
 
-type ITeamProps = { team: ITeam; session: ISession };
+type ITeamProps = { team: ITeam; session: ISession; ghOauthState: string };
 
 const userType = t.type({ id: t.string });
 
@@ -120,13 +121,20 @@ export const getServerSideProps = ({
   pipe(
     confirmOrCreateUser("id", userType),
     RTE.chain((_) => getTeam(teamName)),
-    RTE.chain((team) => (session) => TE.right({ session, team })),
+    RTE.chain((team) =>
+      pipe(
+        getGHOAuthState,
+        RTE.fromReaderEither,
+        RTE.chain((ghOauthState) => RTE.right({ ghOauthState, team }))
+      )
+    ),
+    RTE.chain((p) => (session) => TE.right({ session, ...p })),
     withSession(req, "[teamName].tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
 
 export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
   "Uh oh. Looks like this resource does not exist. If you suspect it should, reach out to us using the Intercom below.",
-  ({ team, session }) =>
+  ({ team, session, ghOauthState }) =>
     pipe(useColorMode(), ({ colorMode }) => (
       <>
         <Grid templateColumns="repeat(4, 1fr)" gap={6}>
@@ -171,7 +179,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
             </Link>
           ))}
           <ChakraLink
-            href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`}
+            href={`https://github.com/apps/meeshkan/installations/new?state=${ghOauthState}`}
             aria-label="Link to GitHub to install meeshkan on a repository"
             bg={`mode.${colorMode}.card`}
             p={4}

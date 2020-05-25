@@ -74,6 +74,7 @@ import {
 } from "../utils/teams";
 import { confirmOrCreateUser } from "../utils/user";
 import { withSession } from "./api/session";
+import { getGHOAuthState } from "../utils/oauth";
 
 interface ImportProjectVariables {
   userId: string;
@@ -105,7 +106,12 @@ type TeamsMutationType = t.TypeOf<typeof teamsMutationType>;
 
 type NegativeImportProjectOutcome = UNDEFINED_ERROR | INCORRECT_TYPE_SAFETY;
 
-export type ITeamsProps = { session: ISession; teams: ITeam[]; id: string };
+export type ITeamsProps = {
+  session: ISession;
+  teams: ITeam[];
+  id: string;
+  ghOauthState: string;
+};
 
 const createProject = ({
   setTeams,
@@ -187,13 +193,20 @@ export const getServerSideProps = ({
 }> =>
   pipe(
     confirmOrCreateUser("id", userType),
-    RTE.chain(({ id }) =>
+    RTE.chain((p) =>
       pipe(
         getTeams,
-        RTE.chain((teams) => RTE.right({ teams, id }))
+        RTE.chain((teams) => RTE.right({ teams, ...p }))
       )
     ),
-    RTE.chain(({ teams, id }) => (session) => TE.right({ session, teams, id })),
+    RTE.chain((p) =>
+      pipe(
+        getGHOAuthState,
+        RTE.fromReaderEither,
+        RTE.chain((ghOauthState) => RTE.right({ ghOauthState, ...p }))
+      )
+    ),
+    RTE.chain((p) => (session) => TE.right({ session, ...p })),
     withSession(req, "index.tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
 
@@ -320,14 +333,13 @@ const useRepoList = (
 
 export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
   "Meeshkan is temporarily offline. We are aware of the problem and are working hard to resolve it. For online support, please contact us using the Itercom icon below.",
-  ({ session, teams, id }) =>
+  ({ session, teams, id, ghOauthState }) =>
     pipe(
       {
         useColorMode: useColorMode(),
         router: useRouter(),
         useDisclosure: useDisclosure(),
         teamsFromClientSideFetch: useTeams(session),
-        stateForLogin: `{"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`,
         useOwner: useState<
           E.Either<
             Loading,
@@ -368,7 +380,6 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
         toast,
         useColorMode: { colorMode },
         useDisclosure: { onOpen, isOpen, onClose },
-        stateForLogin,
         useOwner: [owner, setOwner],
         useOwnerRepos: [ownerRepos, setOwnerRepos],
       }) => (
@@ -498,7 +509,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                         px={4}
                         variantColor="red"
                         // @ts-ignore
-                        href={`https://github.com/apps/meeshkan/installations/new?state=${stateForLogin}`}
+                        href={`https://github.com/apps/meeshkan/installations/new?state=${ghOauthState}`}
                         aria-label="Link to GitHub to install meeshkan on a repository"
                       >
                         <Icon name="github" mr={2} />
@@ -620,7 +631,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                           Not seeing the repository you want?
                         </Text>
                         <ChakraLink
-                          href={`https://github.com/apps/meeshkan/installations/new?state=${stateForLogin}`}
+                          href={`https://github.com/apps/meeshkan/installations/new?state=${ghOauthState}`}
                           aria-label="Link to GitHub to install meeshkan on a repository"
                           color={colorMode == "light" ? "red.500" : "red.200"}
                         >

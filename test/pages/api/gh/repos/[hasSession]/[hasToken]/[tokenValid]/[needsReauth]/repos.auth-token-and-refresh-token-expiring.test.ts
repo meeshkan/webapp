@@ -1,12 +1,12 @@
-process.env.GH_TOKEN_SIGNING_KEY = "abcdabcdabcdabcdabcdabcdabcdabcd";
-import { mockAuth0WithSession } from "../../../../../../../../../../mocks/auth0";
+process.env.GH_TOKEN_SIGNING_KEY = "this-token-is-32-characters-long";
+import { mockAuth0WithSession } from "../../../../../../../../../mocks/auth0";
 import {
   mockRequest,
   mockResponse,
-} from "../../../../../../../../../../mocks/reqres";
-import { mockGraphqlRequestWithResolve } from "../../../../../../../../../../mocks/graphql-request";
-import { encrypt } from "../../../../../../../../../../src/utils/sec";
-import endpoint from "../../../../../../../../../../src/pages/api/gh/repos";
+} from "../../../../../../../../../mocks/reqres";
+import { mockGraphqlRequestWithResolve } from "../../../../../../../../../mocks/graphql-request";
+import { encrypt } from "../../../../../../../../../src/utils/sec";
+import endpoint from "../../../../../../../../../src/pages/api/gh/repos";
 import crypto from "crypto";
 import * as E from "fp-ts/lib/Either";
 

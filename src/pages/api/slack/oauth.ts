@@ -50,8 +50,6 @@ const authenticateAppWithSlack = (
   params: URLSearchParams
 ) => (session: ISession): TE.TaskEither<NegativeOAuthOutcome, void> =>
   pipe(
-    // i: nothing
-    // o: response from the slack api
     TE.tryCatch(
       () =>
         fetch(process.env.SLACK_OAUTH_APP_URL, {
@@ -64,8 +62,6 @@ const authenticateAppWithSlack = (
         error,
       })
     ),
-    // i: response from the slack api
-    // o: result of the json transformation
     TE.chain((res) =>
       res.ok
         ? TE.tryCatch(
@@ -81,9 +77,6 @@ const authenticateAppWithSlack = (
             msg: `Could not call slack endpoint: ${res.status} ${res.statusText}`,
           })
     ),
-    // i: result of the json transformation
-    // o: Slack token type decoded
-    // pipe(1, (x) => x + 3) === flow((x) => x + 3)(1)
     TE.chainEitherK<NegativeOAuthOutcome, any, SlackTokenType>(
       flow(
         slackTokenType.decode,
@@ -96,13 +89,15 @@ const authenticateAppWithSlack = (
         )
       )
     ),
-    // i: Slack token type decoded
-    // o: Encrypted slack token
     TE.chain((slackToken) =>
-      TE.right(encrypt(JSON.stringify(slackToken), crypto.randomBytes(16)))
+      TE.right(
+        encrypt(
+          JSON.stringify(slackToken),
+          crypto.randomBytes(16),
+          process.env.SLACK_TOKEN_SIGNING_KEY
+        )
+      )
     ),
-    // i: Encrypted slack token
-    // o: Nothing
     TE.chain(({ encryptedData, iv }) =>
       TE.tryCatch(
         () =>
@@ -136,6 +131,7 @@ export default safeApi<NegativeOAuthOutcome, void>(
     pipe(
       Oauth.Oauth(
         req,
+        process.env.SLACK_OAUTH_FLOW_SIGNING_KEY,
         t.type({ id: t.string, teamName: t.string, projectName: t.string })
       ),
       RTE.chain(({ teamName, projectName }) =>

@@ -1,4 +1,4 @@
-process.env.GH_TOKEN_SIGNING_KEY = "this-token-is-32-characters-long";
+process.env.GH_TOKEN_SIGNING_KEY = "abcdabcdabcdabcdabcdabcdabcdabcd";
 import { mockAuth0WithSession } from "../../../../../../../../mocks/auth0";
 import {
   mockRequest,
@@ -12,7 +12,8 @@ import * as E from "fp-ts/lib/Either";
 
 const token = encrypt(
   JSON.stringify({ corrupted: "token", without: "any", sensible: "values" }),
-  crypto.randomBytes(16)
+  crypto.randomBytes(16),
+  process.env.GH_TOKEN_SIGNING_KEY
 );
 
 mockAuth0WithSession();

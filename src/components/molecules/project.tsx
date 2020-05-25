@@ -109,10 +109,13 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
               </Link>
             ))}
           </MenuGroup>
-          <MenuItem color={`mode.${colorMode}.text`}>
+          {
+            // temporarily disabling this until we find a good way to pipe the state
+            // to the menu. it will require an additional API endpoint.
+            /*<MenuItem color={`mode.${colorMode}.text`}>
             <ChakraLink
               isExternal
-              href={`https://github.com/apps/meeshkan/installations/new?state={"env":"${process.env.GITHUB_AUTH_ENV}","id":"${session.user.sub}"}`}
+              href={`https://github.com/apps/meeshkan/installations/new?state={needStateHere}`}
               aria-label="Link to GitHub to install the Meeshkan app on a repository"
               color={`mode.${colorMode}.text`}
               _hover={{ textDecor: "none" }}
@@ -120,7 +123,8 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
               <Icon name="external-link" mr={2} />
               Authorize another
             </ChakraLink>
-          </MenuItem>
+                  </MenuItem>*/
+          }
           <MenuDivider />
           <MenuGroup title="Other" color={`mode.${colorMode}.title`}>
             <MenuItem color={`mode.${colorMode}.text`}>
