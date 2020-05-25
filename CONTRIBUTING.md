@@ -10,16 +10,9 @@ Please note that this project is governed by the [Meeshkan Community Code of Con
 
 - [Contribute](#contribute)
   - [Branching](#branching)
-    - [Backport a fix / feature to a previous version](#backport-a-fix--feature-to-a-previous-version)
-    - [Submit a Beta / Next release](#submit-a-beta--next-release)
   - [Formatting & linting](#formatting--linting)
   - [Commit Message conventions](#commit-message-conventions)
-  - [Generate README TOC](#generate-readme-toc)
   - [Running tests](#running-tests)
-    - [Running only a single test](#running-only-a-single-test)
-  - [Release Process](#release-process)
-  - [GitHub Apps](#github-apps)
-  - [Becoming a maintainer](#becoming-a-maintainer)
   - [Generating the CONTRIBUTORS.md file](#generating-the-contributorsmd-file)
 
 <!-- tocstop -->
