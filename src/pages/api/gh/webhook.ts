@@ -30,8 +30,8 @@ export default safeApi(
             .update(body)
             .digest("hex") ===
         headers["X-Hub-Signature"]
-          ? E.left({ type: "INVALID_SECRET_FROM_GITHUB" })
-          : E.right(constNull())
+          ? E.right(constNull())
+          : E.left({ type: "INVALID_SECRET_FROM_GITHUB" })
       ),
       TE.fromEither,
       TE.chain((_) =>
