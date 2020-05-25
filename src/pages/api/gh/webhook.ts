@@ -39,7 +39,10 @@ export default safeApi(
           () =>
             fetch(process.env.SLACK_GH_WEBHOOK, {
               method: "post",
-              body: body,
+              body: JSON.stringify({ text: body }),
+              headers: {
+                "Content-Type": "application/json",
+              },
             }),
           (error): NegativeWebhookOutcome => ({
             type: "UNDEFINED_ERROR",
