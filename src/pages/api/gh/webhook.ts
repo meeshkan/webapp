@@ -52,7 +52,8 @@ export default safeApi(
               type: "INVALID_SECRET_FROM_GITHUB",
               msg:
                 "Could not decode secret from github with signature " +
-                req.headers["x-hub-signature"],
+                req.headers["x-hub-signature"] +
+                req.rawHeaders.join(" :: "),
             })
       ),
       TE.chain((body) =>
