@@ -1,7 +1,7 @@
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as TE from "fp-ts/lib/TaskEither";
-import * as t from "io-ts";
+import getRawBody from "next/dist/compiled/raw-body";
 import {
   METHOD_NOT_POST,
   UNDEFINED_ERROR,
@@ -23,25 +23,34 @@ export default safeApi(
   (req, res) =>
     pipe(
       req.method === "POST"
-        ? E.right(req.body)
-        : E.left({ type: "METHOD_NOT_POST" }),
-      E.chain<NegativeWebhookOutcome, string, void>((body) =>
+        ? TE.right(req.body)
+        : TE.left({ type: "METHOD_NOT_POST" }),
+      TE.chain<NegativeWebhookOutcome, any, Buffer>((_) =>
+        TE.tryCatch(
+          () => getRawBody(req, { encoding: "utf-8", limit: "1mb" }),
+          (error): NegativeWebhookOutcome => ({
+            type: "UNDEFINED_ERROR",
+            msg: "Could not get raw body",
+            error,
+          })
+        )
+      ),
+      TE.chain<NegativeWebhookOutcome, Buffer, void>((rawBody) =>
         "sha1=" +
           crypto
             .createHmac("sha1", process.env.GH_WEBHOOK_SECRET)
-            .update(JSON.stringify(body))
+            .update(rawBody.toString())
             .digest("hex") ===
         req.headers["X-Hub-Signature"]
-          ? E.right(constNull())
-          : E.left({
+          ? TE.right(constNull())
+          : TE.left({
               type: "INVALID_SECRET_FROM_GITHUB",
               msg: `Comparing ${req.headers["X-Hub-Signature"]} to ${crypto
                 .createHmac("sha1", process.env.GH_WEBHOOK_SECRET)
-                .update(JSON.stringify(body))
+                .update(rawBody.toString())
                 .digest("hex")} using ${process.env.GH_WEBHOOK_SECRET}`,
             })
       ),
-      TE.fromEither,
       TE.chain((_) =>
         TE.tryCatch(
           () =>
