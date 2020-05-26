@@ -8,9 +8,7 @@
     "start": "node server.js",
     "test": "jest",
     "export": "next export",
-    "deploy": "npm run build && npm run export",
-    "snyk-protect": "snyk protect",
-    "prepare": "yarn run snyk-protect"
+    "deploy": "npm run build && npm run export"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^0.11.0",
