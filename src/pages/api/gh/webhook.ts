@@ -46,13 +46,13 @@ export default safeApi(
             .createHmac("sha1", process.env.GH_WEBHOOK_SECRET)
             .update(body)
             .digest("hex") ===
-        req.headers["X-Hub-Signature"]
+        req.headers["x-hub-signature"]
           ? TE.right(body)
           : TE.left({
               type: "INVALID_SECRET_FROM_GITHUB",
               msg:
                 "Could not decode secret from github with signature " +
-                req.headers["X-Hub-Signature"],
+                req.headers["x-hub-signature"],
             })
       ),
       TE.chain((body) =>
