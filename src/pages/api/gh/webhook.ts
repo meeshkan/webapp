@@ -27,7 +27,7 @@ export default safeApi(
         "sha1=" +
           crypto
             .createHmac("sha1", process.env.GH_WEBHOOK_SECRET)
-            .update(body)
+            .update(JSON.stringify(body))
             .digest("hex") ===
         headers["X-Hub-Signature"]
           ? E.right(constNull())
