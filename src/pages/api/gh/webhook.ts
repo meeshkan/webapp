@@ -25,39 +25,13 @@ export default safeApi(
       req.method === "POST"
         ? TE.right(req.body)
         : TE.left({ type: "METHOD_NOT_POST" }),
-      TE.chain<NegativeWebhookOutcome, any, Buffer>((_) =>
-        TE.tryCatch(
-          () => getRawBody(req, { encoding: "utf-8", limit: "1mb" }),
-          (error): NegativeWebhookOutcome => ({
-            type: "UNDEFINED_ERROR",
-            msg: "Could not get raw body",
-            error,
-          })
-        )
-      ),
-      TE.chain<NegativeWebhookOutcome, Buffer, void>((rawBody) =>
-        "sha1=" +
-          crypto
-            .createHmac("sha1", process.env.GH_WEBHOOK_SECRET)
-            .update(rawBody.toString())
-            .digest("hex") ===
-        req.headers["X-Hub-Signature"]
-          ? TE.right(constNull())
-          : TE.left({
-              type: "INVALID_SECRET_FROM_GITHUB",
-              msg: `Comparing ${req.headers["X-Hub-Signature"]} to ${crypto
-                .createHmac("sha1", process.env.GH_WEBHOOK_SECRET)
-                .update(rawBody.toString())
-                .digest("hex")} using ${process.env.GH_WEBHOOK_SECRET}`,
-            })
-      ),
-      TE.chain((_) =>
+      TE.chain<NegativeWebhookOutcome, any, Response>((body) =>
         TE.tryCatch(
           () =>
             fetch(process.env.SLACK_GH_WEBHOOK, {
               method: "post",
               body: JSON.stringify({
-                text: "```" + JSON.stringify(req.body, null, 2) + "```",
+                text: "```" + JSON.stringify(body, null, 2) + "```",
               }),
               headers: {
                 "Content-Type": "application/json",
