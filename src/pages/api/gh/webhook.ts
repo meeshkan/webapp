@@ -20,18 +20,26 @@ type NegativeWebhookOutcome =
   | UNDEFINED_ERROR;
 
 export default safeApi(
-  ({ body, method, headers }, res) =>
+  (req, res) =>
     pipe(
-      method === "POST" ? E.right(body) : E.left({ type: "METHOD_NOT_POST" }),
+      req.method === "POST"
+        ? E.right(req.body)
+        : E.left({ type: "METHOD_NOT_POST" }),
       E.chain<NegativeWebhookOutcome, string, void>((body) =>
         "sha1=" +
           crypto
             .createHmac("sha1", process.env.GH_WEBHOOK_SECRET)
             .update(JSON.stringify(body))
             .digest("hex") ===
-        headers["X-Hub-Signature"]
+        req.headers["X-Hub-Signature"]
           ? E.right(constNull())
-          : E.left({ type: "INVALID_SECRET_FROM_GITHUB" })
+          : E.left({
+              type: "INVALID_SECRET_FROM_GITHUB",
+              msg: `Comparing ${req.headers["X-Hub-Signature"]} to ${crypto
+                .createHmac("sha1", process.env.GH_WEBHOOK_SECRET)
+                .update(JSON.stringify(body))
+                .digest("hex")} using ${process.env.GH_WEBHOOK_SECRET}`,
+            })
       ),
       TE.fromEither,
       TE.chain((_) =>
@@ -39,7 +47,7 @@ export default safeApi(
           () =>
             fetch(process.env.SLACK_GH_WEBHOOK, {
               method: "post",
-              body: JSON.stringify({ text: body }),
+              body: JSON.stringify({ text: req.body }),
               headers: {
                 "Content-Type": "application/json",
               },

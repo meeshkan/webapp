@@ -61,6 +61,7 @@ export interface METHOD_NOT_POST {
 }
 export interface INVALID_SECRET_FROM_GITHUB {
   type: "INVALID_SECRET_FROM_GITHUB";
+  msg: string;
 }
 export interface PROJECT_DOES_NOT_EXIST {
   type: "PROJECT_DOES_NOT_EXIST";
