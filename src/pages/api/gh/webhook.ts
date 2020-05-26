@@ -56,7 +56,9 @@ export default safeApi(
           () =>
             fetch(process.env.SLACK_GH_WEBHOOK, {
               method: "post",
-              body: JSON.stringify({ text: req.body }),
+              body: JSON.stringify({
+                text: "```" + JSON.stringify(req.body, null, 2) + "```",
+              }),
               headers: {
                 "Content-Type": "application/json",
               },
