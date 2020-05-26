@@ -333,7 +333,7 @@ const useRepoList = (
   );
 
 export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
-  "Meeshkan is temporarily offline. We are aware of the problem and are working hard to resolve it. For online support, please contact us using the Itercom icon below.",
+  "Meeshkan is temporarily offline. We are aware of the problem and are working hard to resolve it. Please check back soon!",
   ({ session, teams, id, ghOauthState }) =>
     pipe(
       {

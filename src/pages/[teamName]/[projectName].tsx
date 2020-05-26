@@ -151,7 +151,7 @@ export const getServerSideProps = ({
   )().then(_E.eitherSanitizedWithGenericError);
 
 export default withError<GET_SERVER_SIDE_PROPS_ERROR, IProjectWithTeamName>(
-  "Uh oh. It looks like this resource does not exist! If you suspect it should, please reach out using the Intercom below.",
+  "Uh oh. It looks like this resource does not exist!",
   (projectProps) => (
     <>
       <Grid
