@@ -35,7 +35,7 @@ export default safeApi(
         new Promise((resolve, _) => {
           let data = "";
           req.on("data", (chunk) => {
-            data += chunk;
+            data += typeof chunk === "string" ? chunk : chunk.toString();
           });
           req.on("end", () => resolve(E.right(data)));
         })
