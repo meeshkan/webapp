@@ -50,7 +50,9 @@ export default safeApi(
           ? TE.right(body)
           : TE.left({
               type: "INVALID_SECRET_FROM_GITHUB",
-              msg: "Could not decode secret from github",
+              msg:
+                "Could not decode secret from github with signature " +
+                req.headers["X-Hub-Signature"],
             })
       ),
       TE.chain((body) =>
