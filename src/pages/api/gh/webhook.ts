@@ -1,7 +1,7 @@
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as TE from "fp-ts/lib/TaskEither";
-import getRawBody from "next/dist/compiled/raw-body";
+import * as t from "io-ts";
 import {
   METHOD_NOT_POST,
   UNDEFINED_ERROR,
@@ -10,7 +10,7 @@ import {
 } from "../../../utils/error";
 import safeApi, { _400ErrorHandler } from "../../../utils/safeApi";
 import crypto from "crypto";
-import { constNull } from "fp-ts/lib/function";
+import { constNull, constVoid } from "fp-ts/lib/function";
 import fetch from "isomorphic-unfetch";
 
 type NegativeWebhookOutcome =
@@ -19,20 +19,46 @@ type NegativeWebhookOutcome =
   | REST_ENDPOINT_ERROR
   | UNDEFINED_ERROR;
 
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 export default safeApi(
   (req, res) =>
     pipe(
       req.method === "POST"
-        ? TE.right(req.body)
+        ? TE.right(constVoid())
         : TE.left({ type: "METHOD_NOT_POST" }),
-      TE.chain<NegativeWebhookOutcome, any, Response>((body) =>
+      TE.chain<NegativeWebhookOutcome, void, string>((_) => () =>
+        new Promise((resolve, _) => {
+          let data = "";
+          req.on("data", (chunk) => {
+            data += chunk;
+          });
+          req.on("end", () => resolve(E.right(data)));
+        })
+      ),
+      TE.chain<NegativeWebhookOutcome, string, string>((body) =>
+        "sha1=" +
+          crypto
+            .createHmac("sha1", process.env.GH_WEBHOOK_SECRET)
+            .update(body)
+            .digest("hex") ===
+        req.headers["X-Hub-Signature"]
+          ? TE.right(body)
+          : TE.left({
+              type: "INVALID_SECRET_FROM_GITHUB",
+              msg: "Could not decode secret from github",
+            })
+      ),
+      TE.chain((body) =>
         TE.tryCatch(
           () =>
             fetch(process.env.SLACK_GH_WEBHOOK, {
               method: "post",
-              body: JSON.stringify({
-                text: "```\n" + JSON.stringify(body, null, 2) + "\n```",
-              }),
+              body: JSON.stringify({ text: body }),
               headers: {
                 "Content-Type": "application/json",
               },
