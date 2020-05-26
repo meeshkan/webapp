@@ -6,7 +6,7 @@
     "dev": "node server.js",
     "build": "next build",
     "start": "node server.js",
-    "prettier": "prettier --write src/**/* test/**/* mocks/**/* server.js sentry.js next.config.js jest.config.js",
+    "format": "prettier --write src/**/* test/**/* mocks/**/* server.js sentry.js next.config.js jest.config.js",
     "test": "jest",
     "export": "next export",
     "deploy": "npm run build && npm run export"
