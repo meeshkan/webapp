@@ -42,6 +42,7 @@ import {
   lensTaskEitherHead,
   optionalHead,
 } from "../../../monocle-ts";
+import ReactGA from "react-ga";
 import {
   defaultGQLErrorHandler,
   GET_SERVER_SIDE_PROPS_ERROR,
@@ -353,20 +354,31 @@ const updateConfiguration = ({
             )
           )
         ),
-        TE.chain((_) => TE.right(constNull())),
-        TE.mapLeft((l) =>
-          pipe(
-            toast({
-              title: "Oh no!",
-              description:
-                "We could not update your configuration. Please try again soon!",
-              status: "error",
-              duration: 5000,
-              isClosable: true,
-              position: "bottom-right",
-            }),
-            constant(l)
+        TE.chain((_) =>
+          TE.right(
+            ReactGA.event({
+              category: "Projects",
+              action: "Configure",
+              label: "configuration.tsx",
+            })
           )
+        ),
+        // TODO: is there an equivalent of mapLeft that is kinda like
+        // chainFirst?
+        TE.mapLeft(
+          (l) =>
+            ({
+              _: toast({
+                title: "Oh no!",
+                description:
+                  "We could not update your configuration. Please try again soon!",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+                position: "bottom-right",
+              }),
+              __: l,
+            }.__)
         )
       ),
     (_, e) => () => Promise.resolve(E.right(constVoid()))

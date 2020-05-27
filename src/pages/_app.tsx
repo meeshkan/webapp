@@ -18,12 +18,16 @@ import Layout from "../components/layout";
 import { useFetchSession } from "../utils/user";
 import { useRouter } from "next/router";
 import { isLeft, isRight } from "fp-ts/lib/Either";
-
+import ReactGA from "react-ga";
 function MyApp({ Component, pageProps }: AppProps) {
   const { colorMode } = useColorMode();
   const sessionAndThunk = useFetchSession();
   const router = useRouter();
 
+  if (global["window"]) {
+    ReactGA.initialize("UA-107981669-10");
+    ReactGA.pageview(window.location.pathname + window.location.search);
+  }
   return (
     <>
       <Head>
