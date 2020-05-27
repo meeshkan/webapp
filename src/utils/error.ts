@@ -32,6 +32,10 @@ export interface OAUTH_FLOW_ERROR {
   type: "OAUTH_FLOW_ERROR";
   msg: string;
 }
+export interface FILTERED_OUT {
+  type: "FILTERED_OUT";
+  msg: string;
+}
 export interface NO_TOKEN_YET {
   type: "NO_TOKEN_YET";
   msg: string;

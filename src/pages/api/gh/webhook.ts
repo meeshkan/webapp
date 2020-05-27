@@ -7,15 +7,17 @@ import {
   UNDEFINED_ERROR,
   INVALID_SECRET_FROM_GITHUB,
   REST_ENDPOINT_ERROR,
+  FILTERED_OUT,
 } from "../../../utils/error";
 import safeApi, { _400ErrorHandler } from "../../../utils/safeApi";
 import crypto from "crypto";
-import { constNull, constVoid } from "fp-ts/lib/function";
+import { constNull, constVoid, flow } from "fp-ts/lib/function";
 import fetch from "isomorphic-unfetch";
 
 type NegativeWebhookOutcome =
   | METHOD_NOT_POST
   | INVALID_SECRET_FROM_GITHUB
+  | FILTERED_OUT
   | REST_ENDPOINT_ERROR
   | UNDEFINED_ERROR;
 
@@ -56,13 +58,22 @@ export default safeApi(
                 req.rawHeaders.join(" :: "),
             })
       ),
+      TE.chain(flow(JSON.parse, TE.right)),
+      TE.chain<NegativeWebhookOutcome, any, any>((body) =>
+        body.installation
+          ? TE.right(body)
+          : TE.left({
+              type: "FILTERED_OUT",
+              msg: "Did not receive an installation event",
+            })
+      ),
       TE.chain((body) =>
         TE.tryCatch(
           () =>
             fetch(process.env.SLACK_GH_WEBHOOK, {
               method: "post",
               body: JSON.stringify({
-                text: JSON.stringify(JSON.parse(body), null, 2),
+                text: JSON.stringify(body, null, 2),
               }),
               headers: {
                 "Content-Type": "application/json",
