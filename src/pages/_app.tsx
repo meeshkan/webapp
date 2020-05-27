@@ -10,6 +10,7 @@ import {
   useColorMode,
   Skeleton,
   Flex,
+  Text,
 } from "@chakra-ui/core";
 import customTheme from "../theme";
 import Navigation from "../components/organisms/navigation";
@@ -71,15 +72,17 @@ function MyApp({ Component, pageProps }: AppProps) {
                     >
                       Sign in
                     </Button>
-                    <Button
-                      rounded="sm"
-                      fontWeight="900"
-                      variantColor="red"
-                      onClick={() => router.push("/api/login")}
-                    >
-                      Sign up
-                    </Button>
                   </Flex>
+                  <Text
+                      textAlign="center"
+                      mt={20}
+                      lineHeight="base"
+                      fontStyle="italic"
+                      fontWeight={500}
+                      color={`mode.${colorMode}.text`}
+                    >
+                      Meeshkan is currently in alpha and by invitation only.
+                    </Text>
                 </Box>
               ) : (
                 <Component {...pageProps} />
