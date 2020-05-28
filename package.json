@@ -6,6 +6,7 @@
     "dev": "node server.js",
     "build": "next build",
     "start": "node server.js",
+    "format": "prettier --write src/**/* test/**/* mocks/**/* server.js sentry.js next.config.js jest.config.js",
     "test": "jest",
     "export": "next export",
     "deploy": "npm run build && npm run export"
@@ -51,6 +52,7 @@
     "@types/pino": "^6.0.1",
     "@types/react": "^16.9.34",
     "jest": "^26.0.1",
+    "prettier": "^2.0.5",
     "ts-jest": "^26.0.0",
     "typescript": "^3.8.3"
   },
