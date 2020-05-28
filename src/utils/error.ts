@@ -32,6 +32,10 @@ export interface OAUTH_FLOW_ERROR {
   type: "OAUTH_FLOW_ERROR";
   msg: string;
 }
+export interface FILTERED_OUT {
+  type: "FILTERED_OUT";
+  msg: string;
+}
 export interface NO_TOKEN_YET {
   type: "NO_TOKEN_YET";
   msg: string;
@@ -54,6 +58,13 @@ export interface USER_HAS_TEAMS {
 }
 export interface ID_NOT_IN_STATE {
   type: "ID_NOT_IN_STATE";
+  msg: string;
+}
+export interface METHOD_NOT_POST {
+  type: "METHOD_NOT_POST";
+}
+export interface INVALID_SECRET_FROM_GITHUB {
+  type: "INVALID_SECRET_FROM_GITHUB";
   msg: string;
 }
 export interface PROJECT_DOES_NOT_EXIST {

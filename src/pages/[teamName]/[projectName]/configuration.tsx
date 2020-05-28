@@ -378,7 +378,7 @@ const ConfigurationPage = withError<
   NegativeConfigurationFetchOutcome,
   IConfigurationProps
 >(
-  "Meeshkan is temporarily offline. We are aware of the problem and are working hard to resolve it. For online support, please contact us using the Itercom icon below.",
+  "Meeshkan is temporarily offline. We are aware of the problem and are working hard to resolve it. Please check back soon!",
   ({
     session,
     configuration,

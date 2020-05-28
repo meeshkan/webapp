@@ -133,7 +133,7 @@ export const getServerSideProps = ({
   )().then(_E.eitherSanitizedWithGenericError);
 
 export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
-  "Uh oh. Looks like this resource does not exist. If you suspect it should, reach out to us using the Intercom below.",
+  "Uh oh. Looks like this resource does not exist.",
   ({ team, session, ghOauthState }) =>
     pipe(useColorMode(), ({ colorMode }) => (
       <>

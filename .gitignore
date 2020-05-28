@@ -34,3 +34,6 @@ yarn-error.log*
 
 .now
 .vercel
+
+# packages
+yarn.lock
