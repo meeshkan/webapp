@@ -15,9 +15,8 @@ import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import { Loading } from "../../utils/hookNeedingFetch";
 import { NotAuthorized } from "../../utils/user";
 
-
 interface INavigationProps {
-  session: Either<Loading, Either<NotAuthorized, ISession>>
+  session: Either<Loading, Either<NotAuthorized, ISession>>;
 }
 
 const Navigation = ({ session }: INavigationProps) => {
@@ -59,7 +58,9 @@ const Navigation = ({ session }: INavigationProps) => {
                   mr={2}
                 />
               </Stack>
-            ) : <Project session={session.right.right} />}
+            ) : (
+              <Project session={session.right.right} />
+            )}
           </section>
         )}
       </Flex>

@@ -12,10 +12,7 @@ import crypto from "crypto";
 import unmock, { u } from "unmock";
 import * as E from "fp-ts/lib/Either";
 
-unmock
-  .nock("https://api.github.com")
-  .post("/oauth")
-  .reply(200, u.string());
+unmock.nock("https://api.github.com").post("/oauth").reply(200, u.string());
 beforeAll(() => unmock.on());
 afterAll(() => unmock.off());
 
