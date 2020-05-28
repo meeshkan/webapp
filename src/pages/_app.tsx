@@ -4,26 +4,18 @@ import {
   ThemeProvider,
   CSSReset,
   ColorModeProvider,
-  Box,
-  Heading,
-  Button,
-  useColorMode,
   Skeleton,
-  Flex,
-  Text,
 } from "@chakra-ui/core";
 import customTheme from "../theme";
 import Navigation from "../components/organisms/navigation";
 import Head from "next/head";
 import Layout from "../components/layout";
 import { useFetchSession } from "../utils/user";
-import { useRouter } from "next/router";
 import { isLeft, isRight } from "fp-ts/lib/Either";
+import SignIn from "../components/organisms/signIn";
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const { colorMode } = useColorMode();
   const sessionAndThunk = useFetchSession();
-  const router = useRouter();
 
   return (
     <>
@@ -53,37 +45,7 @@ function MyApp({ Component, pageProps }: AppProps) {
               {isLeft(sessionAndThunk[0]) ? (
                 <></>
               ) : isLeft(sessionAndThunk[0].right) ? (
-                <Box as="section" my={12}>
-                  <Heading
-                    as="h2"
-                    color={`mode.${colorMode}.title`}
-                    textAlign="center"
-                    mb={4}
-                  >
-                    Sign in to start using Meeshkan
-                  </Heading>
-                  <Flex justify="center">
-                    <Button
-                      rounded="sm"
-                      mr={4}
-                      fontWeight="900"
-                      variantColor="red"
-                      onClick={() => router.push("/api/login")}
-                    >
-                      Sign in
-                    </Button>
-                  </Flex>
-                  <Text
-                      textAlign="center"
-                      mt={20}
-                      lineHeight="base"
-                      fontStyle="italic"
-                      fontWeight={500}
-                      color={`mode.${colorMode}.text`}
-                    >
-                      Meeshkan is currently in alpha and by invitation only.
-                    </Text>
-                </Box>
+                <SignIn />
               ) : (
                 <Component {...pageProps} />
               )}
