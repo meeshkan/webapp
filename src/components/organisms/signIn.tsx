@@ -16,7 +16,15 @@ const SignIn = () => {
   const router = useRouter();
 
   return (
-    <Box as="section" my={12}>
+    <Box
+      as="section"
+      mt={24}
+      mx="auto"
+      p={8}
+      backgroundColor={`mode.${colorMode}.card`}
+      maxW="750px"
+      rounded="sm"
+    >
       <Heading
         as="h2"
         color={`mode.${colorMode}.title`}
