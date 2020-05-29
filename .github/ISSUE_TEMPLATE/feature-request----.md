@@ -17,10 +17,6 @@ assignees: ''
 
 <!-- Why are you proposing this feature? What problem would it be solving? -->
 
-### Collaboration
-
-<!-- Would you be able to help us build this feature? Spoiler alert: This will likely help it get implemented quicker 😏 -->
-
 ### Additional Context
 
 <!-- Anything else that will help us understand your vision -->
