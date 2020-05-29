@@ -3,7 +3,6 @@ import { pipe } from "fp-ts/lib/pipeable";
 import { bracket, fromEither, right, TaskEither } from "fp-ts/lib/TaskEither";
 import { NextApiRequest, NextApiResponse } from "next";
 import logger from "pino";
-import fetch from "isomorphic-unfetch";
 import { INCORRECT_TYPE_SAFETY } from "./error";
 import { PathReporter } from "io-ts/lib/PathReporter";
 import * as E from "fp-ts/lib/Either";
@@ -34,18 +33,6 @@ export const logchain = <E extends object>(e: E) =>
           errors: PathReporter.report(E.left(e.errors)),
         }
       : e,
-    I.chainFirst((toLog) =>
-      process.env.LOGFLARE_PRODUCTION_URL
-        ? fetch(process.env.LOGFLARE_PRODUCTION_URL, {
-            method: "POST",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify([{ tag: "MEESHKAN_MANUAL_LOG", ...toLog }]),
-          })
-        : constNull()
-    ),
     I.chainFirst((toLog) => Logger.error(toLog))
   );
 

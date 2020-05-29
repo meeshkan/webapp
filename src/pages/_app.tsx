@@ -29,6 +29,19 @@ function MyApp({ Component, pageProps }: AppProps) {
       <Head>
         <title>Meeshkan Webapp</title>
         <link rel="icon" href="/icon.png" />
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=UA-107981669-10"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-107981669-10');`,
+          }}
+        ></script>
       </Head>
       <ThemeProvider theme={customTheme}>
         <CSSReset />
@@ -36,7 +49,9 @@ function MyApp({ Component, pageProps }: AppProps) {
           <Layout>
             <Navigation session={sessionAndThunk[0]} />
             <Skeleton isLoaded={isRight(sessionAndThunk[0])}>
-                {isLeft(sessionAndThunk[0]) ? <></> : isLeft(sessionAndThunk[0].right) ?
+              {isLeft(sessionAndThunk[0]) ? (
+                <></>
+              ) : isLeft(sessionAndThunk[0].right) ? (
                 <Box as="section" my={12}>
                   <Heading
                     as="h2"
@@ -66,8 +81,10 @@ function MyApp({ Component, pageProps }: AppProps) {
                     </Button>
                   </Flex>
                 </Box>
-                : <Component {...pageProps} />}
-              </Skeleton>
+              ) : (
+                <Component {...pageProps} />
+              )}
+            </Skeleton>
           </Layout>
         </ColorModeProvider>
       </ThemeProvider>

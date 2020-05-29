@@ -1,4 +1,4 @@
-export const CREATE_PROJECT_MUTATION = `mutation CREATE_PROJECT($userId:ID!, $teamName:String!, $repositoryName: String!, $namePlusTeam: String!, $nodePlusTeam: String!, $nodeID: String!) {
+export const CREATE_PROJECT_MUTATION = `mutation CREATE_PROJECT($userId:ID!, $teamName:String!, $repositoryName: String!, $owner: String!, $namePlusTeam: String!, $nodePlusTeam: String!, $nodeID: String!) {
   userUpdate(filter: {
     id: $userId
   },
@@ -15,6 +15,7 @@ export const CREATE_PROJECT_MUTATION = `mutation CREATE_PROJECT($userId:ID!, $te
               namePlusTeamName: $namePlusTeam
               repository: {
                 create:{
+                  owner: $owner
                   name: $repositoryName
                   nodeId: $nodeID
                   nodeIdPlusTeamId:$nodePlusTeam
