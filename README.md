@@ -65,6 +65,6 @@ These libraries are, in no particualr order:
 
 ## Contributing
 
-Thanks for wanting to contribute! Take a look at our [Contributing Guide](CONTRIBUTING.md) for notes on our commit message conventions and how to run tests.
+Thanks for your interest in contributing to our webapp! To propose a contribution process, please file an [issue](https://github.com/meeshkan/webapp/issues).
 
 Please note that this project is governed by the [Meeshkan Community Code of Conduct](https://github.com/meeshkan/code-of-conduct). By participating in this project, you agree to abide by its terms.
