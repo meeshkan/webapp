@@ -25,7 +25,7 @@ If you're an existing Meeshkan user, everything from configuration instructions 
 
 This repository makes heavy use of certain libraries. Without being familiar with the basics of how these libraries work, it will be difficult to understand the code base.
 
-These libraries are, in no particualr order:
+These libraries are, in no particular order:
 
 - [`next.js`](https://github.com/zeit/next.js): Opinionated framework for writing server-rendered React apps.
 - [`chakra-ui`](https://github.com/chakra-ui/chakra-ui): Accessible React component library.
