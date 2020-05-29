@@ -1,70 +1,62 @@
-# Webapp readme
+# Meeshkan Webapp
 
-## Installing, building, testing and running
+⚠️ _Meeshkan is currently in alpha and by invitation only. [Request alpha access](https://meeshkan.com/) if you're interested._
 
-Here are instructions on how to install, build and run this web app.
+Repositories in, bug fixes out. [Meeshkan](https://meeshkan.com/) is an automated testing tool designed to find bugs in your projects. In its current state, it's built to handle APIs and third-party services. Once installed, Meeshkan runs weekly and submits issues to your repository when it finds bugs.
 
-### Installation
+We're actively building this webapp to facilitate the core service. Through the Meeshkan webapp, you can see what tests were run and resolve any issues that come up while executing your tests.
 
-To install the webapp, download this repository and run:
+![Example of the Meeshkan dashboard in dark mode.](https://user-images.githubusercontent.com/26869552/83249968-ab134a80-a1a7-11ea-9168-bf4864e6c680.png)
 
-```bash
-yarn
-```
+## What's in this document:
 
-### Build
+- [Documentation](#documentation)
+- [Routing style](#routing-style)
+- [Important dependencies](#important-dependencies)
+- [Known issues](#known-issues)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
 
-To build the webapp, run:
+## Documentation
 
-```bash
-yarn build
-```
-
-Note that there are many environment variables used in `webapp`. If you are attempting to build it without those variables, the build and/or first run will likely fail. If you are a member of the Meeshkan organization on `vercel`, you can obtain the development version of these variables by running `vercel env pull`. Otherwise, you can create an `.env` file and populate it with the variables you need to run the parts of the app you wish to run. At a minimum, you will need an Auth0 app with GitHub login configured and the GitHub login will need a mandatory e-mail field.
-
-### Test
-
-To test the webapp, invoke
-
-```bash
-yarn test
-```
-
-Please see the above note about environment variables before attempting to test the web app.
-
-### Run
-
-To run the webapp, invoke
-
-```bash
-yarn dev
-```
-
-Please see the above note about environment variables before attempting to run the web app.
-
-## Routing style
-
-We optimize for user experience (clear URL structure) and only add an abstraction if absolutely necessary. The repercussion of this is we will have some reserved paths such as `settings`, `user`, and more. We percieve this to have minimal impact and aren't actively solving for these edge cases.
+If you're an existing Meeshkan user, everything from configuration instructions to frequently asked questions is available in the [Meeshkan documentation](https://meeshkan.com/docs/).
 
 ## Important dependencies
 
 This repository makes heavy use of certain libraries. Without being familiar with the basics of how these libraries work, it will be difficult to understand the code base.
 
-These libraries are, in no particualr order:
+These libraries are, in no particular order:
 
-- [`next.js`](https://github.com/zeit/next.js)
-- [`chakra-ui`](https://github.com/chakra-ui/chakra-ui)
-- [`fp-ts`](https://github.com/gcanti/fp-ts)
-- [`io-ts`](https://github.com/gcanti/io-ts)
-- [`monocle-ts`](https://github.com/gcanti/monocle-ts)
+- [`next.js`](https://github.com/zeit/next.js): Opinionated framework for writing server-rendered React apps.
+- [`chakra-ui`](https://github.com/chakra-ui/chakra-ui): Accessible React component library.
+- [`fp-ts`](https://github.com/gcanti/fp-ts): Typed functional programming for TypeScript.
+- [`io-ts`](https://github.com/gcanti/io-ts): Run-time type system for IO decoding/encoding.
+- [`monocle-ts`](https://github.com/gcanti/monocle-ts): Functional optics for TypeScript projects.
+
+## Routing style
+
+We optimize for user experience (clear URL structure) and only add an abstraction if absolutely necessary. The repercussion of this is we will have some reserved paths such as `settings`, `user`, and more. We percieve this to have minimal impact and aren't actively solving for these edge cases.
 
 ## Known issues
 
 - We currently have no way to know if a user revokes an incoming webhook.
-- Github often responds that a stored refresh token is invalid.
+- GitHub often responds that a stored refresh token is invalid.
+
+## Roadmap
+
+We're still in the early stages and things are changing rapidly, but here are some larger goals we'd like to accomplish with this webapp. Please note that these are subject to change at any time.
+
+- Allow you to control the frequency of your tests
+- Give you access to explore the specification Meeshkan builds of your repository
+- More team-related functionalities
+- Burn-down chart of bugs
+
+Have a suggestion? [File an issue](https://github.com/meeshkan/webapp/issues/new).
 
 ## Contributing
 
-Thanks for your interest in contributing to our webapp! To propose a contribution process, please file an [issue](https://github.com/meeshkan/webapp/issues).
+⚠️ The purpose of this repository is to keep our work open and transparent. But, given the way our webapp is configured, **we're unable to take outside contributions directly**. [File an issue](https://github.com/meeshkan/webapp/issues/new) if you have a feature request or bug report. You can also [contact our team directly](https://meeshkan.com/contact/).
 
-Please note that this project is governed by the [Meeshkan Community Code of Conduct](https://github.com/meeshkan/code-of-conduct). By participating in this project, you agree to abide by its terms.
+Please note that this project is governed by the [Meeshkan Community Code of Conduct](https://github.com/meeshkan/code-of-conduct). By participating, you agree to abide by its terms.
+
+➡️ If you're a member of the Meeshkan organization, you can find all of the local development instructions in the [contributing guide](./CONTRIBUTING.md).
