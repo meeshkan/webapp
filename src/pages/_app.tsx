@@ -12,11 +12,16 @@ import Head from "next/head";
 import Layout from "../components/layout";
 import { useFetchSession } from "../utils/user";
 import { isLeft, isRight } from "fp-ts/lib/Either";
+import ReactGA from "react-ga";
 import SignIn from "../components/organisms/signIn";
-
+        
 function MyApp({ Component, pageProps }: AppProps) {
   const sessionAndThunk = useFetchSession();
 
+  if (global["window"]) {
+    ReactGA.initialize("UA-107981669-10");
+    ReactGA.pageview(window.location.pathname + window.location.search);
+  }
   return (
     <>
       <Head>

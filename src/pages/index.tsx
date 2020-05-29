@@ -42,6 +42,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import { NextRouter, useRouter } from "next/router";
 import React, { useState } from "react";
+import ReactGA from "react-ga";
 import Card from "../components/molecules/card";
 import { withError } from "../components/molecules/error";
 import * as _E from "../fp-ts/Either";
@@ -182,7 +183,17 @@ const createProject = ({
           `/${importProjectVariables.teamName}/${importProjectVariables.repositoryName}/configuration`
         )
         .then((_) =>
-          E.right({ _: closeModal(), __: importProjectIsExecuting(false) }._)
+          E.right(
+            {
+              _: closeModal(),
+              __: importProjectIsExecuting(false),
+              ___: ReactGA.event({
+                category: "Projects",
+                action: "Created",
+                label: "index.tsx",
+              }),
+            }._
+          )
         )
   );
 
@@ -509,6 +520,13 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                         fontWeight={900}
                         px={4}
                         variantColor="red"
+                        onClick={() =>
+                          ReactGA.event({
+                            category: "Github",
+                            action: "Import repo start",
+                            label: "index.tsx",
+                          })
+                        }
                         // @ts-ignore
                         href={`https://github.com/apps/meeshkan/installations/new?state=${ghOauthState}`}
                         aria-label="Link to GitHub to install meeshkan on a repository"
