@@ -6,6 +6,8 @@ Repositories in, bug fixes out. [Meeshkan](https://meeshkan.com/) is an automate
 
 We're actively building this webapp to facilitate the core service. Through the Meeshkan webapp, you can see what tests were run and resolve any issues that come up while executing your tests.
 
+📖 Looking for an overview? [Read our announcement blog post](https://meeshkan.com/blog/open-source-webapp/).
+
 ![Example of the Meeshkan dashboard in dark mode.](https://user-images.githubusercontent.com/26869552/83249968-ab134a80-a1a7-11ea-9168-bf4864e6c680.png)
 
 ## What's in this document:
