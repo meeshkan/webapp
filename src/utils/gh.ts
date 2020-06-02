@@ -27,7 +27,7 @@ import {
   UNKNOWN_GRAPHQL_ERROR,
 } from "./error";
 import { decrypt, encrypt } from "./sec";
-import { confirmOrCreateUser } from "./user";
+import { confirmOrCreateUser, getUserIdFromIdOrEnv } from "./user";
 import {
   GITHUB_INFO_QUERY_OR_MUTATION,
   UPDATE_GITHUB_INFO_MUTATION,
@@ -478,7 +478,7 @@ export const authenticateAppWithGithub = (
             CREATE_GITHUB_INFO_MUTATION,
             UPDATE_GITHUB_INFO_MUTATION,
             {
-              userId,
+              userId: getUserIdFromIdOrEnv(userId),
               githubSyncChecksum: saltedEncryptedData.encryptedData,
               githubSyncNonce: saltedEncryptedData.iv,
             }

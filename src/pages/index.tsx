@@ -73,7 +73,7 @@ import {
   teamsToProjects,
   useTeams,
 } from "../utils/teams";
-import { confirmOrCreateUser } from "../utils/user";
+import { confirmOrCreateUser, getUserIdFromIdOrEnv } from "../utils/user";
 import { withSession } from "./api/session";
 import { getGHOAuthState } from "../utils/oauth";
 
@@ -621,7 +621,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                                     importProjectIsExecuting[1],
                                   closeModal: onClose,
                                   toast,
-                                  userId: id,
+                                  userId: getUserIdFromIdOrEnv(id),
                                   namePlusTeam: `${repo.name}${SEPARATOR}${allTeams[0].name}`,
                                   nodeID: repo.node_id,
                                   nodePlusTeam:
