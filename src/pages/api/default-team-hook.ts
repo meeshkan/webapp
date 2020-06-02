@@ -22,6 +22,7 @@ import { logchain } from "../../utils/safeApi";
 import {
   confirmOrCreateUser,
   NegativeConfirmOrCreateUserOutcome,
+  getUserIdFromIdOrEnv,
 } from "../../utils/user";
 import { NegativeSessionFetchOutcome, withSession } from "./session";
 
@@ -52,7 +53,7 @@ const createTeamFromUserName = (userId: string) => (
       () =>
         eightBaseClient(session).request(CREATE_TEAM_FROM_USER_NAME, {
           teamName: session.user.nickname,
-          userId,
+          userId: getUserIdFromIdOrEnv(userId),
         }),
       defaultGQLErrorHandler("mutation to insert default team")
     ),
@@ -121,7 +122,7 @@ const uploadPhotoForTeam = (userId: string, teamId: string) => (
         () =>
           client.request(ASSOCIATE_PHOTO_WITH_TEAM, {
             teamId,
-            userId,
+            userId: getUserIdFromIdOrEnv(userId),
             fileId: url.split("/").slice(-1)[0],
             filename,
           }),

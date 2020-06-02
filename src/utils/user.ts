@@ -19,6 +19,11 @@ import { hookNeedingFetch } from "./hookNeedingFetch";
 export type NotAuthorized = "NotAuthorized";
 export const NotAuthorized: NotAuthorized = "NotAuthorized";
 
+export const getUserIdFromIdOrEnv = (userId: string) =>
+  process.env.MEESHKAN_ALTERNATIVE_ID
+    ? process.env.MEESHKAN_ALTERNATIVE_ID
+    : userId;
+
 export const fetchSession: TE.TaskEither<NotAuthorized, ISession> = () =>
   fetch("/api/session")
     .then((res) => (res.ok ? res.json() : null))

@@ -27,7 +27,7 @@ import * as Oauth from "../../../utils/oauth";
 import safeApi, { _400ErrorHandler } from "../../../utils/safeApi";
 import { encrypt } from "../../../utils/sec";
 import { SEPARATOR } from "../../../utils/separator";
-import { confirmOrCreateUser } from "../../../utils/user";
+import { confirmOrCreateUser, getUserIdFromIdOrEnv } from "../../../utils/user";
 import { withSession } from "../session";
 
 const userType = t.type({ id: t.string });
@@ -109,7 +109,7 @@ const authenticateAppWithSlack = (
             CREATE_SLACK_INFO_MUTATION,
             UPDATE_SLACK_INFO_MUTATION,
             {
-              userId,
+              userId: getUserIdFromIdOrEnv(userId),
               slackSyncCheckSum: encryptedData,
               slackSyncNonce: iv,
               teamName,

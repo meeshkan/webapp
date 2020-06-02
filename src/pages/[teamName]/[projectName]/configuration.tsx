@@ -58,7 +58,7 @@ import {
 import { eightBaseClient, upsertHack } from "../../../utils/graphql";
 import { hookNeedingFetch, Loading } from "../../../utils/hookNeedingFetch";
 import { SEPARATOR } from "../../../utils/separator";
-import { confirmOrCreateUser } from "../../../utils/user";
+import { confirmOrCreateUser, getUserIdFromIdOrEnv } from "../../../utils/user";
 import { withSession } from "../../api/session";
 import { getSlackOAuthState } from "../../../utils/oauth";
 
@@ -425,7 +425,7 @@ const ConfigurationPage = withError<
             teamNameAsPredicate: {
               equals: teamName,
             },
-            userId: id,
+            userId: getUserIdFromIdOrEnv(id),
             namePlusTeamName: `${projectName}${SEPARATOR}${teamName}`,
           })(session)().then(constNull),
         configuration:
