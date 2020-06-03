@@ -189,7 +189,7 @@ export const getServerSideProps = ({
 
 const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
   "Could not find this test resource.",
-  ({ test: { log, location, commitHash } }) => {
+  ({ test: { log, location, commitHash, status } }) => {
     const { colorMode } = useColorMode();
     const logs = JSON.parse(log);
     const failures = logs.commands.filter((a) => a.success === false);
@@ -220,7 +220,15 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
             <Code
               ml={2}
               fontSize="inherit"
-              variantColor="red"
+              variantColor={
+                status === "In progress"
+                  ? "yellow"
+                  : status === "Passing"
+                  ? "cyan"
+                  : status === "Failed"
+                  ? "red"
+                  : null
+              }
             >{`${location}@${commitHash.slice(0, 7)}`}</Code>
           </Heading>
           <Accordion w="full" defaultIndex={[0]} allowMultiple>

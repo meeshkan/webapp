@@ -46,7 +46,7 @@ export const Test = ({
             variantColor={
               status === "In progress"
                 ? "yellow"
-                : status === "Success"
+                : status === "Passing"
                 ? "cyan"
                 : status === "Failed"
                 ? "red"
