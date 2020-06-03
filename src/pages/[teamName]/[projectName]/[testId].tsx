@@ -53,7 +53,7 @@ const TestT = t.type({
   commitHash: t.string,
   status: t.string,
   location: t.string,
-  log: t.string,
+  log: t.union([t.string, t.null]),
 });
 
 type ITestT = t.TypeOf<typeof TestT>;
@@ -189,7 +189,10 @@ export const getServerSideProps = ({
 
 const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
   "Could not find this test resource.",
-  ({ test: { log, location, commitHash } }) => {
+  ({ test: { log, location, commitHash, status } }) => {
+    if (status === "In progress") {
+      return <div>Your tests are currently in progress.</div>;
+    }
     const { colorMode } = useColorMode();
     const logs = JSON.parse(log);
     const failures = logs.commands.filter((a) => a.success === false);
