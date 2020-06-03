@@ -1,12 +1,17 @@
 import React from "react";
 import {
   Icon,
+  Box,
   Flex,
   useColorMode,
   Button,
   LightMode,
   Stack,
   IconButton,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator
 } from "@chakra-ui/core";
 import Project from "../molecules/project";
 import Link from "next/link";
@@ -34,15 +39,33 @@ const Navigation = ({ session }: INavigationProps) => {
         pos="sticky"
         top={8}
       >
-        <Link href="/">
-          <Icon
-            name="Logo"
-            color={`mode.${colorMode}.title`}
-            h={8}
-            w="auto"
-            cursor="pointer"
-          />
-        </Link>
+        <Flex
+          align="center"
+          backgroundColor={`mode.${colorMode}.card`}
+          rounded="sm"
+        >
+          <Link href="/">
+            <Icon
+              name="Logo"
+              color={`mode.${colorMode}.title`}
+              h={8}
+              w="auto"
+              cursor="pointer"
+            />
+          </Link>
+          <Breadcrumb ml={3} mt={2} addSeparator={true}>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="#" color={`mode.${colorMode}.tertiary`}>
+                Example
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbItem isCurrentPage>
+              <BreadcrumbLink color={`mode.${colorMode}.tertiary`} href="#">
+                Another
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+          </Breadcrumb>
+        </Flex>
         {!isLeft(session) && (
           <section>
             {isLeft(session.right) ? (
