@@ -46,10 +46,7 @@ export const Test = ({
             variantColor={
               status === "In progress"
                 ? "yellow"
-                : // NB: Success is depricated
-                // Once this enum no longer exists, remove that
-                // from the check
-                status === "Success" || status === "Passing"
+                : status === "Passing"
                 ? "cyan"
                 : status === "Failed"
                 ? "red"
