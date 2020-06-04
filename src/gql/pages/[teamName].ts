@@ -22,6 +22,12 @@ export const GET_TEAM_QUERY = `query($teamName: String!) {
         project {
           items {
             name
+            repository {
+              owner
+            }
+            configuration {
+              id
+            }
           }
         }
       }

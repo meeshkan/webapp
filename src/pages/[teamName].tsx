@@ -13,6 +13,8 @@ import {
   Input,
   Button,
   Box,
+  Flex,
+  Code,
 } from "@chakra-ui/core";
 import * as E from "fp-ts/lib/Either";
 import { flow } from "fp-ts/lib/function";
@@ -77,6 +79,18 @@ const Team = t.type({
     items: t.array(
       t.type({
         name: t.string,
+        repository: t.union([
+          t.null,
+          t.type({
+            owner: t.string,
+          }),
+        ]),
+        configuration: t.union([
+          t.null,
+          t.type({
+            id: t.string,
+          }),
+        ]),
       })
     ),
   }),
@@ -164,7 +178,10 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
           <Card gridArea="1 / 1 / 2 / 2" heading="Team settings">
             <Text>example</Text>
           </Card>
-          <Card gridArea="2 / 1 / 3 / 2" heading="Team members">
+          <Card
+            gridArea="2 / 1 / 3 / 2"
+            heading={`Team members - ${team.users.items.length}`}
+          >
             <FormControl>
               <FormLabel
                 fontWeight={500}
@@ -194,7 +211,13 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
               </Stack>
             </FormControl>
             {team.users.items.map((user, index) => (
-              <Stack isInline align="center" mt={4} justify="space-between">
+              <Stack
+                key={index}
+                isInline
+                align="center"
+                mt={4}
+                justify="space-between"
+              >
                 <Stack align="center" isInline>
                   <Image
                     src={
@@ -217,33 +240,33 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
           </Card>
           <Box gridArea="1 / 2 / 3 / 4">
             <Grid templateColumns="repeat(2, 1fr)" gap={8}>
-              {team.project.items.map(({ name }, index) => (
-                <Link
-                  key={name}
-                  href={`/${team.name}/${name}`}
-                  aria-label={`Links to ${team.name}'s project ${name}`}
+              {team.project.items.map((project, index) => (
+                <Card
+                  key={index}
+                  link={`/${team.name}/${project.name}`}
+                  linkLabel={`Links to ${team.name}'s project ${project.name}`}
                 >
-                  <a>
-                    <Card key={index}>
-                      <Stack spacing={2}>
-                        <Text
-                          color={`mode.${colorMode}.text`}
-                          lineHeight="none"
-                        >
-                          {team.name}
-                        </Text>
-                        <Heading
-                          as="h3"
-                          lineHeight="none"
-                          fontSize="md"
-                          fontWeight={900}
-                        >
-                          {name}
-                        </Heading>
-                      </Stack>
-                    </Card>
-                  </a>
-                </Link>
+                  <Stack spacing={2}>
+                    <Flex align="center" justify="space-between">
+                      <Text color={`mode.${colorMode}.text`} lineHeight="none">
+                        {project.repository.owner}
+                      </Text>
+                      {project.configuration && (
+                        <Code variantColor="cyan" fontWeight={700} rounded="sm">
+                          configured
+                        </Code>
+                      )}
+                    </Flex>
+                    <Heading
+                      as="h3"
+                      lineHeight="none"
+                      fontSize="md"
+                      fontWeight={900}
+                    >
+                      {project.name}
+                    </Heading>
+                  </Stack>
+                </Card>
               ))}
               <ChakraLink
                 href={`https://github.com/apps/meeshkan/installations/new?state=${ghOauthState}`}
