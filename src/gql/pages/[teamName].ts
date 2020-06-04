@@ -10,6 +10,15 @@ export const GET_TEAM_QUERY = `query($teamName: String!) {
         image {
           downloadUrl
         }
+        users {
+          items {
+            email
+            status
+            avatar {
+              downloadUrl
+            }
+          }
+        }
         project {
           items {
             name

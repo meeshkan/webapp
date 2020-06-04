@@ -8,6 +8,11 @@ import {
   Stack,
   Text,
   useColorMode,
+  FormControl,
+  FormLabel,
+  Input,
+  Button,
+  Box,
 } from "@chakra-ui/core";
 import * as E from "fp-ts/lib/Either";
 import { flow } from "fp-ts/lib/function";
@@ -54,6 +59,20 @@ const Team = t.type({
     }),
   ]),
   name: t.string,
+  users: t.type({
+    items: t.array(
+      t.type({
+        email: t.string,
+        status: t.string,
+        avatar: t.union([
+          t.null,
+          t.type({
+            downloadUrl: t.string,
+          }),
+        ]),
+      })
+    ),
+  }),
   project: t.type({
     items: t.array(
       t.type({
@@ -137,63 +156,118 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
   ({ team, session, ghOauthState }) =>
     pipe(useColorMode(), ({ colorMode }) => (
       <>
-        <Grid templateColumns="repeat(4, 1fr)" gap={6}>
-          {team.project.items.map(({ name }, index) => (
-            <Link
-              key={name}
-              href={`/${team.name}/${name}`}
-              aria-label={`Links to ${team.name}'s project ${name}`}
-            >
-              <a>
-                <Card key={index}>
-                  <Stack spacing={4} isInline>
-                    <Image
-                      size={10}
-                      src={
-                        team.image
-                          ? team.image.downloadUrl
-                          : "https://picsum.photos/200"
-                      }
-                      alt={`${team.name}'s organization image`}
-                      bg="gray.50"
-                      border="1px solid"
-                      borderColor={`mode.${colorMode}.icon`}
-                      rounded="sm"
-                    />
-                    <Stack spacing={2}>
-                      <Text color={`mode.${colorMode}.text`} lineHeight="none">
-                        {team.name}
-                      </Text>
-                      <Heading
-                        as="h3"
-                        lineHeight="none"
-                        fontSize="md"
-                        fontWeight={900}
-                      >
-                        {name}
-                      </Heading>
-                    </Stack>
-                  </Stack>
-                </Card>
-              </a>
-            </Link>
-          ))}
-          <ChakraLink
-            href={`https://github.com/apps/meeshkan/installations/new?state=${ghOauthState}`}
-            aria-label="Link to GitHub to install meeshkan on a repository"
-            bg={`mode.${colorMode}.card`}
-            p={4}
-            rounded="sm"
-            color={`mode.${colorMode}.title`}
-            _hover={{ color: `mode.${colorMode}.titleHover` }}
-          >
-            <Stack spacing={4} align="center" isInline>
-              <Icon h={10} w={10} name="add" stroke="2px" />
-              <Heading as="h3" lineHeight="none" fontSize="md" fontWeight={900}>
-                Authorize a repository
-              </Heading>
-            </Stack>
-          </ChakraLink>
+        <Grid
+          templateColumns="repeat(3, 1fr)"
+          templateRows="repeat(2, 1fr)"
+          gap={8}
+        >
+          <Card gridArea="1 / 1 / 2 / 2" heading="Team settings">
+            <Text>example</Text>
+          </Card>
+          <Card gridArea="2 / 1 / 3 / 2" heading="Team members">
+            <FormControl>
+              <FormLabel
+                fontWeight={500}
+                color={`mode.${colorMode}.title`}
+                mt={4}
+              >
+                Email
+              </FormLabel>
+              <Stack isInline>
+                <Input
+                  borderColor={`mode.${colorMode}.icon`}
+                  color={`mode.${colorMode}.text`}
+                  rounded="sm"
+                  size="sm"
+                  name="directory"
+                />
+                <Button
+                  size="sm"
+                  px={4}
+                  rounded="sm"
+                  fontWeight={900}
+                  variantColor="blue"
+                  type="submit"
+                >
+                  Invite
+                </Button>
+              </Stack>
+            </FormControl>
+            {team.users.items.map((user, index) => (
+              <Stack isInline align="center" mt={4} justify="space-between">
+                <Stack align="center" isInline>
+                  <Image
+                    src={
+                      user.avatar
+                        ? user.avatar.downloadUrl
+                        : "https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
+                    }
+                    rounded="full"
+                    size={8}
+                    border="1px solid"
+                    borderColor={`mode.${colorMode}.icon`}
+                  />
+                  <Text>{user.email}</Text>
+                </Stack>
+                <Text color="gray.500" fontStyle="italic">
+                  {user.status}
+                </Text>
+              </Stack>
+            ))}
+          </Card>
+          <Box gridArea="1 / 2 / 3 / 4">
+            <Grid templateColumns="repeat(2, 1fr)" gap={8}>
+              {team.project.items.map(({ name }, index) => (
+                <Link
+                  key={name}
+                  href={`/${team.name}/${name}`}
+                  aria-label={`Links to ${team.name}'s project ${name}`}
+                >
+                  <a>
+                    <Card key={index}>
+                      <Stack spacing={2}>
+                        <Text
+                          color={`mode.${colorMode}.text`}
+                          lineHeight="none"
+                        >
+                          {team.name}
+                        </Text>
+                        <Heading
+                          as="h3"
+                          lineHeight="none"
+                          fontSize="md"
+                          fontWeight={900}
+                        >
+                          {name}
+                        </Heading>
+                      </Stack>
+                    </Card>
+                  </a>
+                </Link>
+              ))}
+              <ChakraLink
+                href={`https://github.com/apps/meeshkan/installations/new?state=${ghOauthState}`}
+                aria-label="Link to GitHub to install meeshkan on a repository"
+                bg={`mode.${colorMode}.card`}
+                p={4}
+                rounded="sm"
+                color={`mode.${colorMode}.title`}
+                _hover={{ color: `mode.${colorMode}.titleHover` }}
+              >
+                <Stack spacing={4} align="center" isInline>
+                  <Icon h={10} w={10} name="add" stroke="2px" />
+                  <Heading
+                    as="h3"
+                    lineHeight="none"
+                    fontSize="md"
+                    fontWeight={900}
+                  >
+                    Import a project
+                  </Heading>
+                </Stack>
+              </ChakraLink>
+            </Grid>
+          </Box>
         </Grid>
       </>
     ))
