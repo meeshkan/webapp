@@ -54,6 +54,7 @@ export const Team = t.type({
         name: t.string,
         repository: t.type({
           nodeId: t.string,
+          owner: t.string,
         }),
       })
     ),

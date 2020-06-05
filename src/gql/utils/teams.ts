@@ -20,7 +20,11 @@ export const GET_TEAMS_QUERY = `query {
           items {
             name
             repository {
-                nodeId
+              nodeId
+              owner
+            }
+            configuration {
+              id
             }
           }
         }

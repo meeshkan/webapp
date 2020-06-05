@@ -73,7 +73,6 @@ import {
   ITeam,
   NegativeTeamsFetchOutcome,
   Team,
-  teamsToProjects,
   useTeams,
 } from "../utils/teams";
 import { confirmOrCreateUser, getUserIdFromIdOrEnv } from "../utils/user";

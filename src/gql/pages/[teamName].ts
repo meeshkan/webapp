@@ -6,6 +6,7 @@ export const GET_TEAM_QUERY = `query($teamName: String!) {
       }
     }) {
       items{
+        inviteLink
         name
         image {
           downloadUrl
