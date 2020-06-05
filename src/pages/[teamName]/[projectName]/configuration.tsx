@@ -483,7 +483,7 @@ const ConfigurationPage = withError<
                 <AlertIcon mt={0.75} />
                 <Box>
                   <AlertDescription color="yellow.900">
-                    Testing with production data can lend to data modifications and irreparable data loss.
+                    Testing with production data can lead to irreparable data loss. Be sure to check your credentials before saving. 
                   </AlertDescription>
                 </Box>
               </Alert>
