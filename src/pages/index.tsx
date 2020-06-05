@@ -28,6 +28,9 @@ import {
   useDisclosure,
   useToast,
   useToastOptions,
+  FormControl,
+  FormLabel,
+  Input,
 } from "@chakra-ui/core";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
@@ -384,11 +387,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
         ),
       }),
       ({
-        repoListAndThunk,
         allTeams,
-        router,
-        teamsFromClientSideFetch,
-        importProjectIsExecuting,
         toast,
         useColorMode: { colorMode },
         useDisclosure: { onOpen, isOpen, onClose },
@@ -404,44 +403,46 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
               "repeat(3, 1fr)",
               "repeat(4, 1fr)",
             ]}
-            gap={6}
+            gap={8}
           >
-            {teamsToProjects(allTeams).map(
-              ({ teamName, teamImage, projectName }, index) => (
-                <Card
-                  key={index}
-                  link={`/${teamName}/${projectName}`}
-                  linkLabel={`Links to ${teamName}'s project ${projectName}`}
-                >
-                  <Stack spacing={4} isInline>
-                    <Image
-                      size={10}
-                      src={teamImage}
-                      alt={`${teamName}'s organization image`}
-                      bg="gray.50"
-                      border="1px solid"
-                      borderColor={`mode.${colorMode}.icon`}
-                      rounded="sm"
-                    />
-                    <Stack spacing={2}>
-                      <Text color={`mode.${colorMode}.text`} lineHeight="none">
-                        {teamName}
-                      </Text>
-                      <Heading
-                        as="h3"
-                        lineHeight="none"
-                        fontSize="md"
-                        fontWeight={900}
-                      >
-                        {projectName}
-                      </Heading>
-                    </Stack>
+            {allTeams.map((team, index) => (
+              <Card
+                key={index}
+                link={`/${team.name}/`}
+                linkLabel={`Links to ${team.name}'s dashboard`}
+              >
+                <Stack spacing={4} isInline>
+                  <Image
+                    size={10}
+                    src={
+                      team.image
+                        ? team.image.downloadUrl
+                        : "https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
+                    }
+                    alt={`${team.name}'s organization image`}
+                    bg="gray.50"
+                    border="1px solid"
+                    borderColor={`mode.${colorMode}.icon`}
+                    rounded="sm"
+                  />
+                  <Stack spacing={2}>
+                    <Heading
+                      as="h3"
+                      lineHeight="none"
+                      fontSize="md"
+                      fontWeight={900}
+                    >
+                      {team.name}
+                    </Heading>
+                    <Text color={`mode.${colorMode}.text`} lineHeight="none">
+                      {`${team.project.items.length} projects`}
+                    </Text>
                   </Stack>
-                </Card>
-              )
-            )}
+                </Stack>
+              </Card>
+            ))}
 
-            {/* Import a project | BUTTON */}
+            {/* Create a team | BUTTON */}
             <Button
               onClick={onOpen}
               pos="unset"
@@ -457,11 +458,11 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
               _hover={{ color: `mode.${colorMode}.titleHover` }}
             >
               <Icon h={10} w={10} mr={2} name="add" stroke="2px" />
-              Import a project
+              Create a team
             </Button>
           </Grid>
 
-          {/* Import a project | MODAL */}
+          {/* Create a team | MODAL */}
           <Modal
             onClose={onClose}
             isOpen={isOpen}
@@ -470,198 +471,40 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
             closeOnOverlayClick={true}
             size="lg"
           >
-            <Skeleton isLoaded={!E.isLeft(repoListAndThunk[0])}>
-              <ModalOverlay />
-              <ModalContent
-                rounded="sm"
-                backgroundColor={`mode.${colorMode}.card`}
+            <ModalOverlay />
+            <ModalContent
+              rounded="sm"
+              backgroundColor={`mode.${colorMode}.card`}
+            >
+              <ModalHeader
+                borderBottom="1px solid"
+                borderColor={`mode.${colorMode}.icon`}
+                mx={4}
+                px={0}
+                pt={4}
+                pb={2}
+                fontWeight={900}
+                color={`mode.${colorMode}.title`}
               >
-                <ModalHeader
-                  borderBottom="1px solid"
-                  borderColor={`mode.${colorMode}.icon`}
-                  mx={4}
-                  px={0}
-                  pt={4}
-                  pb={2}
-                  fontWeight={900}
-                  color={`mode.${colorMode}.title`}
-                >
-                  Import a project to {allTeams[0].name}'s Team
-                </ModalHeader>
-                <ModalCloseButton
-                  rounded="sm"
-                  size="sm"
-                  mt={2}
-                  mr={0}
-                  color={`mode.${colorMode}.text`}
-                />
-                <ModalBody px={2}>
-                  {importProjectIsExecuting[0] ? (
-                    <Box
-                      h="100%"
-                      w="100%"
-                      d="flex"
-                      justifyContent="center"
-                      alignItems="center"
-                    >
-                      <Spinner
-                        color={colorMode === "light" ? "red.500" : "red.300"}
-                        size="xl"
-                        thickness="4px"
-                        emptyColor={`mode.${colorMode}.icon`}
-                      />
-                    </Box>
-                  ) : E.isRight(repoListAndThunk[0]) &&
-                    E.isLeft(repoListAndThunk[0].right) ? (
-                    <Flex h="100%" justify="center" align="center">
-                      <Button
-                        as={"a"}
-                        rounded="sm"
-                        fontWeight={900}
-                        px={4}
-                        variantColor="red"
-                        onClick={() =>
-                          ReactGA.event({
-                            category: "Github",
-                            action: "Import repo start",
-                            label: "index.tsx",
-                          })
-                        }
-                        // @ts-ignore
-                        href={`https://github.com/apps/meeshkan/installations/new?state=${ghOauthState}`}
-                        aria-label="Link to GitHub to install meeshkan on a repository"
-                      >
-                        <Icon name="github" mr={2} />
-                        Import from GitHub
-                      </Button>
-                    </Flex>
-                  ) : (
-                    E.isRight(repoListAndThunk[0]) &&
-                    E.isRight(repoListAndThunk[0].right) &&
-                    E.isRight(owner) &&
-                    E.isRight(owner.right) &&
-                    O.isSome(owner.right.right) && (
-                      <>
-                        <Menu closeOnSelect={true}>
-                          <MenuButton
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="space-between"
-                            minWidth="204px"
-                            rounded="sm"
-                            ml={2}
-                            mb={4}
-                            border="1px solid"
-                            backgroundColor={`mode.${colorMode}.background`}
-                            borderColor={`mode.${colorMode}.icon`}
-                          >
-                            <Image
-                              src={owner.right.right.value.avatar_url}
-                              size={8}
-                              roundedLeft="sm"
-                              borderColor={`mode.${colorMode}.background`}
-                            />
-                            <Text mr={8} color={`mode.${colorMode}.text`}>
-                              {owner.right.right.value.login}
-                            </Text>
-                            <Icon
-                              name="arrow-up-down"
-                              size="12px"
-                              color="gray.500"
-                              mr={2}
-                            />
-                          </MenuButton>
-                          <MenuList
-                            border="none"
-                            placement="bottom-start"
-                            backgroundColor={`mode.${colorMode}.card`}
-                            color={`mode.${colorMode}.text`}
-                          >
-                            <MenuOptionGroup
-                              defaultValue={owner.right.right.value.login}
-                              type="radio"
-                            >
-                              {repoListAndThunk[0].right.right.map(
-                                (reposForOwner, index) => (
-                                  <MenuItemOption
-                                    key={index}
-                                    value={NEA.head(reposForOwner).owner.login}
-                                    onClick={() => {
-                                      setOwner(
-                                        E.right(
-                                          E.right(
-                                            O.some(
-                                              NEA.head(reposForOwner).owner
-                                            )
-                                          )
-                                        )
-                                      );
-                                      setOwnerRepos(
-                                        E.right(E.right(O.some(reposForOwner)))
-                                      );
-                                    }}
-                                  >
-                                    {NEA.head(reposForOwner).owner.login}
-                                  </MenuItemOption>
-                                )
-                              )}
-                            </MenuOptionGroup>
-                          </MenuList>
-                        </Menu>
-                        <Stack>
-                          {E.isRight(ownerRepos) &&
-                            E.isRight(ownerRepos.right) &&
-                            O.isSome(ownerRepos.right.right) &&
-                            ownerRepos.right.right.value.map((repo, index) => (
-                              <ImportProject
-                                key={index}
-                                repoName={repo.name}
-                                onClick={createProject({
-                                  importProjectIsExecuting:
-                                    importProjectIsExecuting[1],
-                                  closeModal: onClose,
-                                  toast,
-                                  userId: getUserIdFromIdOrEnv(id),
-                                  namePlusTeam: `${repo.name}${SEPARATOR}${allTeams[0].name}`,
-                                  nodeID: repo.node_id,
-                                  nodePlusTeam:
-                                    repo.node_id + SEPARATOR + allTeams[0].id,
-                                  repositoryName: repo.name,
-                                  owner: repo.owner.login,
-                                  // this assumes that at least one team exist
-                                  // doesn't cover error case
-                                  // where team addition fails
-                                  // also does not allow multiple teams
-                                  teamName: allTeams[0].name,
-                                  setTeams: teamsFromClientSideFetch[2],
-                                  router,
-                                })(session)}
-                              />
-                            ))}
-                        </Stack>
-                      </>
-                    )
-                  )}
-                </ModalBody>
-                <ModalFooter d="flex" justifyContent="center" fontSize="sm">
-                  {E.isRight(repoListAndThunk[0]) &&
-                    !E.isLeft(repoListAndThunk[0].right) && (
-                      <>
-                        <Text mr={2} color={`mode.${colorMode}.text`}>
-                          Not seeing the repository you want?
-                        </Text>
-                        <ChakraLink
-                          href={`https://github.com/apps/meeshkan/installations/new?state=${ghOauthState}`}
-                          aria-label="Link to GitHub to install meeshkan on a repository"
-                          color={colorMode == "light" ? "red.500" : "red.200"}
-                        >
-                          Configure on GitHub.
-                        </ChakraLink>
-                      </>
-                    )}
-                </ModalFooter>
-              </ModalContent>
-            </Skeleton>
+                Create a team
+              </ModalHeader>
+              <ModalCloseButton
+                rounded="sm"
+                size="sm"
+                mt={2}
+                mr={0}
+                color={`mode.${colorMode}.text`}
+              />
+              <ModalBody px={2}>
+                <FormControl isRequired>
+                  <FormLabel>Team name</FormLabel>
+                  <Input />
+                </FormControl>
+              </ModalBody>
+              <ModalFooter>
+                <Button>Create</Button>
+              </ModalFooter>
+            </ModalContent>
           </Modal>
         </>
       )
