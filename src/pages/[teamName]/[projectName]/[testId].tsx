@@ -53,7 +53,7 @@ const TestT = t.type({
   commitHash: t.string,
   status: t.string,
   location: t.string,
-  log: t.string,
+  log: t.union([t.string, t.null]),
 });
 
 type ITestT = t.TypeOf<typeof TestT>;
@@ -189,59 +189,79 @@ export const getServerSideProps = ({
 
 const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
   "Could not find this test resource.",
-  ({ test: { log, location, commitHash } }) => {
-    const { colorMode } = useColorMode();
-    const logs = JSON.parse(log);
-    const failures = logs.commands.filter((a) => a.success === false);
-    return (
-      <Grid
-        templateColumns="repeat(3, 1fr)"
-        templateRows="repeat(2, minmax(204px, 45%))"
-        gap={8}
-      >
-        <Card gridArea="1 / 2 / 4 / 1" heading="Tests">
-          {logs.commands.map((item, index) => (
-            <LogItem
-              key={index}
-              success={item.success}
-              path={item.path}
-              method={item.method}
-            />
-          ))}
-        </Card>
-        <Box gridArea="1 / 4 / 4 / 2">
-          <Heading
-            mb={4}
-            color={`mode.${colorMode}.title`}
-            fontWeight={900}
-            fontSize="xl"
+  ({ test: { log, location, commitHash, status } }) =>
+    status === "In progress" ? (
+      <div>Your tests are currently in progress.</div>
+    ) : (
+      pipe(
+        {
+          colorMode: useColorMode().colorMode,
+          logs: JSON.parse(log),
+        },
+        (p) => ({
+          ...p,
+          failures: p.logs.commands.filter((a) => a.success === false),
+        }),
+        ({ colorMode, logs, failures }) => (
+          <Grid
+            templateColumns="repeat(3, 1fr)"
+            templateRows="repeat(2, minmax(204px, 45%))"
+            gap={8}
           >
-            Test Failures
-            <Code
-              ml={2}
-              fontSize="inherit"
-              variantColor="red"
-            >{`${location}@${commitHash.slice(0, 7)}`}</Code>
-          </Heading>
-          <Accordion w="full" defaultIndex={[0]} allowMultiple>
-            {failures.length > 0 ? (
-              failures.map((item, index) => (
-                <FailureMessage
+            <Card gridArea="1 / 2 / 4 / 1" heading="Tests">
+              {logs.commands.map((item, index) => (
+                <LogItem
                   key={index}
-                  method={item.method}
+                  success={item.success}
                   path={item.path}
-                  headers={item.headers}
-                  query={item.query}
+                  method={item.method}
                 />
-              ))
-            ) : (
-              <Text color={`mode.${colorMode}.text`}>No bugs found here!</Text>
-            )}
-          </Accordion>
-        </Box>
-      </Grid>
-    );
-  }
+              ))}
+            </Card>
+            <Box gridArea="1 / 4 / 4 / 2">
+              <Heading
+                mb={4}
+                color={`mode.${colorMode}.title`}
+                fontWeight={900}
+                fontSize="xl"
+              >
+                Test Failures
+                <Code
+                  ml={2}
+                  fontSize="inherit"
+                  variantColor={
+                    status === "In progress"
+                      ? "yellow"
+                      : status === "Passing"
+                      ? "cyan"
+                      : status === "Failed"
+                      ? "red"
+                      : null
+                  }
+                >{`${location}@${commitHash.slice(0, 7)}`}</Code>
+              </Heading>
+              <Accordion w="full" defaultIndex={[0]} allowMultiple>
+                {failures.length > 0 ? (
+                  failures.map((item, index) => (
+                    <FailureMessage
+                      key={index}
+                      method={item.method}
+                      path={item.path}
+                      headers={item.headers}
+                      query={item.query}
+                    />
+                  ))
+                ) : (
+                  <Text color={`mode.${colorMode}.text`}>
+                    No bugs found here!
+                  </Text>
+                )}
+              </Accordion>
+            </Box>
+          </Grid>
+        )
+      )
+    )
 );
 
 export default TestPage;
