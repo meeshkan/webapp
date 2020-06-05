@@ -16,6 +16,11 @@ import {
   useColorMode,
   useToast,
   useToastOptions,
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+  CloseButton,
 } from "@chakra-ui/core";
 import * as E from "fp-ts/lib/Either";
 import { constant, constNull, constVoid, flow } from "fp-ts/lib/function";
@@ -474,6 +479,14 @@ const ConfigurationPage = withError<
             overflow="auto"
           >
             <Card heading="Build settings" id={`build-settings`}>
+              <Alert status="warning" alignItems="flex-start">
+                <AlertIcon mt={0.75} />
+                <Box>
+                  <AlertDescription color="yellow.900">
+                    Testing with production data can lend to data modifications and irreparable data loss.
+                  </AlertDescription>
+                </Box>
+              </Alert>
               <FormControl d="flex" alignItems="center" mt={4}>
                 <FormLabel
                   fontWeight={500}
