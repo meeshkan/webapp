@@ -30,16 +30,29 @@ export const CREATE_PROJECT_MUTATION = `mutation CREATE_PROJECT($userId:ID!, $te
     id
     team {
       items{
-        name
         id
+        inviteLink
+        name
         image {
           downloadUrl
+        }
+        users {
+          items {
+            email
+            status
+            avatar {
+              downloadUrl
+            }
+          }
         }
         project {
           items {
             name
             repository {
-                nodeId
+              nodeId
+            }
+            configuration {
+              id
             }
           }
         }

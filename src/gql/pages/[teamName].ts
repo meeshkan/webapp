@@ -6,11 +6,12 @@ export const GET_TEAM_QUERY = `query($teamName: String!) {
       }
     }) {
       items{
-        inviteLink
+        id
         name
         image {
           downloadUrl
         }
+        inviteLink
         users {
           items {
             email
@@ -25,6 +26,7 @@ export const GET_TEAM_QUERY = `query($teamName: String!) {
             name
             repository {
               owner
+              nodeId
             }
             configuration {
               id
