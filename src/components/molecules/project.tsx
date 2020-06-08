@@ -23,20 +23,14 @@ interface IProjectSettingsProps {
 
 const ProjectSettings = ({ session }: IProjectSettingsProps) => {
   const { colorMode, toggleColorMode } = useColorMode();
-  const fetchedProjectsAndThunk = useTeams(session);
-  const projects = isLeft(fetchedProjectsAndThunk[0])
+  const fetchedTeamsAndThunk = useTeams(session);
+  const teams = isLeft(fetchedTeamsAndThunk[0])
     ? // we are loading
       []
-    : isLeft(fetchedProjectsAndThunk[0].right)
+    : isLeft(fetchedTeamsAndThunk[0].right)
     ? // there was an error with the fetch
       []
-    : fetchedProjectsAndThunk[0].right.right.flatMap((team) =>
-        team.project.items.map((project) => ({
-          ...project,
-          teamImage: team.image,
-          teamName: team.name,
-        }))
-      );
+    : fetchedTeamsAndThunk[0].right.right;
   return (
     <>
       <Menu closeOnSelect={false}>
@@ -78,11 +72,11 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
           </MenuGroup>
           <MenuDivider />
           <MenuGroup title="Teams" color={`mode.${colorMode}.title`}>
-            {projects.map(({ teamImage, teamName, name }, index) => (
+            {teams.map((team, index) => (
               <Link
-                href={`/${teamName}/${name}`}
+                href={`/${team.name}/`}
                 key={index}
-                aria-label={`Links to ${teamName}'s project ${name}`}
+                aria-label={`Links to ${team.name}'s dashboard`}
               >
                 <MenuItem
                   color={`mode.${colorMode}.text`}
@@ -91,17 +85,17 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
                 >
                   <Image
                     src={
-                      teamImage
-                        ? teamImage.downloadUrl
+                      team.image
+                        ? team.image.downloadUrl
                         : "https://picsum.photos/200"
                     }
                     fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
-                    alt={`${teamName}'s organization image`}
+                    alt={`${team.name}'s organization image`}
                     h={4}
                     w={4}
                     mr={2}
                   />
-                  {name}
+                  {team.name}
                 </MenuItem>
               </Link>
             ))}
