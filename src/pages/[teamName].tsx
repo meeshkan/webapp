@@ -34,6 +34,7 @@ import {
   useToast,
   useClipboard,
   useToastOptions,
+  LightMode,
 } from "@chakra-ui/core";
 import { useRouter, NextRouter } from "next/router";
 import * as t from "io-ts";
@@ -552,18 +553,22 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                     isReadOnly
                     size="sm"
                     rounded="sm"
+                    borderColor={`mode.${colorMode}.icon`}
+                    color={`mode.${colorMode}.text`}
                   />
-                  <Button
-                    onClick={onCopy}
-                    ml={2}
-                    size="sm"
-                    px={4}
-                    rounded="sm"
-                    fontWeight={900}
-                    variantColor="blue"
-                  >
-                    {hasCopied ? "Copied" : "Copy"}
-                  </Button>
+                  <LightMode>
+                    <Button
+                      onClick={onCopy}
+                      ml={2}
+                      size="sm"
+                      px={4}
+                      rounded="sm"
+                      fontWeight={900}
+                      variantColor="blue"
+                    >
+                      {hasCopied ? "Copied" : "Copy"}
+                    </Button>
+                  </LightMode>
                 </Stack>
               </FormControl>
               {team.users.items.map((user, index) => (
@@ -586,9 +591,9 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                       border="1px solid"
                       borderColor={`mode.${colorMode}.icon`}
                     />
-                    <Text>{user.email}</Text>
+                    <Text color={`mode.${colorMode}.text`}>{user.email}</Text>
                   </Stack>
-                  <Text color="gray.500" fontStyle="italic">
+                  <Text fontStyle="italic" color={`mode.${colorMode}.tertiary`}>
                     {user.status}
                   </Text>
                 </Stack>
