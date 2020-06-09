@@ -3,6 +3,9 @@ import Card from "../molecules/card";
 import { Test } from "../molecules/test";
 import { Text, useColorMode } from "@chakra-ui/core";
 import * as t from "io-ts";
+import { newestDateFirst } from "../../utils/date";
+import * as A from "fp-ts/lib/Array";
+import * as Ord from "fp-ts/lib/Ord";
 
 const TTest = t.type({
   status: t.string,
@@ -19,6 +22,11 @@ type BranchProps = {
   teamName: string;
 };
 
+export const newestTestFirst: Ord.Ord<ITTest> = {
+  compare: (d0, d1) => newestDateFirst.compare(d0.createdAt, d1.createdAt),
+  equals: (d0, d1) => newestDateFirst.equals(d0.createdAt, d1.createdAt)
+}
+
 const Branch = ({ tests, teamName, projectName }: BranchProps) => {
   const { colorMode } = useColorMode();
   return (
@@ -28,7 +36,7 @@ const Branch = ({ tests, teamName, projectName }: BranchProps) => {
           You haven't done any branch tests yet.
         </Text>
       ) : (
-        tests.map((test, index) => (
+        A.sort(newestTestFirst)(tests).map((test, index) => (
           <Test
             key={index}
             branchName={"branch"}
