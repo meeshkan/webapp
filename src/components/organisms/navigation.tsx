@@ -28,7 +28,7 @@ interface INavigationProps {
 const Navigation = ({ session }: INavigationProps) => {
   const { colorMode, toggleColorMode } = useColorMode();
   const router = useRouter()
-  const pathForBreadcrumbs = router.pathname.split("/");
+  const pathForBreadcrumbs = router.asPath.split("/").slice(1);
 
   return (
     <>
@@ -57,13 +57,25 @@ const Navigation = ({ session }: INavigationProps) => {
             />
           </Link>
           <Breadcrumb ml={3} mt={2} addSeparator={true}>
-            {pathForBreadcrumbs.slice(1).map((crumb, i) => (
-              <BreadcrumbItem key={i}>
-                <BreadcrumbLink color={`mode.${colorMode}.tertiary`}>
-                  {crumb}
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            ))}
+            {pathForBreadcrumbs.map((crumb, i, pathForBreadcrumbs) => {
+              if (pathForBreadcrumbs.length - 1 === i) {
+                return(
+                  <BreadcrumbItem key={i} isCurrentPage>
+                    <BreadcrumbLink color={`mode.${colorMode}.tertiary`}>
+                      {crumb}
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                )
+              } else {
+                return(
+                  <BreadcrumbItem key={i}>
+                    <BreadcrumbLink color={`mode.${colorMode}.tertiary`}>
+                      {crumb}
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                )
+              }
+              })}
           </Breadcrumb>
         </Flex>
         {!isLeft(session) && (
