@@ -7,6 +7,7 @@ import {
   Heading,
   Text,
   useColorMode,
+  Link,
 } from "@chakra-ui/core";
 import * as E from "fp-ts/lib/Either";
 import { flow } from "fp-ts/lib/function";
@@ -38,6 +39,7 @@ import {
 import { confirmOrCreateUser } from "../../../utils/user";
 import { GET_TEST_QUERY } from "../../../gql/pages/[teamName]/[projectName]/[testId]";
 import { eightBaseClient } from "../../../utils/graphql";
+import Error from "../../../components/molecules/error";
 
 type NegativeTestFetchOutcome =
   | NOT_LOGGED_IN
@@ -192,6 +194,12 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
   ({ test: { log, location, commitHash, status } }) =>
     status === "In progress" ? (
       <div>Your tests are currently in progress.</div>
+    ) : JSON.parse(log)["build-error"] ? (
+      <Error
+        errorMessage={`It looks like we couldn't build your repository for testing. Please consult the bulid log ${
+          JSON.parse(log)["build-error"]
+        }`}
+      />
     ) : (
       pipe(
         {
