@@ -17,7 +17,6 @@ import {
   Flex,
   Code,
   Modal,
-  Skeleton,
   ModalOverlay,
   ModalContent,
   ModalHeader,
@@ -35,12 +34,17 @@ import {
   useClipboard,
   useToastOptions,
   LightMode,
+  Editable,
+  EditablePreview,
+  EditableInput,
+  ButtonGroup,
+  IconButton,
 } from "@chakra-ui/core";
 import { useRouter, NextRouter } from "next/router";
 import * as t from "io-ts";
 import * as E from "fp-ts/lib/Either";
 import * as A from "fp-ts/lib/Array";
-import { flow, constant } from "fp-ts/lib/function";
+import { flow, constant, constNull, constVoid } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -50,8 +54,11 @@ import * as NEA from "fp-ts/lib/ReadonlyNonEmptyArray";
 import * as _E from "../fp-ts/Either";
 import { NonEmptyArray, groupSort } from "fp-ts/lib/NonEmptyArray";
 import { LensTaskEither, lensTaskEitherHead } from "../monocle-ts";
-import { GET_TEAM_QUERY } from "../gql/pages/[teamName]";
-import { CREATE_PROJECT_MUTATION } from "../gql/pages/[teamName]";
+import {
+  GET_TEAM_QUERY,
+  UPDATE_TEAM_MUTATION,
+  CREATE_PROJECT_MUTATION,
+} from "../gql/pages/[teamName]";
 import {
   defaultGQLErrorHandler,
   GET_SERVER_SIDE_PROPS_ERROR,
@@ -82,6 +89,7 @@ import { withSession } from "./api/session";
 import ReactGA from "react-ga";
 import Card from "../components/molecules/card";
 import { withError } from "../components/molecules/error";
+import { useForm } from "react-hook-form";
 
 type NegativeTeamFetchOutcome =
   | NOT_LOGGED_IN
@@ -100,6 +108,7 @@ type ITeamProps = {
   ghOauthState: string;
 };
 type NegativeImportProjectOutcome = UNDEFINED_ERROR | INCORRECT_TYPE_SAFETY;
+type NegativeUpdateTeamOutcome = UNDEFINED_ERROR | INCORRECT_TYPE_SAFETY;
 type ITeam = t.TypeOf<typeof Team>;
 type TeamsMutationType = t.TypeOf<typeof teamsMutationType>;
 type IRepositoriesGroupedByOwner = NonEmptyArray<IRepository>[];
@@ -107,6 +116,13 @@ type ImportProps = {
   repoName: String;
   onClick: TE.TaskEither<NegativeImportProjectOutcome, void>;
 };
+type ITeamUpdate = t.TypeOf<typeof TeamUpdate>;
+
+const TeamUpdate = t.type({
+  teamName: t.union([t.null, t.string]),
+  newTeamName: t.union([t.null, t.string]),
+  userId: t.union([t.null, t.string]),
+});
 
 const Team = t.type({
   id: t.string,
@@ -153,6 +169,7 @@ const Team = t.type({
 
 const teamsMutationType = t.type({
   userUpdate: t.type({
+    id: t.string,
     team: t.type({
       items: t.array(Team),
     }),
@@ -221,6 +238,15 @@ const getTeam = (teamName: string) => (
   );
 
 const userType = t.type({ id: t.string });
+const updateTeamVariables = t.type({
+  teamName: t.string,
+  userId: t.string,
+  newTeamName: t.string,
+});
+type UpdateTeamVariables = t.TypeOf<typeof updateTeamVariables> & {
+  toast: (props: useToastOptions) => void;
+  router: NextRouter;
+};
 
 const ImportProject = ({ repoName, onClick }: ImportProps) => {
   const { colorMode } = useColorMode();
@@ -418,6 +444,76 @@ const useRepoList = (
     )
   );
 
+const updateTeam = ({
+  toast,
+  router,
+  ...updateTeamVariables
+}: UpdateTeamVariables) => (
+  session: ISession
+): TE.TaskEither<NegativeUpdateTeamOutcome, void> =>
+  TE.bracket<NegativeUpdateTeamOutcome, void, void>(
+    () =>
+      Promise.resolve(E.right<NegativeUpdateTeamOutcome, void>(constNull())),
+    () =>
+      pipe(
+        TE.tryCatch(
+          () =>
+            eightBaseClient(session).request(
+              UPDATE_TEAM_MUTATION,
+              updateTeamVariables
+            ),
+          (error): NegativeUpdateTeamOutcome => ({
+            type: "UNDEFINED_ERROR",
+            msg: "Could not make update team mutation",
+            error,
+          })
+        ),
+        TE.chainEitherK(
+          flow(
+            teamsMutationType.decode,
+            E.mapLeft(
+              (errors): NegativeUpdateTeamOutcome => ({
+                type: "INCORRECT_TYPE_SAFETY",
+                msg:
+                  "Teams list from gql endpoint does not match type definition",
+                errors,
+              })
+            )
+          )
+        ),
+        // TODO: is there an equivalent of mapLeft that is kinda like
+        // chainFirst?
+        TE.mapLeft(
+          (l) =>
+            ({
+              _: toast({
+                title: "Oh no!",
+                description:
+                  "We could not update your team name. Please try again soon!",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+                position: "bottom-right",
+              }),
+              __: l,
+            }.__)
+        ),
+        TE.chain((_) => TE.right(constNull()))
+      ),
+    (_, e) => () =>
+      router.push(`/${updateTeamVariables.newTeamName}/`).then((_) =>
+        E.right(
+          {
+            _: ReactGA.event({
+              category: "Teams",
+              action: "Updated",
+              label: "[teamName].tsx",
+            }),
+          }._
+        )
+      )
+  );
+
 export const getServerSideProps = ({
   params: { teamName },
   req,
@@ -475,9 +571,21 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
           >
         >(E.left(InitialLoading)),
         toast: useToast(),
+        useForm: useForm({
+          // ...(configuration ? { defaultValues: configuration } : {}),
+        }),
       },
       (p) => ({
         ...p,
+        onSubmit: (values: ITeamUpdate) =>
+          updateTeam({
+            toast: p.toast,
+            router: p.router,
+            ...values,
+            teamName: team.name,
+            newTeamName: values.newTeamName,
+            userId: getUserIdFromIdOrEnv(id),
+          })(session)().then(constNull),
         repoListAndThunk: useRepoList(
           p.useOwner[0],
           p.useOwner[1],
@@ -495,6 +603,8 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
         useDisclosure: { onOpen, isOpen, onClose },
         useOwner: [owner, setOwner],
         useOwnerRepos: [ownerRepos, setOwnerRepos],
+        useForm: { handleSubmit, formState, register },
+        onSubmit,
       }) => (
         <>
           <Grid
@@ -503,46 +613,72 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
             gap={8}
           >
             <Card gridArea="1 / 1 / 2 / 2" heading="Team settings">
-              <Flex align="center" mt={4}>
-                <Image
-                  src={team.image && team.image.downloadUrl}
-                  fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
-                  size={8}
-                  rounded="sm"
-                  mr={4}
-                />
-                <Box>
-                  <FormLabel
-                    color={`mode.${colorMode}.text`}
-                    fontSize="sm"
-                    p="0 0 4px 0"
-                  >
-                    Logo
-                  </FormLabel>
-                  <Text
-                    color={`mode.${colorMode}.tertiary`}
-                    fontStyle="italic"
-                    fontSize="xs"
-                    lineHeight="1"
-                  >
-                    Suggested size 250x250
+              <Box as="form" onSubmit={handleSubmit(onSubmit)}>
+                <Flex align="center" mt={4}>
+                  <Image
+                    src={team.image && team.image.downloadUrl}
+                    fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
+                    size={8}
+                    rounded="sm"
+                    mr={4}
+                  />
+                  <Box>
+                    <FormLabel
+                      color={`mode.${colorMode}.text`}
+                      fontSize="sm"
+                      p="0 0 4px 0"
+                    >
+                      Logo
+                    </FormLabel>
+                    <Text
+                      color={`mode.${colorMode}.tertiary`}
+                      fontStyle="italic"
+                      fontSize="xs"
+                      lineHeight="1"
+                    >
+                      Suggested size 250x250
+                    </Text>
+                  </Box>
+                </Flex>
+                <FormControl d="flex" mt={4} alignItems="center">
+                  <FormLabel color={`mode.${colorMode}.text`}>Name:</FormLabel>
+                  <Input
+                    defaultValue={team.name}
+                    name="newTeamName"
+                    ref={register}
+                    borderColor={`mode.${colorMode}.icon`}
+                    rounded="sm"
+                    size="sm"
+                    color={`mode.${colorMode}.title`}
+                    fontWeight={600}
+                  />
+                </FormControl>
+                <FormControl d="flex" mt={4}>
+                  <FormLabel color={`mode.${colorMode}.text`}>Plan:</FormLabel>
+                  <Text color={`mode.${colorMode}.title`} fontWeight={600}>
+                    Free
                   </Text>
-                </Box>
-              </Flex>
-              <FormControl d="flex" mt={4}>
-                <FormLabel color={`mode.${colorMode}.text`}>
-                  Team Name:
-                </FormLabel>
-                <Text color={`mode.${colorMode}.title`} fontWeight={600}>
-                  {team.name}
-                </Text>
-              </FormControl>
-              <FormControl d="flex">
-                <FormLabel color={`mode.${colorMode}.text`}>Plan:</FormLabel>
-                <Text color={`mode.${colorMode}.title`} fontWeight={600}>
-                  Free
-                </Text>
-              </FormControl>
+                </FormControl>
+                <Flex
+                  borderTop="1px solid"
+                  borderColor={`mode.${colorMode}.icon`}
+                  justify="flex-end"
+                  mt={4}
+                >
+                  <Button
+                    type="submit"
+                    size="sm"
+                    mt={4}
+                    px={4}
+                    rounded="sm"
+                    fontWeight={900}
+                    variantColor="blue"
+                    isLoading={formState.isSubmitting}
+                  >
+                    Save
+                  </Button>
+                </Flex>
+              </Box>
             </Card>
 
             <Card

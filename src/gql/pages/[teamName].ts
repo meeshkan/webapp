@@ -70,3 +70,39 @@ export const CREATE_PROJECT_MUTATION = `mutation CREATE_PROJECT($userId:ID!, $te
     id
   }
 }`;
+
+export const UPDATE_TEAM_MUTATION = `mutation UPDATE_TEAM($userId: ID!, $teamName: String!, $newTeamName: String!) {
+  userUpdate(filter: {id: $userId}, data: {team: {update: {filter: {name: $teamName}, data: {name: $newTeamName}}}}) {
+    team(filter: {name: {equals: $newTeamName}}) {
+      items {
+        id
+        name
+        image {
+          downloadUrl
+        }
+        inviteLink
+        users {
+          items {
+            email
+            status
+            avatar {
+              downloadUrl
+            }
+          }
+        }
+        project {
+          items {
+            name
+            repository {
+              owner
+              nodeId
+            }
+            configuration {
+              id
+            }
+          }
+        }
+      }
+    }
+  }
+}`;
