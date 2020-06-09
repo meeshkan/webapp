@@ -19,7 +19,6 @@ import {
   Alert,
   AlertDescription,
   AlertIcon,
-  AlertTitle,
   CloseButton
 } from "@chakra-ui/core";
 import * as E from "fp-ts/lib/Either";
@@ -479,15 +478,25 @@ const ConfigurationPage = withError<
             overflow="auto"
           >
             <Card heading="Build settings" id={`build-settings`}>
-              <Alert status="warning" alignItems="flex-start" rounded="sm">
+              <Alert
+                status="warning"
+                alignItems="flex-start"
+                mt={4}
+                rounded="sm"
+              >
                 <AlertIcon mt={0.75} />
                 <Box>
-                  <AlertDescription color="yellow.900">
+                  <AlertDescription color={`mode.${colorMode}.alertText`}>
                     Testing with production data can lead to irreparable data
                     loss. Be sure to check your credentials before saving.
                   </AlertDescription>
                 </Box>
-                <CloseButton pos="absolute" top="8px" right="8px" />
+                <CloseButton
+                  color={`mode.${colorMode}.text`}
+                  pos="absolute"
+                  top="8px"
+                  right="8px"
+                />
               </Alert>
               <FormControl d="flex" alignItems="center" mt={4}>
                 <FormLabel
