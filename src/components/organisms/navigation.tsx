@@ -69,7 +69,7 @@ const Navigation = ({ session }: INavigationProps) => {
               } else {
                 return(
                   <BreadcrumbItem key={i}>
-                    <BreadcrumbLink color={`mode.${colorMode}.tertiary`}>
+                    <BreadcrumbLink href={`/${crumb}`} color={`mode.${colorMode}.tertiary`}>
                       {crumb}
                     </BreadcrumbLink>
                   </BreadcrumbItem>
