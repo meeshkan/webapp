@@ -665,18 +665,20 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                   justify="flex-end"
                   mt={4}
                 >
-                  <Button
-                    type="submit"
-                    size="sm"
-                    mt={4}
-                    px={4}
-                    rounded="sm"
-                    fontWeight={900}
-                    variantColor="blue"
-                    isLoading={formState.isSubmitting}
-                  >
-                    Save
-                  </Button>
+                  <LightMode>
+                    <Button
+                      type="submit"
+                      size="sm"
+                      mt={4}
+                      px={4}
+                      rounded="sm"
+                      fontWeight={900}
+                      variantColor="blue"
+                      isLoading={formState.isSubmitting}
+                    >
+                      Save
+                    </Button>
+                  </LightMode>
                 </Flex>
               </Box>
             </Card>
