@@ -479,13 +479,14 @@ const ConfigurationPage = withError<
             overflow="auto"
           >
             <Card heading="Build settings" id={`build-settings`}>
-              <Alert status="warning" alignItems="flex-start">
+              <Alert status="warning" alignItems="flex-start" rounded='sm'>
                 <AlertIcon mt={0.75} />
                 <Box>
                   <AlertDescription color="yellow.900">
                     Testing with production data can lead to irreparable data loss. Be sure to check your credentials before saving. 
                   </AlertDescription>
                 </Box>
+                <CloseButton pos='absolute' top='8px' right='8px' />
               </Alert>
               <FormControl d="flex" alignItems="center" mt={4}>
                 <FormLabel
