@@ -20,7 +20,7 @@ import {
   AlertDescription,
   AlertIcon,
   AlertTitle,
-  CloseButton,
+  CloseButton
 } from "@chakra-ui/core";
 import * as E from "fp-ts/lib/Either";
 import { constant, constNull, constVoid, flow } from "fp-ts/lib/function";
@@ -40,12 +40,12 @@ import * as _E from "../../../fp-ts/Either";
 import {
   CREATE_CONFIGURATION,
   UPDATE_CONFIGURATION,
-  GET_CONFIGURATION_QUERY,
+  GET_CONFIGURATION_QUERY
 } from "../../../gql/pages/[teamName]/[projectName]/configuration";
 import {
   LensTaskEither,
   lensTaskEitherHead,
-  optionalHead,
+  optionalHead
 } from "../../../monocle-ts";
 import ReactGA from "react-ga";
 import {
@@ -58,7 +58,7 @@ import {
   PROJECT_DOES_NOT_EXIST,
   TEAM_DOES_NOT_EXIST,
   UNDEFINED_ERROR,
-  UNKNOWN_GRAPHQL_ERROR,
+  UNKNOWN_GRAPHQL_ERROR
 } from "../../../utils/error";
 import { eightBaseClient, upsertHack } from "../../../utils/graphql";
 import { hookNeedingFetch, Loading } from "../../../utils/hookNeedingFetch";
@@ -79,7 +79,7 @@ type NegativeConfigurationFetchOutcome =
 const Configuration = t.type({
   buildCommand: t.union([t.null, t.string]),
   openAPISpec: t.union([t.null, t.string]),
-  directory: t.union([t.null, t.string]),
+  directory: t.union([t.null, t.string])
 });
 
 type IConfiguration = t.TypeOf<typeof Configuration>;
@@ -95,19 +95,19 @@ type IConfigurationProps = {
 
 const Project = t.type({
   name: t.string,
-  configuration: t.union([t.null, Configuration]),
+  configuration: t.union([t.null, Configuration])
 });
 
 type IProject = t.TypeOf<typeof Project>;
 
 const Team = t.type({
   image: t.type({
-    downloadUrl: t.string,
+    downloadUrl: t.string
   }),
   name: t.string,
   project: t.type({
-    items: t.array(Project),
-  }),
+    items: t.array(Project)
+  })
 });
 
 type ITeam = t.TypeOf<typeof Team>;
@@ -115,9 +115,9 @@ type ITeam = t.TypeOf<typeof Team>;
 const queryTp = t.type({
   user: t.type({
     team: t.type({
-      items: t.array(Team),
-    }),
-  }),
+      items: t.array(Team)
+    })
+  })
 });
 
 type QueryTp = t.TypeOf<typeof queryTp>;
@@ -129,7 +129,7 @@ const getConfiguration = (teamName: string, projectName: string) => (
       () =>
         eightBaseClient(session).request(GET_CONFIGURATION_QUERY, {
           teamName,
-          projectName,
+          projectName
         }),
       defaultGQLErrorHandler("getConfiguration query")
     ),
@@ -140,7 +140,7 @@ const getConfiguration = (teamName: string, projectName: string) => (
           (errors): NegativeConfigurationFetchOutcome => ({
             type: "INCORRECT_TYPE_SAFETY",
             msg: "Could not decode team name query",
-            errors,
+            errors
           })
         )
       )
@@ -148,27 +148,27 @@ const getConfiguration = (teamName: string, projectName: string) => (
     LensTaskEither.fromPath<NegativeConfigurationFetchOutcome, QueryTp>()([
       "user",
       "team",
-      "items",
+      "items"
     ])
       .compose(
         lensTaskEitherHead<NegativeConfigurationFetchOutcome, ITeam>(
           TE.left({
             type: "TEAM_DOES_NOT_EXIST",
-            msg: `Could not find team for: ${teamName} ${projectName}`,
+            msg: `Could not find team for: ${teamName} ${projectName}`
           })
         )
       )
       .compose(
         LensTaskEither.fromPath<NegativeConfigurationFetchOutcome, ITeam>()([
           "project",
-          "items",
+          "items"
         ])
       )
       .compose(
         lensTaskEitherHead<NegativeConfigurationFetchOutcome, IProject>(
           TE.left({
             type: "PROJECT_DOES_NOT_EXIST",
-            msg: `Could not find project for: ${teamName} ${projectName}`,
+            msg: `Could not find project for: ${teamName} ${projectName}`
           })
         )
       )
@@ -177,12 +177,12 @@ const getConfiguration = (teamName: string, projectName: string) => (
           "configuration"
         )
       ).get,
-    TE.chain((configuration) =>
+    TE.chain(configuration =>
       TE.right(
         configuration || {
           openAPISpec: null,
           buildCommand: null,
-          directory: null,
+          directory: null
         }
       )
     )
@@ -192,7 +192,7 @@ const userType = t.type({ id: t.string });
 
 export const getServerSideProps = ({
   params: { teamName, projectName },
-  req,
+  req
 }): Promise<{
   props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, IConfigurationProps>;
 }> =>
@@ -201,25 +201,25 @@ export const getServerSideProps = ({
     RTE.chain(({ id }) =>
       flow(
         getConfiguration(teamName, projectName),
-        TE.chain((configuration) => TE.right({ configuration, id }))
+        TE.chain(configuration => TE.right({ configuration, id }))
       )
     ),
-    RTE.chain((p) =>
+    RTE.chain(p =>
       pipe(
         getSlackOAuthState<NegativeConfigurationFetchOutcome>(
           teamName,
           projectName
         ),
         RTE.fromReaderEither,
-        RTE.chain((slackOauthState) => RTE.right({ slackOauthState, ...p }))
+        RTE.chain(slackOauthState => RTE.right({ slackOauthState, ...p }))
       )
     ),
-    RTE.chain((p) => (session) =>
+    RTE.chain(p => session =>
       TE.right({
         ...p,
         session,
         teamName,
-        projectName,
+        projectName
       })
     ),
     withSession<NegativeConfigurationFetchOutcome, IConfigurationProps>(
@@ -236,11 +236,11 @@ const updateConfigurationVariables = t.type({
   openAPISpec: t.string,
   directory: t.string,
   teamNameAsPredicate: t.type({
-    equals: t.string,
+    equals: t.string
   }),
   projectNameAsPredicate: t.type({
-    equals: t.string,
-  }),
+    equals: t.string
+  })
 });
 type UpdateConfigurationVariables = t.TypeOf<
   typeof updateConfigurationVariables
@@ -258,7 +258,7 @@ type UpdateConfigurationVariables = t.TypeOf<
 
 const updatedConfigurationProject = t.type({
   name: t.string,
-  configuration: Configuration,
+  configuration: Configuration
 });
 
 type UpdatedConfigurationProject = t.TypeOf<typeof updatedConfigurationProject>;
@@ -267,8 +267,8 @@ const updatedConfigurationTeam = t.type({
   name: t.string,
   id: t.string,
   project: t.type({
-    items: t.array(updatedConfigurationProject),
-  }),
+    items: t.array(updatedConfigurationProject)
+  })
 });
 
 type UpdatedConfigurationTeam = t.TypeOf<typeof updatedConfigurationTeam>;
@@ -277,9 +277,9 @@ const updatedConfigurationType = t.type({
   userUpdate: t.type({
     id: t.string,
     team: t.type({
-      items: t.array(updatedConfigurationTeam),
-    }),
-  }),
+      items: t.array(updatedConfigurationTeam)
+    })
+  })
 });
 
 type UpdatedConfigurationType = t.TypeOf<typeof updatedConfigurationType>;
@@ -291,7 +291,7 @@ type NegativeUpdateConfigurationOutcome =
 
 const mk_LENS_ACCESSOR_ERROR = (): NegativeUpdateConfigurationOutcome => ({
   type: "LENS_ACCESSOR_ERROR",
-  msg: "Could not access required properties on returned value",
+  msg: "Could not access required properties on returned value"
 });
 
 const updateConfiguration = ({
@@ -319,7 +319,7 @@ const updateConfiguration = ({
           (error): NegativeUpdateConfigurationOutcome => ({
             type: "UNDEFINED_ERROR",
             msg: "Could not make import project mutation",
-            error,
+            error
           })
         ),
         TE.chainEitherK(
@@ -330,7 +330,7 @@ const updateConfiguration = ({
                 type: "INCORRECT_TYPE_SAFETY",
                 msg:
                   "Teams list from gql endpoint does not match type definition",
-                errors,
+                errors
               })
             )
           )
@@ -340,7 +340,7 @@ const updateConfiguration = ({
             Lens.fromPath<UpdatedConfigurationType>()([
               "userUpdate",
               "team",
-              "items",
+              "items"
             ])
               .composeOptional(optionalHead())
               .composeLens(
@@ -350,7 +350,7 @@ const updateConfiguration = ({
               .composeLens(
                 Lens.fromPath<UpdatedConfigurationProject>()(["configuration"])
               ).getOption,
-            O.chainFirst((congurationUpdate) =>
+            O.chainFirst(congurationUpdate =>
               O.some(setConfiguration(E.right(E.right(congurationUpdate))))
             ),
             O.fold(
@@ -359,19 +359,19 @@ const updateConfiguration = ({
             )
           )
         ),
-        TE.chain((_) =>
+        TE.chain(_ =>
           TE.right(
             ReactGA.event({
               category: "Projects",
               action: "Configure",
-              label: "configuration.tsx",
+              label: "configuration.tsx"
             })
           )
         ),
         // TODO: is there an equivalent of mapLeft that is kinda like
         // chainFirst?
         TE.mapLeft(
-          (l) =>
+          l =>
             ({
               _: toast({
                 title: "Oh no!",
@@ -380,9 +380,9 @@ const updateConfiguration = ({
                 status: "error",
                 duration: 5000,
                 isClosable: true,
-                position: "bottom-right",
+                position: "bottom-right"
               }),
-              __: l,
+              __: l
             }.__)
         )
       ),
@@ -402,21 +402,21 @@ const ConfigurationPage = withError<
     teamName,
     projectName,
     slackOauthState,
-    id,
+    id
   }: IConfigurationProps) =>
     pipe(
       {
         useColorMode: useColorMode(),
         toast: useToast(),
         useForm: useForm({
-          ...(configuration ? { defaultValues: configuration } : {}),
+          ...(configuration ? { defaultValues: configuration } : {})
         }),
         useGetConfiguration: hookNeedingFetch(
           getConfiguration(teamName, projectName)(session)
         ),
-        useNotifications: useState(false),
+        useNotifications: useState(false)
       },
-      (p) => ({
+      p => ({
         ...p,
         onSubmit: (values: IConfiguration) =>
           updateConfiguration({
@@ -425,13 +425,13 @@ const ConfigurationPage = withError<
             ...values,
             teamName,
             projectNameAsPredicate: {
-              equals: projectName,
+              equals: projectName
             },
             teamNameAsPredicate: {
-              equals: teamName,
+              equals: teamName
             },
             userId: getUserIdFromIdOrEnv(id),
-            namePlusTeamName: `${projectName}${SEPARATOR}${teamName}`,
+            namePlusTeamName: `${projectName}${SEPARATOR}${teamName}`
           })(session)().then(constNull),
         configuration:
           E.isRight(p.useGetConfiguration[0]) &&
@@ -439,20 +439,20 @@ const ConfigurationPage = withError<
             ? p.useGetConfiguration[0].right.right
             : configuration
             ? configuration
-            : { openAPISpec: null, buildCommand: null, directory: null },
+            : { openAPISpec: null, buildCommand: null, directory: null }
       }),
       ({
         useColorMode: { colorMode },
         useForm: { handleSubmit, formState, register },
         useNotifications: [notifications, setNotificaitons],
-        onSubmit,
+        onSubmit
       }) => (
         <Grid
           templateColumns={[
             "repeat(auto-fit, 1fr)",
             "repeat(2, 1fr)",
             "repeat(3, 1fr)",
-            "repeat(4, 1fr)",
+            "repeat(4, 1fr)"
           ]}
           gap={20}
         >
@@ -479,13 +479,15 @@ const ConfigurationPage = withError<
             overflow="auto"
           >
             <Card heading="Build settings" id={`build-settings`}>
-              <Alert status="warning" alignItems="flex-start">
+              <Alert status="warning" alignItems="flex-start" rounded="sm">
                 <AlertIcon mt={0.75} />
                 <Box>
                   <AlertDescription color="yellow.900">
-                    Testing with production data can lead to irreparable data loss. Be sure to check your credentials before saving. 
+                    Testing with production data can lead to irreparable data
+                    loss. Be sure to check your credentials before saving.
                   </AlertDescription>
                 </Box>
+                <CloseButton pos="absolute" top="8px" right="8px" />
               </Alert>
               <FormControl d="flex" alignItems="center" mt={4}>
                 <FormLabel
