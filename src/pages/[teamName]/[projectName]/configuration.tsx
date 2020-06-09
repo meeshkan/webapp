@@ -479,29 +479,30 @@ const ConfigurationPage = withError<
             gridArea="1 / 2 / 4 / 4"
             overflow="auto"
           >
+            <Alert
+              display={alert ? "flex" : "none"}
+              status="warning"
+              alignItems="flex-start"
+              rounded="sm"
+            >
+              <AlertIcon mt={0.75} />
+              <Box>
+                <AlertDescription
+                  color={colorMode === "light" ? "yellow.900" : "yellow.50"}
+                >
+                  Testing with production data can lead to irreparable data
+                  loss. Be sure to check your credentials before saving.
+                </AlertDescription>
+              </Box>
+              <CloseButton
+                onClick={() => showAlert(false)}
+                color={`mode.${colorMode}.text`}
+                pos="absolute"
+                top="8px"
+                right="8px"
+              />
+            </Alert>
             <Card heading="Build settings" id={`build-settings`}>
-              <Alert
-                display={alert ? "flex" : "none"}
-                status="warning"
-                alignItems="flex-start"
-                mt={4}
-                rounded="sm"
-              >
-                <AlertIcon mt={0.75} />
-                <Box>
-                  <AlertDescription color={`mode.${colorMode}.alertText`}>
-                    Testing with production data can lead to irreparable data
-                    loss. Be sure to check your credentials before saving.
-                  </AlertDescription>
-                </Box>
-                <CloseButton
-                  onClick={() => showAlert(false)}
-                  color={`mode.${colorMode}.text`}
-                  pos="absolute"
-                  top="8px"
-                  right="8px"
-                />
-              </Alert>
               <FormControl d="flex" alignItems="center" mt={4}>
                 <FormLabel
                   fontWeight={500}
