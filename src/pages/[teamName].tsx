@@ -95,7 +95,7 @@ type NegativeTeamFetchOutcome =
 type QueryTp = t.TypeOf<typeof queryTp>;
 type ITeamProps = {
   team: ITeam;
-  id?: string;
+  id: string;
   session: ISession;
   ghOauthState: string;
 };
@@ -426,12 +426,22 @@ export const getServerSideProps = ({
 }> =>
   pipe(
     confirmOrCreateUser("id", userType),
-    RTE.chain((_) => getTeam(teamName)),
-    RTE.chain((team) =>
+    RTE.chain(({ id }) =>
+      pipe(
+        getTeam(teamName),
+        RTE.chain<
+          ISession,
+          NegativeTeamFetchOutcome,
+          ITeam,
+          { id: string; team: ITeam }
+        >((team) => RTE.right({ team, id }))
+      )
+    ),
+    RTE.chain(({ id, team }) =>
       pipe(
         getGHOAuthState,
         RTE.fromReaderEither,
-        RTE.chain((ghOauthState) => RTE.right({ ghOauthState, team }))
+        RTE.chain((ghOauthState) => RTE.right({ ghOauthState, team, id }))
       )
     ),
     RTE.chain((p) => (session) => TE.right({ session, ...p })),

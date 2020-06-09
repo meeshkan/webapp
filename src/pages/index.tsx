@@ -123,6 +123,7 @@ const createTeam = ({
             )
           )
         ),
+        TE.chain((_) => TE.right(constNull())),
         TE.mapLeft((l) =>
           pipe(
             toast({
