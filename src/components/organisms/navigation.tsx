@@ -19,6 +19,7 @@ import { Either, isLeft, isRight } from "fp-ts/lib/Either";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import { Loading } from "../../utils/hookNeedingFetch";
 import { NotAuthorized } from "../../utils/user";
+import { useRouter } from 'next/router'
 
 interface INavigationProps {
   session: Either<Loading, Either<NotAuthorized, ISession>>;
@@ -26,6 +27,8 @@ interface INavigationProps {
 
 const Navigation = ({ session }: INavigationProps) => {
   const { colorMode, toggleColorMode } = useColorMode();
+  const router = useRouter()
+  const pathForBreadcrumbs = router.pathname.split("/");
 
   return (
     <>
@@ -54,16 +57,13 @@ const Navigation = ({ session }: INavigationProps) => {
             />
           </Link>
           <Breadcrumb ml={3} mt={2} addSeparator={true}>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="#" color={`mode.${colorMode}.tertiary`}>
-                Example
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbItem isCurrentPage>
-              <BreadcrumbLink color={`mode.${colorMode}.tertiary`} href="#">
-                Another
-              </BreadcrumbLink>
-            </BreadcrumbItem>
+            {pathForBreadcrumbs.slice(1).map((crumb, i) => (
+              <BreadcrumbItem key={i}>
+                <BreadcrumbLink color={`mode.${colorMode}.tertiary`}>
+                  {crumb}
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            ))}
           </Breadcrumb>
         </Flex>
         {!isLeft(session) && (
