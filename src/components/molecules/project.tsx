@@ -42,9 +42,11 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
         >
           <Image
             src={session.user.picture}
+            fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
             alt={`${session.user.name}'s headshot`}
             size={10}
             roundedLeft="sm"
+            border="1px solid"
             borderColor={`mode.${colorMode}.background`}
           />
           <Text ml={2} mr={8} color={`mode.${colorMode}.text`}>
@@ -70,7 +72,7 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
               {colorMode === "light" ? "Dark mode" : "Light mode"}
             </MenuItem>
           </MenuGroup>
-          <MenuDivider />
+          <MenuDivider borderColor={`mode.${colorMode}.icon`} />
           <MenuGroup title="Teams" color={`mode.${colorMode}.title`}>
             {teams.map((team, index) => (
               <Link
@@ -91,6 +93,9 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
                     }
                     fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
                     alt={`${team.name}'s organization image`}
+                    rounded="sm"
+                    border="1px solid"
+                    borderColor={`mode.${colorMode}.icon`}
                     h={4}
                     w={4}
                     mr={2}
@@ -101,7 +106,7 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
             ))}
           </MenuGroup>
 
-          <MenuDivider />
+          <MenuDivider borderColor={`mode.${colorMode}.icon`} />
 
           <MenuGroup title="Other" color={`mode.${colorMode}.title`}>
             <MenuItem color={`mode.${colorMode}.text`}>

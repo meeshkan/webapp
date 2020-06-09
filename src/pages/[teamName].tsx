@@ -51,7 +51,7 @@ import * as _E from "../fp-ts/Either";
 import { NonEmptyArray, groupSort } from "fp-ts/lib/NonEmptyArray";
 import { LensTaskEither, lensTaskEitherHead } from "../monocle-ts";
 import { GET_TEAM_QUERY } from "../gql/pages/[teamName]";
-import { CREATE_PROJECT_MUTATION } from "../gql/pages";
+import { CREATE_PROJECT_MUTATION } from "../gql/pages/[teamName]";
 import {
   defaultGQLErrorHandler,
   GET_SERVER_SIDE_PROPS_ERROR,

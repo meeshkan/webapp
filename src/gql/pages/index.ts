@@ -1,41 +1,30 @@
-export const CREATE_PROJECT_MUTATION = `mutation CREATE_PROJECT($userId:ID!, $teamName:String!, $repositoryName: String!, $owner: String!, $namePlusTeam: String!, $nodePlusTeam: String!, $nodeID: String!) {
-  userUpdate(filter: {
-    id: $userId
-  },
-  data:{
-    team: {
-      update: {
-        filter:{
-          name:$teamName
-        }
-        data:{
-          project: {
-            create: {
-              name: $repositoryName
-              namePlusTeamName: $namePlusTeam
-              repository: {
-                create:{
-                  owner: $owner
-                  name: $repositoryName
-                  nodeId: $nodeID
-                  nodeIdPlusTeamId:$nodePlusTeam
-                }
-              }
-            }
-          }
+export const CREATE_TEAM_MUTATION = `mutation CREATE_TEAM(
+  $userId:ID!
+  $teamName:String!
+) {
+  userUpdate(
+    filter: {
+      id: $userId
+    }
+    data:{
+      team: {
+        create: {
+          name: $teamName
         }
       }
-    }
   }) {
-    id
-    team {
-      items{
+    team(filter: {
+      name: {
+        equals: $teamName
+      }
+    }){
+      items {
         id
-        inviteLink
         name
         image {
           downloadUrl
         }
+        inviteLink
         users {
           items {
             email
@@ -49,6 +38,7 @@ export const CREATE_PROJECT_MUTATION = `mutation CREATE_PROJECT($userId:ID!, $te
           items {
             name
             repository {
+              owner
               nodeId
             }
             configuration {
