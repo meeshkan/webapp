@@ -413,7 +413,8 @@ const ConfigurationPage = withError<
         useGetConfiguration: hookNeedingFetch(
           getConfiguration(teamName, projectName)(session)
         ),
-        useNotifications: useState(false)
+        useNotifications: useState(false),
+        useAlert: useState(true)
       },
       p => ({
         ...p,
@@ -444,6 +445,7 @@ const ConfigurationPage = withError<
         useColorMode: { colorMode },
         useForm: { handleSubmit, formState, register },
         useNotifications: [notifications, setNotificaitons],
+        useAlert: [alert, showAlert],
         onSubmit
       }) => (
         <Grid
@@ -479,6 +481,7 @@ const ConfigurationPage = withError<
           >
             <Card heading="Build settings" id={`build-settings`}>
               <Alert
+                display={alert ? "flex" : "none"}
                 status="warning"
                 alignItems="flex-start"
                 mt={4}
@@ -492,6 +495,7 @@ const ConfigurationPage = withError<
                   </AlertDescription>
                 </Box>
                 <CloseButton
+                  onClick={() => showAlert(false)}
                   color={`mode.${colorMode}.text`}
                   pos="absolute"
                   top="8px"
