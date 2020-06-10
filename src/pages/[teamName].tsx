@@ -299,6 +299,20 @@ const createProject = ({
               error,
             })
           ),
+          TE.mapLeft((l) =>
+            pipe(
+              toast({
+                title: "Oh no!",
+                description:
+                  "We could not import your repository. Please try again soon!",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+                position: "bottom-right",
+              }),
+              constant(l)
+            )
+          )
         ),
       (_, e) => () =>
         router
