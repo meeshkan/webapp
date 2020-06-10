@@ -14,7 +14,7 @@ const customTheme = {
       600: "#52606D",
       700: "#3E4C59",
       800: "#323F4B",
-      900: "#1F2933",
+      900: "#1F2933"
     },
     red: {
       50: "#FCE8EE",
@@ -26,7 +26,7 @@ const customTheme = {
       600: "#B81445",
       700: "#A1123D",
       800: "#8A0F34",
-      900: "#5C0A23",
+      900: "#5C0A23"
     },
     blue: {
       50: "#E9EDFB",
@@ -38,7 +38,7 @@ const customTheme = {
       600: "#1F3BAD",
       700: "#1B3498",
       800: "#172C82",
-      900: "#0F1E57",
+      900: "#0F1E57"
     },
     cyan: {
       50: "#E9FBF8",
@@ -50,7 +50,7 @@ const customTheme = {
       600: "#29A38B",
       700: "#248F79",
       800: "#1F7A68",
-      900: "#145246",
+      900: "#145246"
     },
     mode: {
       light: {
@@ -61,7 +61,7 @@ const customTheme = {
         text: "#3E4C59", // gray.700
         tertiary: "#616E7C", // gray.500
         icon: "#E4E7EB", // gray.100
-        link: "#264AD9", // blue.500
+        link: "#264AD9" // blue.500
       },
       dark: {
         background: "#323F4B", // gray.800
@@ -71,9 +71,9 @@ const customTheme = {
         text: "#CBD2D9", // gray.200
         tertiary: "#7B8794", // gray.400
         icon: "#323F4B", // gray.800
-        link: "#7D92E8", // blue.300
-      },
-    },
+        link: "#7D92E8" // blue.300
+      }
+    }
   },
   icons: {
     ...theme.icons,
@@ -94,7 +94,7 @@ const customTheme = {
           <path d="M144.029 13.464C142.445 13.464 141.245 14.04 140.597 14.928V13.8H136.997V25.8H140.597V19.248C140.597 17.544 141.509 16.776 142.829 16.776C143.981 16.776 144.917 17.472 144.917 18.96V25.8H148.517V18.432C148.517 15.192 146.453 13.464 144.029 13.464Z" />
         </g>
       ),
-      viewBox: "0 0 149 30",
+      viewBox: "0 0 149 30"
     },
     add: {
       path: (
@@ -105,7 +105,7 @@ const customTheme = {
           strokeLinecap="round"
         />
       ),
-      viewBox: "0 0 24 24",
+      viewBox: "0 0 24 24"
     },
     slack: {
       path: (
@@ -115,7 +115,7 @@ const customTheme = {
           fill="currentColor"
         />
       ),
-      viewBox: "0 0 16 16",
+      viewBox: "0 0 16 16"
     },
     info: {
       path: (
@@ -127,7 +127,7 @@ const customTheme = {
           strokeLinejoin="round"
         />
       ),
-      viewBox: "0 0 12 12",
+      viewBox: "0 0 12 12"
     },
     github: {
       path: (
@@ -136,7 +136,7 @@ const customTheme = {
           fill="currentColor"
         />
       ),
-      viewBox: "0 0 16 16",
+      viewBox: "0 0 16 16"
     },
     checkmark: {
       path: (
@@ -149,7 +149,7 @@ const customTheme = {
           fill="none"
         />
       ),
-      viewBox: "0 0 18 16",
+      viewBox: "0 0 18 16"
     },
     xmark: {
       path: (
@@ -162,8 +162,8 @@ const customTheme = {
           fill="none"
         />
       ),
-      viewBox: "0 0 16 16",
-    },
+      viewBox: "0 0 16 16"
+    }
   },
   opacity: {
     "0": "0",
@@ -171,12 +171,12 @@ const customTheme = {
     "40%": "0.4",
     "60%": "0.6",
     "80%": "0.8",
-    "100%": "1",
+    "100%": "1"
   },
   fonts: {
     body: `Inter, sans-serif`,
     heading: `Inter, sans-serif`,
-    mono: "Fira Code, monospace",
+    mono: "Fira Code, monospace"
   },
   fontWeights: {
     ...theme.fontWeights,
@@ -188,8 +188,8 @@ const customTheme = {
     600: 600,
     700: 700,
     800: 800,
-    900: 900,
-  },
+    900: 900
+  }
 };
 
 export default customTheme;
