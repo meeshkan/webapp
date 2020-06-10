@@ -75,7 +75,7 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
           <MenuDivider borderColor={`mode.${colorMode}.icon`} />
           <MenuGroup title="Teams" color={`mode.${colorMode}.title`}>
             {teams.map((team, index) => (
-              <Link href={`/${team.name}/`} key={index}>
+              <Link href={`/${team.name}`} key={index}>
                 <MenuItem
                   color={`mode.${colorMode}.text`}
                   d="flex"

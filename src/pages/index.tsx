@@ -219,7 +219,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
             {allTeams.map((team, index) => (
               <Card
                 key={index}
-                link={`/${team.name}/`}
+                link={`/${team.name}`}
                 linkLabel={`Links to ${team.name}'s dashboard`}
               >
                 <Stack spacing={4} isInline>
