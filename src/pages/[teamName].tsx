@@ -196,11 +196,6 @@ interface ImportProjectVariables {
   router: NextRouter;
   importProjectIsExecuting: React.Dispatch<React.SetStateAction<boolean>>;
   toast: (props: useToastOptions) => void;
-  setTeams: React.Dispatch<
-    React.SetStateAction<
-      E.Either<Loading, E.Either<NegativeTeamsFetchOutcome, ITeam[]>>
-    >
-  >;
 }
 
 const getTeam = (teamName: string) => (
@@ -269,7 +264,6 @@ const ImportProject = ({ repoName, onClick }: ImportProps) => {
 };
 
 const createProject = ({
-  setTeams,
   importProjectIsExecuting,
   toast,
   closeModal,
@@ -953,7 +947,6 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                                               // doesn't cover error case
                                               // where team addition fails
                                               teamName: team.name,
-                                              setTeams: teamsFromClientSideFetch[2],
                                               router,
                                             })(session)}
                                           />
