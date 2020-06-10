@@ -75,22 +75,15 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
           <MenuDivider borderColor={`mode.${colorMode}.icon`} />
           <MenuGroup title="Teams" color={`mode.${colorMode}.title`}>
             {teams.map((team, index) => (
-              <Link
-                href={`/${team.name}/`}
-                key={index}
-                aria-label={`Links to ${team.name}'s dashboard`}
-              >
+              <Link href={`/${team.name}/`} key={index}>
                 <MenuItem
                   color={`mode.${colorMode}.text`}
                   d="flex"
                   alignContent="center"
+                  aria-label={`Links to ${team.name}'s dashboard`}
                 >
                   <Image
-                    src={
-                      team.image
-                        ? team.image.downloadUrl
-                        : "https://picsum.photos/200"
-                    }
+                    src={team.image && team.image.downloadUrl}
                     fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
                     alt={`${team.name}'s organization image`}
                     rounded="sm"

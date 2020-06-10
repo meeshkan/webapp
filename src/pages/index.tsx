@@ -91,56 +91,56 @@ const createTeam = ({
 }: createTeamVariables) => (
   session: ISession
 ): TE.TaskEither<NegativeCreateTeamOutcome, void> =>
-    TE.bracket<NegativeCreateTeamOutcome, void, void>(
-      () =>
-        Promise.resolve(
-          E.right<NegativeCreateTeamOutcome, void>(createTeamIsExecuting(true))
+  TE.bracket<NegativeCreateTeamOutcome, void, void>(
+    () =>
+      Promise.resolve(
+        E.right<NegativeCreateTeamOutcome, void>(createTeamIsExecuting(true))
+      ),
+    () =>
+      pipe(
+        TE.tryCatch(
+          () =>
+            eightBaseClient(session).request(
+              CREATE_TEAM_MUTATION,
+              createTeamVariables
+            ),
+          (error): NegativeCreateTeamOutcome => ({
+            type: "UNDEFINED_ERROR",
+            msg: "Could not make create team mutation",
+            error,
+          })
         ),
-      () =>
-        pipe(
-          TE.tryCatch(
-            () =>
-              eightBaseClient(session).request(
-                CREATE_TEAM_MUTATION,
-                createTeamVariables
-              ),
-            (error): NegativeCreateTeamOutcome => ({
-              type: "UNDEFINED_ERROR",
-              msg: "Could not make create team mutation",
-              error,
-            })
-          ),
-          TE.chain((_) => TE.right(constNull())),
-          TE.mapLeft((l) =>
-            pipe(
-              toast({
-                title: "Oh no!",
-                description:
-                  "We could not create your team. Please try again soon!",
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-                position: "bottom-right",
-              }),
-              constant(l)
-            )
-          )
-        ),
-      (_, e) => () =>
-        router.push(`/${createTeamVariables.teamName}/`).then((_) =>
-          E.right(
-            {
-              _: closeModal(),
-              __: createTeamIsExecuting(false),
-              ___: ReactGA.event({
-                category: "Teams",
-                action: "Created",
-                label: "index.tsx",
-              }),
-            }._
+        TE.chain((_) => TE.right(constNull())),
+        TE.mapLeft((l) =>
+          pipe(
+            toast({
+              title: "Oh no!",
+              description:
+                "We could not create your team. Please try again soon!",
+              status: "error",
+              duration: 5000,
+              isClosable: true,
+              position: "bottom-right",
+            }),
+            constant(l)
           )
         )
-    );
+      ),
+    (_, e) => () =>
+      router.push(`/${createTeamVariables.teamName}/`).then((_) =>
+        E.right(
+          {
+            _: closeModal(),
+            __: createTeamIsExecuting(false),
+            ___: ReactGA.event({
+              category: "Teams",
+              action: "Created",
+              label: "index.tsx",
+            }),
+          }._
+        )
+      )
+  );
 
 const userType = t.type({ id: t.string });
 export const getServerSideProps = ({
@@ -178,15 +178,13 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
         teamsFromClientSideFetch: useTeams(session),
         createTeamIsExecuting: useState(false),
         toast: useToast(),
-        useForm: useForm({
-          // ...(configuration ? { defaultValues: configuration } : {}),
-        }),
+        useForm: useForm(),
       },
       (p) => ({
         ...p,
         allTeams:
           E.isRight(p.teamsFromClientSideFetch[0]) &&
-            E.isRight(p.teamsFromClientSideFetch[0].right)
+          E.isRight(p.teamsFromClientSideFetch[0].right)
             ? p.teamsFromClientSideFetch[0].right.right
             : teams,
         onSubmit: (values: ITeamCreate) =>
@@ -207,152 +205,154 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
         useForm: { handleSubmit, formState, register },
         onSubmit,
       }) => (
-          <>
-            <Grid
-              templateColumns={[
-                "repeat(2, 1fr)",
-                "repeat(2, 1fr)",
-                "repeat(3, 1fr)",
-                "repeat(3, 1fr)",
-                "repeat(4, 1fr)",
-              ]}
-              gap={8}
-            >
-              {allTeams.map((team, index) => (
-                <Card
-                  key={index}
-                  link={`/${team.name}/`}
-                  linkLabel={`Links to ${team.name}'s dashboard`}
-                >
-                  <Stack spacing={4} isInline>
-                    <Image
-                      size={10}
-                      src={
-                        team.image
-                          ? team.image.downloadUrl
-                          : "https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
-                      }
-                      fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
-                      alt={`${team.name}'s organization image`}
-                      bg="gray.50"
-                      border="1px solid"
-                      borderColor={`mode.${colorMode}.icon`}
-                      rounded="sm"
-                    />
-                    <Stack spacing={2}>
-                      <Heading
-                        as="h3"
-                        lineHeight="none"
-                        fontSize="md"
-                        fontWeight={900}
-                      >
-                        {team.name}
-                      </Heading>
-                      <Text color={`mode.${colorMode}.text`} lineHeight="none">
-                        {`${team.project.items.length} projects`}
-                      </Text>
-                    </Stack>
-                  </Stack>
-                </Card>
-              ))}
-
-              {/* Create a team | BUTTON */}
-              <Button
-                onClick={onOpen}
-                pos="unset"
-                p={4}
-                minH="72px"
-                justifyContent="start"
-                rounded="sm"
-                lineHeight="none"
-                fontSize="md"
-                fontWeight={900}
-                bg={`mode.${colorMode}.card`}
-                color={`mode.${colorMode}.title`}
-                _hover={{ color: `mode.${colorMode}.titleHover` }}
+        <>
+          <Grid
+            templateColumns={[
+              "repeat(2, 1fr)",
+              "repeat(2, 1fr)",
+              "repeat(3, 1fr)",
+              "repeat(3, 1fr)",
+              "repeat(4, 1fr)",
+            ]}
+            gap={8}
+          >
+            {allTeams.map((team, index) => (
+              <Card
+                key={index}
+                link={`/${team.name}/`}
+                linkLabel={`Links to ${team.name}'s dashboard`}
               >
-                <Icon h={10} w={10} mr={2} name="add" stroke="2px" />
+                <Stack spacing={4} isInline>
+                  <Image
+                    size={10}
+                    src={
+                      team.image
+                        ? team.image.downloadUrl
+                        : "https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
+                    }
+                    fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
+                    alt={`${team.name}'s organization image`}
+                    bg="gray.50"
+                    border="1px solid"
+                    borderColor={`mode.${colorMode}.icon`}
+                    rounded="sm"
+                  />
+                  <Stack spacing={2}>
+                    <Heading
+                      as="h3"
+                      lineHeight="none"
+                      fontSize="md"
+                      fontWeight={900}
+                    >
+                      {team.name}
+                    </Heading>
+                    <Text color={`mode.${colorMode}.text`} lineHeight="none">
+                      {`${team.project.items.length} project${
+                        team.project.items.length === 1 ? "" : "s"
+                      }`}
+                    </Text>
+                  </Stack>
+                </Stack>
+              </Card>
+            ))}
+
+            {/* Create a team | BUTTON */}
+            <Button
+              onClick={onOpen}
+              pos="unset"
+              p={4}
+              minH="72px"
+              justifyContent="start"
+              rounded="sm"
+              lineHeight="none"
+              fontSize="md"
+              fontWeight={900}
+              bg={`mode.${colorMode}.card`}
+              color={`mode.${colorMode}.title`}
+              _hover={{ color: `mode.${colorMode}.titleHover` }}
+            >
+              <Icon h={10} w={10} mr={2} name="add" stroke="2px" />
               Create a team
             </Button>
-            </Grid>
+          </Grid>
 
-            {/* Create a team | MODAL */}
-            <Modal
-              onClose={onClose}
-              isOpen={isOpen}
-              isCentered
-              closeOnOverlayClick={true}
-              size="lg"
+          {/* Create a team | MODAL */}
+          <Modal
+            onClose={onClose}
+            isOpen={isOpen}
+            isCentered
+            closeOnOverlayClick={true}
+            size="lg"
+          >
+            <ModalOverlay />
+            <ModalContent
+              rounded="sm"
+              backgroundColor={`mode.${colorMode}.card`}
             >
-              <ModalOverlay />
-              <ModalContent
-                rounded="sm"
-                backgroundColor={`mode.${colorMode}.card`}
+              <ModalHeader
+                borderBottom="1px solid"
+                borderColor={`mode.${colorMode}.icon`}
+                mx={4}
+                px={0}
+                pt={4}
+                pb={2}
+                fontWeight={900}
+                color={`mode.${colorMode}.title`}
               >
-                <ModalHeader
-                  borderBottom="1px solid"
-                  borderColor={`mode.${colorMode}.icon`}
-                  mx={4}
-                  px={0}
-                  pt={4}
-                  pb={2}
-                  fontWeight={900}
-                  color={`mode.${colorMode}.title`}
-                >
-                  Create a team
+                Create a team
               </ModalHeader>
-                <ModalCloseButton
-                  rounded="sm"
-                  size="sm"
-                  mt={2}
-                  mr={0}
-                  color={`mode.${colorMode}.text`}
-                />
-                <Box
-                  as="form"
-                  onSubmit={handleSubmit(onSubmit)}
-                  w="100%"
-                  overflow="auto"
-                >
-                  <ModalBody p={4}>
-                    <FormControl isRequired>
-                      <FormLabel
-                        fontWeight={500}
-                        color={`mode.${colorMode}.title`}
-                      >
-                        Team name
+              <ModalCloseButton
+                rounded="sm"
+                size="sm"
+                mt={2}
+                mr={0}
+                color={`mode.${colorMode}.text`}
+              />
+              <Box
+                as="form"
+                onSubmit={handleSubmit(onSubmit)}
+                w="100%"
+                overflow="auto"
+              >
+                <ModalBody p={4}>
+                  <FormControl isRequired>
+                    <FormLabel
+                      fontWeight={500}
+                      color={`mode.${colorMode}.title`}
+                    >
+                      Team name
                     </FormLabel>
-                      <Input
-                        borderColor={`mode.${colorMode}.icon`}
-                        color={`mode.${colorMode}.text`}
-                        rounded="sm"
+                    <Input
+                      borderColor={`mode.${colorMode}.icon`}
+                      color={`mode.${colorMode}.text`}
+                      rounded="sm"
+                      size="sm"
+                      name="teamName"
+                      ref={register}
+                    />
+                  </FormControl>
+                </ModalBody>
+                <ModalFooter p={4}>
+                  <Flex justifyContent="flex-end">
+                    <LightMode>
+                      <Button
                         size="sm"
-                        name="teamName"
-                        ref={register}
-                      />
-                    </FormControl>
-                  </ModalBody>
-                  <ModalFooter p={4}>
-                    <Flex justifyContent="flex-end">
-                      <LightMode>
-                        <Button
-                          size="sm"
-                          px={4}
-                          rounded="sm"
-                          fontWeight={900}
-                          variantColor="blue"
-                          type="submit"
-                          isLoading={formState.isSubmitting}
-                        >
-                          Create team
+                        px={4}
+                        rounded="sm"
+                        fontWeight={900}
+                        variantColor="blue"
+                        type="submit"
+                        isLoading={formState.isSubmitting}
+                      >
+                        Create team
                       </Button>
-                      </LightMode>
-                    </Flex>
-                  </ModalFooter>
-                </Box>
-              </ModalContent>
-            </Modal>
-          </>
-        )
+                    </LightMode>
+                  </Flex>
+                </ModalFooter>
+              </Box>
+            </ModalContent>
+          </Modal>
+        </>
+      )
     )
 );
