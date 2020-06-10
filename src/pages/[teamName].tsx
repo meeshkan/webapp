@@ -110,7 +110,6 @@ type ITeamProps = {
 type NegativeImportProjectOutcome = UNDEFINED_ERROR | INCORRECT_TYPE_SAFETY;
 type NegativeUpdateTeamOutcome = UNDEFINED_ERROR | INCORRECT_TYPE_SAFETY;
 type ITeam = t.TypeOf<typeof Team>;
-type TeamsMutationType = t.TypeOf<typeof teamsMutationType>;
 type IRepositoriesGroupedByOwner = NonEmptyArray<IRepository>[];
 type ImportProps = {
   repoName: String;
@@ -164,15 +163,6 @@ const Team = t.type({
         ]),
       })
     ),
-  }),
-});
-
-const teamsMutationType = t.type({
-  userUpdate: t.type({
-    id: t.string,
-    team: t.type({
-      items: t.array(Team),
-    }),
   }),
 });
 
