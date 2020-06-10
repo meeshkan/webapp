@@ -23,20 +23,14 @@ interface IProjectSettingsProps {
 
 const ProjectSettings = ({ session }: IProjectSettingsProps) => {
   const { colorMode, toggleColorMode } = useColorMode();
-  const fetchedProjectsAndThunk = useTeams(session);
-  const projects = isLeft(fetchedProjectsAndThunk[0])
+  const fetchedTeamsAndThunk = useTeams(session);
+  const teams = isLeft(fetchedTeamsAndThunk[0])
     ? // we are loading
       []
-    : isLeft(fetchedProjectsAndThunk[0].right)
+    : isLeft(fetchedTeamsAndThunk[0].right)
     ? // there was an error with the fetch
       []
-    : fetchedProjectsAndThunk[0].right.right.flatMap((team) =>
-        team.project.items.map((project) => ({
-          ...project,
-          teamImage: team.image,
-          teamName: team.name,
-        }))
-      );
+    : fetchedTeamsAndThunk[0].right.right;
   return (
     <>
       <Menu closeOnSelect={false}>
@@ -48,9 +42,11 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
         >
           <Image
             src={session.user.picture}
+            fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
             alt={`${session.user.name}'s headshot`}
             size={10}
             roundedLeft="sm"
+            border="1px solid"
             borderColor={`mode.${colorMode}.background`}
           />
           <Text ml={2} mr={8} color={`mode.${colorMode}.text`}>
@@ -76,56 +72,35 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
               {colorMode === "light" ? "Dark mode" : "Light mode"}
             </MenuItem>
           </MenuGroup>
-          <MenuDivider />
-          <MenuGroup
-            defaultValue="Web app"
-            title="Project repo"
-            color={`mode.${colorMode}.title`}
-          >
-            {projects.map(({ teamImage, teamName, name }, index) => (
-              <Link
-                href={`/${teamName}/${name}`}
-                key={index}
-                aria-label={`Links to ${teamName}'s project ${name}`}
-              >
+          <MenuDivider borderColor={`mode.${colorMode}.icon`} />
+          <MenuGroup title="Teams" color={`mode.${colorMode}.title`}>
+            {teams.map((team, index) => (
+              <Link href={`/${team.name}/`} key={index}>
                 <MenuItem
                   color={`mode.${colorMode}.text`}
                   d="flex"
                   alignContent="center"
+                  aria-label={`Links to ${team.name}'s dashboard`}
                 >
                   <Image
-                    src={
-                      teamImage
-                        ? teamImage.downloadUrl
-                        : "https://picsum.photos/200"
-                    }
-                    alt={`${teamName}'s organization image`}
+                    src={team.image && team.image.downloadUrl}
+                    fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
+                    alt={`${team.name}'s organization image`}
+                    rounded="sm"
+                    border="1px solid"
+                    borderColor={`mode.${colorMode}.icon`}
                     h={4}
                     w={4}
                     mr={2}
                   />
-                  {name}
+                  {team.name}
                 </MenuItem>
               </Link>
             ))}
           </MenuGroup>
-          {
-            // temporarily disabling this until we find a good way to pipe the state
-            // to the menu. it will require an additional API endpoint.
-            /*<MenuItem color={`mode.${colorMode}.text`}>
-            <ChakraLink
-              isExternal
-              href={`https://github.com/apps/meeshkan/installations/new?state={needStateHere}`}
-              aria-label="Link to GitHub to install the Meeshkan app on a repository"
-              color={`mode.${colorMode}.text`}
-              _hover={{ textDecor: "none" }}
-            >
-              <Icon name="external-link" mr={2} />
-              Authorize another
-            </ChakraLink>
-                  </MenuItem>*/
-          }
-          <MenuDivider />
+
+          <MenuDivider borderColor={`mode.${colorMode}.icon`} />
+
           <MenuGroup title="Other" color={`mode.${colorMode}.title`}>
             <MenuItem color={`mode.${colorMode}.text`}>
               <ChakraLink

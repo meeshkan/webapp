@@ -100,9 +100,12 @@ const Project = t.type({
 type IProject = t.TypeOf<typeof Project>;
 
 const Team = t.type({
-  image: t.type({
-    downloadUrl: t.string
-  }),
+  image: t.union([
+    t.null,
+    t.type({
+      downloadUrl: t.string,
+    }),
+  ]),
   name: t.string,
   project: t.type({
     items: t.array(Project)
@@ -138,8 +141,8 @@ const getConfiguration = (teamName: string, projectName: string) => (
         E.mapLeft(
           (errors): NegativeConfigurationFetchOutcome => ({
             type: "INCORRECT_TYPE_SAFETY",
-            msg: "Could not decode team name query",
-            errors
+            msg: "Could not decode team name query on configuration",
+            errors,
           })
         )
       )
@@ -327,9 +330,8 @@ const updateConfiguration = ({
             E.mapLeft(
               (errors): NegativeUpdateConfigurationOutcome => ({
                 type: "INCORRECT_TYPE_SAFETY",
-                msg:
-                  "Teams list from gql endpoint does not match type definition",
-                errors
+                msg: "Configuration mutation does not match type definition",
+                errors,
               })
             )
           )

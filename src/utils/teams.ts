@@ -34,6 +34,20 @@ export const Team = t.type({
     }),
   ]),
   name: t.string,
+  users: t.type({
+    items: t.array(
+      t.type({
+        email: t.string,
+        status: t.string,
+        avatar: t.union([
+          t.null,
+          t.type({
+            downloadUrl: t.string,
+          }),
+        ]),
+      })
+    ),
+  }),
   project: t.type({
     items: t.array(
       t.type({

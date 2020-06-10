@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, Stack, useColorMode, Link as ChakraLink } from "@chakra-ui/core";
+import { Text, Stack, useColorMode } from "@chakra-ui/core";
 import Card from "../molecules/card";
 
 type SettingsProps = {
