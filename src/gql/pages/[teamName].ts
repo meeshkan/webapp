@@ -68,6 +68,36 @@ export const CREATE_PROJECT_MUTATION = `mutation CREATE_PROJECT($userId:ID!, $te
     }
   }) {
     id
+    team {
+      items {
+        id
+        name
+        image {
+          downloadUrl
+        }
+        inviteLink
+        users {
+          items {
+            email
+            status
+            avatar {
+              downloadUrl
+            }
+          }
+        }
+        project {
+          items {
+            repository {
+              nodeId
+              owner
+            }
+            configuration {
+              id
+            }
+          }
+        }
+      }
+    }
   }
 }`;
 
