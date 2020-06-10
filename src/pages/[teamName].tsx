@@ -283,6 +283,7 @@ const createProject = ({
               error,
             })
           ),
+          TE.chain((_) => TE.right(constVoid())),
           TE.mapLeft((l) =>
             pipe(
               toast({
