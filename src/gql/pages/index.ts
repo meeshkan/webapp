@@ -38,7 +38,6 @@ export const CREATE_TEAM_MUTATION = `mutation CREATE_TEAM(
           items {
             name
             repository {
-              owner
               nodeId
             }
             configuration {

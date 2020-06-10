@@ -296,93 +296,93 @@ const updateConfiguration = ({
 }: UpdateConfigurationVariables) => (
   session: ISession
 ): TE.TaskEither<NegativeUpdateConfigurationOutcome, void> =>
-  TE.bracket<NegativeUpdateConfigurationOutcome, void, void>(
-    () =>
-      Promise.resolve(
-        E.right<NegativeUpdateConfigurationOutcome, void>(constNull())
-      ),
-    () =>
-      pipe(
-        TE.tryCatch(
-          () =>
-            upsertHack(
-              session,
-              CREATE_CONFIGURATION,
-              UPDATE_CONFIGURATION,
-              updateConfigurationVariables
-            ),
-          (error): NegativeUpdateConfigurationOutcome => ({
-            type: "UNDEFINED_ERROR",
-            msg: "Could not make import project mutation",
-            error,
-          })
+    TE.bracket<NegativeUpdateConfigurationOutcome, void, void>(
+      () =>
+        Promise.resolve(
+          E.right<NegativeUpdateConfigurationOutcome, void>(constNull())
         ),
-        TE.chainEitherK(
-          flow(
-            updatedConfigurationType.decode,
-            E.mapLeft(
-              (errors): NegativeUpdateConfigurationOutcome => ({
-                type: "INCORRECT_TYPE_SAFETY",
-                msg:
-                  "Teams list from gql endpoint does not match type definition",
-                errors,
+      () =>
+        pipe(
+          TE.tryCatch(
+            () =>
+              upsertHack(
+                session,
+                CREATE_CONFIGURATION,
+                UPDATE_CONFIGURATION,
+                updateConfigurationVariables
+              ),
+            (error): NegativeUpdateConfigurationOutcome => ({
+              type: "UNDEFINED_ERROR",
+              msg: "Could not make import project mutation",
+              error,
+            })
+          ),
+          TE.chainEitherK(
+            flow(
+              updatedConfigurationType.decode,
+              E.mapLeft(
+                (errors): NegativeUpdateConfigurationOutcome => ({
+                  type: "INCORRECT_TYPE_SAFETY",
+                  msg:
+                    "Configuration mutatino does not match type definition",
+                  errors,
+                })
+              )
+            )
+          ),
+          TE.chain(
+            flow(
+              Lens.fromPath<UpdatedConfigurationType>()([
+                "userUpdate",
+                "team",
+                "items",
+              ])
+                .composeOptional(optionalHead())
+                .composeLens(
+                  Lens.fromPath<UpdatedConfigurationTeam>()(["project", "items"])
+                )
+                .composeOptional(optionalHead())
+                .composeLens(
+                  Lens.fromPath<UpdatedConfigurationProject>()(["configuration"])
+                ).getOption,
+              O.chainFirst((congurationUpdate) =>
+                O.some(setConfiguration(E.right(E.right(congurationUpdate))))
+              ),
+              O.fold(
+                () => TE.left(mk_LENS_ACCESSOR_ERROR()),
+                () => TE.right(constNull())
+              )
+            )
+          ),
+          TE.chain((_) =>
+            TE.right(
+              ReactGA.event({
+                category: "Projects",
+                action: "Configure",
+                label: "configuration.tsx",
               })
             )
+          ),
+          // TODO: is there an equivalent of mapLeft that is kinda like
+          // chainFirst?
+          TE.mapLeft(
+            (l) =>
+              ({
+                _: toast({
+                  title: "Oh no!",
+                  description:
+                    "We could not update your configuration. Please try again soon!",
+                  status: "error",
+                  duration: 5000,
+                  isClosable: true,
+                  position: "bottom-right",
+                }),
+                __: l,
+              }.__)
           )
         ),
-        TE.chain(
-          flow(
-            Lens.fromPath<UpdatedConfigurationType>()([
-              "userUpdate",
-              "team",
-              "items",
-            ])
-              .composeOptional(optionalHead())
-              .composeLens(
-                Lens.fromPath<UpdatedConfigurationTeam>()(["project", "items"])
-              )
-              .composeOptional(optionalHead())
-              .composeLens(
-                Lens.fromPath<UpdatedConfigurationProject>()(["configuration"])
-              ).getOption,
-            O.chainFirst((congurationUpdate) =>
-              O.some(setConfiguration(E.right(E.right(congurationUpdate))))
-            ),
-            O.fold(
-              () => TE.left(mk_LENS_ACCESSOR_ERROR()),
-              () => TE.right(constNull())
-            )
-          )
-        ),
-        TE.chain((_) =>
-          TE.right(
-            ReactGA.event({
-              category: "Projects",
-              action: "Configure",
-              label: "configuration.tsx",
-            })
-          )
-        ),
-        // TODO: is there an equivalent of mapLeft that is kinda like
-        // chainFirst?
-        TE.mapLeft(
-          (l) =>
-            ({
-              _: toast({
-                title: "Oh no!",
-                description:
-                  "We could not update your configuration. Please try again soon!",
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-                position: "bottom-right",
-              }),
-              __: l,
-            }.__)
-        )
-      ),
-    (_, e) => () => Promise.resolve(E.right(constVoid()))
-  );
+      (_, e) => () => Promise.resolve(E.right(constVoid()))
+    );
 
 const items = ["Build settings", "Slack integration"];
 
@@ -430,11 +430,11 @@ const ConfigurationPage = withError<
           })(session)().then(constNull),
         configuration:
           E.isRight(p.useGetConfiguration[0]) &&
-          E.isRight(p.useGetConfiguration[0].right)
+            E.isRight(p.useGetConfiguration[0].right)
             ? p.useGetConfiguration[0].right.right
             : configuration
-            ? configuration
-            : { openAPISpec: null, buildCommand: null, directory: null },
+              ? configuration
+              : { openAPISpec: null, buildCommand: null, directory: null },
       }),
       ({
         useColorMode: { colorMode },
@@ -442,179 +442,179 @@ const ConfigurationPage = withError<
         useNotifications: [notifications, setNotificaitons],
         onSubmit,
       }) => (
-        <Grid
-          templateColumns={[
-            "repeat(auto-fit, 1fr)",
-            "repeat(2, 1fr)",
-            "repeat(3, 1fr)",
-            "repeat(4, 1fr)",
-          ]}
-          gap={20}
-        >
-          <Box
-            bg={`mode.${colorMode}.card`}
-            rounded="sm"
-            pos="sticky"
-            top={136}
-            p={4}
-            gridArea="1 / 1 / 2 / 2"
+          <Grid
+            templateColumns={[
+              "repeat(auto-fit, 1fr)",
+              "repeat(2, 1fr)",
+              "repeat(3, 1fr)",
+              "repeat(4, 1fr)",
+            ]}
+            gap={20}
           >
-            {items.map((link, i) => (
-              <ItemLink key={i} href={stringToUrl(link)}>
-                {link}
-              </ItemLink>
-            ))}
-          </Box>
-          <Stack
-            as="form"
-            onSubmit={handleSubmit(onSubmit)}
-            w="100%"
-            spacing={8}
-            gridArea="1 / 2 / 4 / 4"
-            overflow="auto"
-          >
-            <Card heading="Build settings" id={`build-settings`}>
-              <FormControl d="flex" alignItems="center" mt={4}>
-                <FormLabel
-                  fontWeight={500}
-                  color={`mode.${colorMode}.title`}
-                  minW="160px"
-                  mr={4}
-                  p={0}
-                >
-                  Root directory
-                  <Tooltip
-                    hasArrow
-                    label="Where is your app located in this repository?"
-                    aria-label="Where is your app located in this repository?"
-                    placement="right"
+            <Box
+              bg={`mode.${colorMode}.card`}
+              rounded="sm"
+              pos="sticky"
+              top={136}
+              p={4}
+              gridArea="1 / 1 / 2 / 2"
+            >
+              {items.map((link, i) => (
+                <ItemLink key={i} href={stringToUrl(link)}>
+                  {link}
+                </ItemLink>
+              ))}
+            </Box>
+            <Stack
+              as="form"
+              onSubmit={handleSubmit(onSubmit)}
+              w="100%"
+              spacing={8}
+              gridArea="1 / 2 / 4 / 4"
+              overflow="auto"
+            >
+              <Card heading="Build settings" id={`build-settings`}>
+                <FormControl d="flex" alignItems="center" mt={4}>
+                  <FormLabel
+                    fontWeight={500}
+                    color={`mode.${colorMode}.title`}
+                    minW="160px"
+                    mr={4}
+                    p={0}
                   >
-                    <Icon
-                      name="info"
-                      size="12px"
-                      ml={2}
-                      color={`mode.${colorMode}.text`}
-                    />
-                  </Tooltip>
-                </FormLabel>
-                <Input
-                  borderColor={`mode.${colorMode}.icon`}
-                  color={`mode.${colorMode}.text`}
-                  rounded="sm"
-                  size="sm"
-                  name="directory"
-                  ref={register}
-                />
-              </FormControl>
-
-              <FormControl d="flex" alignItems="center" mt={4}>
-                <FormLabel
-                  fontWeight={500}
-                  color={`mode.${colorMode}.title`}
-                  minW="160px"
-                  mr={4}
-                  p={0}
-                >
-                  Build command
+                    Root directory
                   <Tooltip
-                    hasArrow
-                    label="The command(s) your app framework provides for compiling your code."
-                    aria-label="The command(s) your app framework provides for compiling your code."
-                    placement="right"
-                  >
-                    <Icon
-                      name="info"
-                      size="12px"
-                      ml={2}
-                      color={`mode.${colorMode}.text`}
-                    />
-                  </Tooltip>
-                </FormLabel>
-                <Input
-                  borderColor={`mode.${colorMode}.icon`}
-                  color={`mode.${colorMode}.text`}
-                  rounded="sm"
-                  size="sm"
-                  name="buildCommand"
-                  ref={register}
-                />
-              </FormControl>
-
-              <FormControl d="flex" alignItems="center" my={4}>
-                <FormLabel
-                  fontWeight={500}
-                  color={`mode.${colorMode}.title`}
-                  minW="160px"
-                  mr={4}
-                  p={0}
-                >
-                  OpenAPI location
-                  <Tooltip
-                    hasArrow
-                    label="Where is your OpenAPI spec located in this repository?"
-                    aria-label="Where is your OpenAPI spec located in this repository?"
-                    placement="right"
-                  >
-                    <Icon
-                      name="info"
-                      size="12px"
-                      ml={2}
-                      color={`mode.${colorMode}.text`}
-                    />
-                  </Tooltip>
-                </FormLabel>
-                <Input
-                  borderColor={`mode.${colorMode}.icon`}
-                  color={`mode.${colorMode}.text`}
-                  rounded="sm"
-                  size="sm"
-                  name="openAPISpec"
-                  ref={register}
-                />
-              </FormControl>
-
-              <Flex justifyContent="flex-end">
-                <LightMode>
-                  <Button
-                    size="sm"
-                    px={4}
+                      hasArrow
+                      label="Where is your app located in this repository?"
+                      aria-label="Where is your app located in this repository?"
+                      placement="right"
+                    >
+                      <Icon
+                        name="info"
+                        size="12px"
+                        ml={2}
+                        color={`mode.${colorMode}.text`}
+                      />
+                    </Tooltip>
+                  </FormLabel>
+                  <Input
+                    borderColor={`mode.${colorMode}.icon`}
+                    color={`mode.${colorMode}.text`}
                     rounded="sm"
-                    fontWeight={900}
-                    variantColor="blue"
-                    type="submit"
-                    isLoading={formState.isSubmitting}
+                    size="sm"
+                    name="directory"
+                    ref={register}
+                  />
+                </FormControl>
+
+                <FormControl d="flex" alignItems="center" mt={4}>
+                  <FormLabel
+                    fontWeight={500}
+                    color={`mode.${colorMode}.title`}
+                    minW="160px"
+                    mr={4}
+                    p={0}
                   >
-                    Save
+                    Build command
+                  <Tooltip
+                      hasArrow
+                      label="The command(s) your app framework provides for compiling your code."
+                      aria-label="The command(s) your app framework provides for compiling your code."
+                      placement="right"
+                    >
+                      <Icon
+                        name="info"
+                        size="12px"
+                        ml={2}
+                        color={`mode.${colorMode}.text`}
+                      />
+                    </Tooltip>
+                  </FormLabel>
+                  <Input
+                    borderColor={`mode.${colorMode}.icon`}
+                    color={`mode.${colorMode}.text`}
+                    rounded="sm"
+                    size="sm"
+                    name="buildCommand"
+                    ref={register}
+                  />
+                </FormControl>
+
+                <FormControl d="flex" alignItems="center" my={4}>
+                  <FormLabel
+                    fontWeight={500}
+                    color={`mode.${colorMode}.title`}
+                    minW="160px"
+                    mr={4}
+                    p={0}
+                  >
+                    OpenAPI location
+                  <Tooltip
+                      hasArrow
+                      label="Where is your OpenAPI spec located in this repository?"
+                      aria-label="Where is your OpenAPI spec located in this repository?"
+                      placement="right"
+                    >
+                      <Icon
+                        name="info"
+                        size="12px"
+                        ml={2}
+                        color={`mode.${colorMode}.text`}
+                      />
+                    </Tooltip>
+                  </FormLabel>
+                  <Input
+                    borderColor={`mode.${colorMode}.icon`}
+                    color={`mode.${colorMode}.text`}
+                    rounded="sm"
+                    size="sm"
+                    name="openAPISpec"
+                    ref={register}
+                  />
+                </FormControl>
+
+                <Flex justifyContent="flex-end">
+                  <LightMode>
+                    <Button
+                      size="sm"
+                      px={4}
+                      rounded="sm"
+                      fontWeight={900}
+                      variantColor="blue"
+                      type="submit"
+                      isLoading={formState.isSubmitting}
+                    >
+                      Save
                   </Button>
-                </LightMode>
-              </Flex>
-            </Card>
+                  </LightMode>
+                </Flex>
+              </Card>
 
-            <Box h={4} />
+              <Box h={4} />
 
-            <Card heading="Slack integration" id={`slack-integration`}>
-              <Flex justifyContent="space-between" my={4}>
-                <FormLabel color={`mode.${colorMode}.text`}>
-                  Global notifications {notifications == true ? "on" : "off"}
-                </FormLabel>
-                <Switch
-                  isChecked={notifications}
-                  onChange={() => setNotificaitons(!notifications)}
-                />
-              </Flex>
-              <Link
-                color={colorMode === "light" ? "blue.500" : "blue.200"}
-                href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_OAUTH_APP_CLIENT_ID}&scope=incoming-webhook&state=${slackOauthState}&redirect_uri=${process.env.SLACK_OAUTH_REDIRECT_URI}`}
-                aria-label="Link to slack to authorize posting notifications from Meeshkan"
-                verticalAlign="middle"
-              >
-                <Icon name="slack" mr={2} />
+              <Card heading="Slack integration" id={`slack-integration`}>
+                <Flex justifyContent="space-between" my={4}>
+                  <FormLabel color={`mode.${colorMode}.text`}>
+                    Global notifications {notifications == true ? "on" : "off"}
+                  </FormLabel>
+                  <Switch
+                    isChecked={notifications}
+                    onChange={() => setNotificaitons(!notifications)}
+                  />
+                </Flex>
+                <Link
+                  color={colorMode === "light" ? "blue.500" : "blue.200"}
+                  href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_OAUTH_APP_CLIENT_ID}&scope=incoming-webhook&state=${slackOauthState}&redirect_uri=${process.env.SLACK_OAUTH_REDIRECT_URI}`}
+                  aria-label="Link to slack to authorize posting notifications from Meeshkan"
+                  verticalAlign="middle"
+                >
+                  <Icon name="slack" mr={2} />
                 Install the slack app here
               </Link>
-            </Card>
-          </Stack>
-        </Grid>
-      )
+              </Card>
+            </Stack>
+          </Grid>
+        )
     )
 );
 

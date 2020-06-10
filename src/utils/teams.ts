@@ -54,7 +54,6 @@ export const Team = t.type({
         name: t.string,
         repository: t.type({
           nodeId: t.string,
-          owner: t.string,
         }),
       })
     ),
@@ -72,7 +71,7 @@ const queryTp = t.type({
 });
 
 type QueryTp = t.TypeOf<typeof queryTp>;
-
+const logFriend = (msg: string) => <A>(a: A): A => { console.log(msg, JSON.stringify(a)); return a }
 export const getTeams = (
   session: ISession
 ): TE.TaskEither<NegativeTeamsFetchOutcome, ITeam[]> =>
@@ -83,6 +82,7 @@ export const getTeams = (
     ),
     TE.chainEitherK(
       flow(
+        logFriend("from 8base"),
         queryTp.decode,
         E.mapLeft(
           (errors): NegativeTeamsFetchOutcome => ({
