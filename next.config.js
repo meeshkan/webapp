@@ -17,6 +17,8 @@ module.exports = nextSourceMaps({
     SENTRY_DSN: process.env.SENTRY_DSN,
     MEESHKAN_ALTERNATIVE_TOKEN: process.env.MEESHKAN_ALTERNATIVE_TOKEN,
     MEESHKAN_ALTERNATIVE_ID: process.env.MEESHKAN_ALTERNATIVE_ID,
+    INTERCOM_ID: process.env.INTERCOM_ID,
+    INTERCOM_EMAIL: process.env.INTERCOM_EMAIL,
   },
   webpack: (config, { isServer, buildId }) => {
     config.plugins.push(
