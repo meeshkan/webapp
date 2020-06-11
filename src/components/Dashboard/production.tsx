@@ -23,8 +23,8 @@ type ProductionProps = {
 };
 export const newestTestFirst: Ord.Ord<ITTest> = {
   compare: (d0, d1) => newestDateFirst.compare(d0.createdAt, d1.createdAt),
-  equals: (d0, d1) => newestDateFirst.equals(d0.createdAt, d1.createdAt)
-}
+  equals: (d0, d1) => newestDateFirst.equals(d0.createdAt, d1.createdAt),
+};
 
 const Production = ({ tests, teamName, projectName }: ProductionProps) => {
   const { colorMode } = useColorMode();
@@ -35,19 +35,19 @@ const Production = ({ tests, teamName, projectName }: ProductionProps) => {
           You haven't done any production tests yet.
         </Text>
       ) : (
-          A.sort(newestTestFirst)(tests).map((test, index) => (
-            <Test
-              key={index}
-              branchName={"master"}
-              commitHash={test.commitHash}
-              date={test.createdAt}
-              status={test.status}
-              testId={test.id}
-              teamName={teamName}
-              projectName={projectName}
-            />
-          ))
-        )}
+        A.sort(newestTestFirst)(tests).map((test, index) => (
+          <Test
+            key={index}
+            branchName={"master"}
+            commitHash={test.commitHash}
+            date={test.createdAt}
+            status={test.status}
+            testId={test.id}
+            teamName={teamName}
+            projectName={projectName}
+          />
+        ))
+      )}
     </Card>
   );
 };

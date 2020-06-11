@@ -24,8 +24,8 @@ type BranchProps = {
 
 export const newestTestFirst: Ord.Ord<ITTest> = {
   compare: (d0, d1) => newestDateFirst.compare(d0.createdAt, d1.createdAt),
-  equals: (d0, d1) => newestDateFirst.equals(d0.createdAt, d1.createdAt)
-}
+  equals: (d0, d1) => newestDateFirst.equals(d0.createdAt, d1.createdAt),
+};
 
 const Branch = ({ tests, teamName, projectName }: BranchProps) => {
   const { colorMode } = useColorMode();

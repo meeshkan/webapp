@@ -7,7 +7,7 @@ import {
   IconButton,
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink
+  BreadcrumbLink,
 } from "@chakra-ui/core";
 import Project from "../molecules/project";
 import Link from "next/link";
@@ -52,7 +52,12 @@ const Navigation = ({ session }: INavigationProps) => {
               cursor="pointer"
             />
           </Link>
-          <Breadcrumb ml={3} mt={2} addSeparator={true} color={`mode.${colorMode}.text`}>
+          <Breadcrumb
+            ml={3}
+            mt={2}
+            addSeparator={true}
+            color={`mode.${colorMode}.text`}
+          >
             {pathForBreadcrumbs.map((crumb, i, pathForBreadcrumbs) => {
               if (pathForBreadcrumbs.length - 1 === i) {
                 return (
