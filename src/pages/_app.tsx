@@ -14,7 +14,7 @@ import { useFetchSession } from "../utils/user";
 import { isLeft, isRight } from "fp-ts/lib/Either";
 import ReactGA from "react-ga";
 import SignIn from "../components/organisms/signIn";
-        
+
 function MyApp({ Component, pageProps }: AppProps) {
   const sessionAndThunk = useFetchSession();
 

@@ -636,38 +636,38 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
               gridArea="2 / 1 / 3 / 2"
               heading={`Team members - ${team.users.items.length}`}
             >
-              {/* <FormControl>
-                  <FormLabel
-                    fontWeight={500}
-                    color={`mode.${colorMode}.title`}
-                    mt={4}
-                  >
-                    Invite link
+              <FormControl>
+                <FormLabel
+                  fontWeight={500}
+                  color={`mode.${colorMode}.title`}
+                  mt={4}
+                >
+                  Invite link
                 </FormLabel>
-                  <Stack isInline>
-                    <Input
-                      value={team.inviteLink}
-                      isReadOnly
+                <Stack isInline>
+                  <Input
+                    value={team.inviteLink}
+                    isReadOnly
+                    size="sm"
+                    rounded="sm"
+                    borderColor={`mode.${colorMode}.icon`}
+                    color={`mode.${colorMode}.text`}
+                  />
+                  <LightMode>
+                    <Button
+                      onClick={onCopy}
+                      ml={2}
                       size="sm"
+                      px={4}
                       rounded="sm"
-                      borderColor={`mode.${colorMode}.icon`}
-                      color={`mode.${colorMode}.text`}
-                    />
-                    <LightMode>
-                      <Button
-                        onClick={onCopy}
-                        ml={2}
-                        size="sm"
-                        px={4}
-                        rounded="sm"
-                        fontWeight={900}
-                        variantColor="blue"
-                      >
-                        {hasCopied ? "Copied" : "Copy"}
-                      </Button>
-                    </LightMode>
-                  </Stack>
-                </FormControl> */}
+                      fontWeight={900}
+                      variantColor="blue"
+                    >
+                      {hasCopied ? "Copied" : "Copy"}
+                    </Button>
+                  </LightMode>
+                </Stack>
+              </FormControl>
               {team.users.items.map((user, index) => (
                 <Stack
                   key={index}
