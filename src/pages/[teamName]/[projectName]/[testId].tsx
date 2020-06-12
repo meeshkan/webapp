@@ -217,8 +217,8 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                 <LogItem
                   key={index}
                   success={item.success}
-                  path={item.path}
-                  method={item.method}
+                  path={item.exchange[0].meta.path}
+                  method={item.exchange[0].request.method}
                 />
               ))}
             </Card>
@@ -249,10 +249,8 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                   failures.map((item, index) => (
                     <FailureMessage
                       key={index}
-                      method={item.method}
-                      path={item.path}
-                      headers={item.headers}
-                      query={item.query}
+                      error_message={item.error_message}
+                      exchange={item.exchange[0]}
                     />
                   ))
                 ) : (

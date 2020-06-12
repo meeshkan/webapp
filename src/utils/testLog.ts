@@ -5,91 +5,39 @@ import { pipe } from "fp-ts/lib/pipeable";
 
 // uses httptypes
 
+const exchangeType = t.type({
+  meta: t.type({
+    path: t.string,
+  }),
+  request: t.type({
+    method: t.string,
+    headers: t.record(t.string, t.union([t.array(t.string), t.string])),
+    query: t.record(t.string, t.union([t.array(t.string), t.string])),
+  }),
+});
+
+export type ExchangeType = t.TypeOf<typeof exchangeType>;
+
 const v1 = t.type({
   commands: t.array(
     t.type({
       success: t.boolean,
-      exchange: t.array(
-        t.type({
-          meta: t.type({
-            path: t.string,
-          }),
-          request: t.type({
-            method: t.string,
-            headers: t.record(t.string, t.union([t.array(t.string), t.string])),
-            query: t.record(t.string, t.union([t.array(t.string), t.string])),
-          }),
-        })
-      ),
+      error_message: t.string,
+      exchange: t.array(exchangeType),
     })
   ),
 });
 
-const v0 = t.type({
-  commands: t.array(
-    t.intersection([
-      t.type({
-        success: t.boolean,
-        path: t.string,
-        method: t.string,
-      }),
-      t.partial({ headers: t.string, query: t.string }),
-    ])
-  ),
-});
-type V0 = t.TypeOf<typeof v0>;
 // for now, our UI expects the format of v0
 // this may change
-type Noramlized = t.TypeOf<typeof v0>;
-
-// fails silently
-const handle_0_0_0 = (i: any): Noramlized =>
-  pipe(
-    v0.decode(i),
-    E.mapLeft((e) => console.log(PathReporter.report(E.left(e)))),
-    E.getOrElse(() => ({ commands: [] }))
-  );
+type Noramlized = t.TypeOf<typeof v1>;
 
 // fails silently
 const handle_0_0_1 = (i: any): Noramlized =>
   pipe(
     v1.decode(i),
-    E.chain((i) =>
-      E.right({
-        commands: i.commands
-          .filter((c) => c.exchange.length > 0)
-          .map((command) => ({
-            success: command.success,
-            path: command.exchange[0].meta.path,
-            method: command.exchange[0].request.method.toUpperCase(),
-            ...(Object.keys(command.exchange[0].request.headers).length > 0
-              ? {
-                  headers: JSON.stringify(
-                    command.exchange[0].request.headers,
-                    null,
-                    2
-                  ),
-                }
-              : {}),
-            ...(Object.keys(command.exchange[0].request.query).length > 0
-              ? {
-                  query: JSON.stringify(
-                    command.exchange[0].request.query,
-                    null,
-                    2
-                  ),
-                }
-              : {}),
-          })),
-      })
-    ),
     E.mapLeft((e) => console.log(PathReporter.report(E.left(e)))),
     E.getOrElse(() => ({ commands: [] }))
   );
 
-export const versionTriage = (i: any): any =>
-  i.version === "0.0.0"
-    ? handle_0_0_0(i)
-    : i.version === "0.0.1"
-    ? handle_0_0_1(i)
-    : i;
+export const versionTriage = (i: any): Noramlized => handle_0_0_1(i);
