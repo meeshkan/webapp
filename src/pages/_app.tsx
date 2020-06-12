@@ -14,6 +14,7 @@ import { useFetchSession } from "../utils/user";
 import { isLeft, isRight } from "fp-ts/lib/Either";
 import ReactGA from "react-ga";
 import SignIn from "../components/organisms/signIn";
+import { loadIntercom } from "intercom-next";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const sessionAndThunk = useFetchSession();
@@ -22,6 +23,12 @@ function MyApp({ Component, pageProps }: AppProps) {
     ReactGA.initialize("UA-107981669-10");
     ReactGA.pageview(window.location.pathname + window.location.search);
   }
+
+  loadIntercom({
+    appId: process.env.INTERCOM_ID,
+    email: process.env.INTERCOM_EMAIL,
+  });
+
   return (
     <>
       <Head>
