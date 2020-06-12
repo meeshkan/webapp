@@ -24,6 +24,7 @@ import FailureMessage from "../../../components/molecules/failureMessage";
 import LogItem from "../../../components/molecules/logItem";
 import * as _E from "../../../fp-ts/Either";
 import { LensTaskEither, lensTaskEitherHead } from "../../../monocle-ts";
+import { versionTriage } from "../../../utils/testLog";
 import { withSession } from "../../../pages/api/session";
 import {
   defaultGQLErrorHandler,
@@ -199,7 +200,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
       pipe(
         {
           colorMode: useColorMode().colorMode,
-          logs: JSON.parse(log),
+          logs: versionTriage(JSON.parse(log)),
         },
         (p) => ({
           ...p,
