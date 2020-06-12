@@ -247,7 +247,11 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
               <Accordion w="full" defaultIndex={[0]} allowMultiple>
                 {failures.length > 0 ? (
                   failures.map((item, index) => (
-                    <FailureMessage key={index} exchange={item.exchange[0]} />
+                    <FailureMessage
+                      key={index}
+                      error_message={item.error_message}
+                      exchange={item.exchange[0]}
+                    />
                   ))
                 ) : (
                   <Text color={`mode.${colorMode}.text`}>

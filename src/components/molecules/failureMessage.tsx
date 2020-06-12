@@ -48,19 +48,23 @@ const FailureMessage = ({ exchange, error_message }: FailureProps) => {
         <AccordionIcon />
       </AccordionHeader>
       <AccordionPanel py={4}>
-        {exchange.request.headers && (
-          <Text mb={2} color={`mode.${colorMode}.text`}>
-            {exchange.request.headers}
-          </Text>
-        )}
-        {exchange.request.query && (
-          <>
+        {exchange.request.headers &&
+          Object.keys(exchange.request.headers).length > 0 && (
             <Text mb={2} color={`mode.${colorMode}.text`}>
-              This bug was found while issuing the following command:
+              {JSON.stringify(exchange.request.headers)}
             </Text>
-            <CodeBlock className="bash">{exchange.request.query}</CodeBlock>
-          </>
-        )}
+          )}
+        {exchange.request.query &&
+          Object.keys(exchange.request.query).length > 0 && (
+            <>
+              <Text mb={2} color={`mode.${colorMode}.text`}>
+                This bug was found while issuing the following command:
+              </Text>
+              <CodeBlock className="bash">
+                {JSON.stringify(exchange.request.query)}
+              </CodeBlock>
+            </>
+          )}
       </AccordionPanel>
     </AccordionItem>
   );
