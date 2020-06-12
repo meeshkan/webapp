@@ -61,7 +61,7 @@ const handle_0_0_1 = (i: any): Noramlized =>
           .map((command) => ({
             success: command.success,
             path: command.exchange[0].meta.path,
-            method: command.exchange[0].request.method,
+            method: command.exchange[0].request.method.toUpperCase(),
             headers: JSON.stringify(
               command.exchange[0].request.headers,
               null,
