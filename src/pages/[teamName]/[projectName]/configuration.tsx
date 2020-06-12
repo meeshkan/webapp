@@ -22,6 +22,7 @@ import {
   CloseButton,
 } from "@chakra-ui/core";
 import * as E from "fp-ts/lib/Either";
+import * as _RTE from "../../../fp-ts/ReaderTaskEither";
 import { constant, constNull, constVoid, flow } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/pipeable";
@@ -199,35 +200,22 @@ export const getServerSideProps = ({
   props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, IConfigurationProps>;
 }> =>
   pipe(
-    confirmOrCreateUser("id", userType),
-    RTE.chain(({ id }) =>
-      flow(
-        getConfiguration(teamName, projectName),
-        TE.chain((configuration) => TE.right({ configuration, id }))
-      )
-    ),
-    RTE.chain((p) =>
-      pipe(
-        getSlackOAuthState<NegativeConfigurationFetchOutcome>(
-          teamName,
-          projectName
-        ),
-        RTE.fromReaderEither,
-        RTE.chain((slackOauthState) => RTE.right({ slackOauthState, ...p }))
-      )
-    ),
-    RTE.chain((p) => (session) =>
+    _RTE.seq3([
+      confirmOrCreateUser("id", userType),
+      getConfiguration(teamName, projectName),
+      RTE.fromReaderEither(getSlackOAuthState(teamName, projectName)),
+    ]),
+    RTE.chain(([{ id }, configuration, slackOauthState]) => (session) =>
       TE.right({
-        ...p,
         session,
+        id,
+        configuration,
+        slackOauthState,
         teamName,
         projectName,
       })
     ),
-    withSession<NegativeConfigurationFetchOutcome, IConfigurationProps>(
-      req,
-      "configuration.tsx getServerSideProps"
-    )
+    withSession(req, "configuration.tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
 
 const updateConfigurationVariables = t.type({

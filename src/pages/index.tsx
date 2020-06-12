@@ -36,6 +36,7 @@ import ReactGA from "react-ga";
 import Card from "../components/molecules/card";
 import { withError } from "../components/molecules/error";
 import * as _E from "../fp-ts/Either";
+import * as _RTE from "../fp-ts/ReaderTaskEither";
 import {
   GET_SERVER_SIDE_PROPS_ERROR,
   UNDEFINED_ERROR,
@@ -149,21 +150,14 @@ export const getServerSideProps = ({
   props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>;
 }> =>
   pipe(
-    confirmOrCreateUser("id", userType),
-    RTE.chain((p) =>
-      pipe(
-        getTeams,
-        RTE.chain((teams) => RTE.right({ teams, ...p }))
-      )
+    _RTE.seq3([
+      confirmOrCreateUser("id", userType),
+      getTeams,
+      RTE.fromReaderEither(getGHOAuthState),
+    ]),
+    RTE.chain(([{ id }, teams, ghOauthState]) => (session) =>
+      TE.right({ session, id, teams, ghOauthState })
     ),
-    RTE.chain((p) =>
-      pipe(
-        getGHOAuthState,
-        RTE.fromReaderEither,
-        RTE.chain((ghOauthState) => RTE.right({ ghOauthState, ...p }))
-      )
-    ),
-    RTE.chain((p) => (session) => TE.right({ session, ...p })),
     withSession(req, "index.tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
 

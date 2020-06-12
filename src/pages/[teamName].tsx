@@ -47,6 +47,7 @@ import * as O from "fp-ts/lib/Option";
 import * as Ord from "fp-ts/lib/Ord";
 import * as NEA from "fp-ts/lib/ReadonlyNonEmptyArray";
 import * as _E from "../fp-ts/Either";
+import * as _RTE from "../fp-ts/ReaderTaskEither";
 import { NonEmptyArray, groupSort } from "fp-ts/lib/NonEmptyArray";
 import { LensTaskEither, lensTaskEitherHead } from "../monocle-ts";
 import {
@@ -470,26 +471,14 @@ export const getServerSideProps = ({
   props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>;
 }> =>
   pipe(
-    confirmOrCreateUser("id", userType),
-    RTE.chain(({ id }) =>
-      pipe(
-        getTeam(teamName),
-        RTE.chain<
-          ISession,
-          NegativeTeamFetchOutcome,
-          ITeam,
-          { id: string; team: ITeam }
-        >((team) => RTE.right({ team, id }))
-      )
+    _RTE.seq3([
+      confirmOrCreateUser("id", userType),
+      getTeam(teamName),
+      RTE.fromReaderEither(getGHOAuthState),
+    ]),
+    RTE.chain(([{ id }, team, ghOauthState]) => (session) =>
+      TE.right({ session, id, team, ghOauthState })
     ),
-    RTE.chain(({ id, team }) =>
-      pipe(
-        getGHOAuthState,
-        RTE.fromReaderEither,
-        RTE.chain((ghOauthState) => RTE.right({ ghOauthState, team, id }))
-      )
-    ),
-    RTE.chain((p) => (session) => TE.right({ session, ...p })),
     withSession(req, "[teamName].tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
 
