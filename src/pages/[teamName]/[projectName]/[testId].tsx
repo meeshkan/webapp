@@ -217,8 +217,8 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                 <LogItem
                   key={index}
                   success={item.success}
-                  path={item.path}
-                  method={item.method}
+                  path={item.exchange[0].meta.path}
+                  method={item.exchange[0].request.method}
                 />
               ))}
             </Card>
@@ -247,13 +247,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
               <Accordion w="full" defaultIndex={[0]} allowMultiple>
                 {failures.length > 0 ? (
                   failures.map((item, index) => (
-                    <FailureMessage
-                      key={index}
-                      method={item.method}
-                      path={item.path}
-                      headers={item.headers}
-                      query={item.query}
-                    />
+                    <FailureMessage key={index} exchange={item.exchange[0]} />
                   ))
                 ) : (
                   <Text color={`mode.${colorMode}.text`}>

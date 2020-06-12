@@ -10,15 +10,14 @@ import {
   Flex,
 } from "@chakra-ui/core";
 import CodeBlock from "../molecules/codeBlock";
+import { ExchangeType } from "../../utils/testLog";
 
 type FailureProps = {
-  method: string;
-  path: string;
-  headers?: string;
-  query?: string;
+  exchange: ExchangeType;
+  error_message: string;
 };
 
-const FailureMessage = ({ method, path, headers, query }: FailureProps) => {
+const FailureMessage = ({ exchange, error_message }: FailureProps) => {
   const { colorMode } = useColorMode();
   return (
     <AccordionItem
@@ -39,27 +38,27 @@ const FailureMessage = ({ method, path, headers, query }: FailureProps) => {
         <Box flex="1" textAlign="left">
           <Flex>
             <Text fontWeight={600} mr={2}>
-              {method.toUpperCase()}
+              {exchange.request.method.toUpperCase()}
             </Text>
             <Text fontWeight={600} color={`mode.${colorMode}.text`}>
-              {path}
+              {exchange.meta.path}
             </Text>
           </Flex>
         </Box>
         <AccordionIcon />
       </AccordionHeader>
       <AccordionPanel py={4}>
-        {headers && (
+        {exchange.request.headers && (
           <Text mb={2} color={`mode.${colorMode}.text`}>
-            {headers}
+            {exchange.request.headers}
           </Text>
         )}
-        {query && (
+        {exchange.request.query && (
           <>
             <Text mb={2} color={`mode.${colorMode}.text`}>
               This bug was found while issuing the following command:
             </Text>
-            <CodeBlock className="bash">{query}</CodeBlock>
+            <CodeBlock className="bash">{exchange.request.query}</CodeBlock>
           </>
         )}
       </AccordionPanel>
