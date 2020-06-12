@@ -14,7 +14,6 @@ import { useFetchSession } from "../utils/user";
 import { isLeft, isRight } from "fp-ts/lib/Either";
 import ReactGA from "react-ga";
 import SignIn from "../components/organisms/signIn";
-import { loadIntercom } from "intercom-next";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const sessionAndThunk = useFetchSession();
@@ -23,11 +22,6 @@ function MyApp({ Component, pageProps }: AppProps) {
     ReactGA.initialize("UA-107981669-10");
     ReactGA.pageview(window.location.pathname + window.location.search);
   }
-
-  loadIntercom({
-    appId: process.env.INTERCOM_ID,
-    email: process.env.INTERCOM_EMAIL,
-  });
 
   return (
     <>
@@ -45,6 +39,19 @@ function MyApp({ Component, pageProps }: AppProps) {
   gtag('js', new Date());
 
   gtag('config', 'UA-107981669-10');`,
+          }}
+        ></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              isRight(sessionAndThunk[0]) && isRight(sessionAndThunk[0].right)
+                ? `window.intercomSettings = { app_id: "${process.env.INTERCOM_ID}", email: "${sessionAndThunk[0].right.right.user.email}"};`
+                : `window.intercomSettings = { app_id: "${process.env.INTERCOM_ID}"};`,
+          }}
+        ></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/nou4ik17';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();`,
           }}
         ></script>
       </Head>
