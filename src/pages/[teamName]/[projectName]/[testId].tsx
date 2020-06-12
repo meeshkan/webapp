@@ -13,6 +13,7 @@ import * as E from "fp-ts/lib/Either";
 import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
+import * as _RTE from "../../../fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
@@ -166,15 +167,12 @@ export const getServerSideProps = ({
   props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>;
 }> =>
   pipe(
-    confirmOrCreateUser("id", userType),
-    RTE.chain(({ id }) =>
-      flow(
-        getTest(teamName, projectName, testId),
-        TE.chain((test) => TE.right({ test, id }))
-      )
-    ),
-    RTE.chain(({ id, test }) => (session) =>
-      TE.right<NegativeTestFetchOutcome, ITestProps>({
+    _RTE.seq2([
+      confirmOrCreateUser("id", userType),
+      getTest(teamName, projectName, testId),
+    ]),
+    RTE.chain(([{ id }, test]) => (session) =>
+      TE.right({
         session,
         id,
         test,
@@ -183,10 +181,7 @@ export const getServerSideProps = ({
         projectName,
       })
     ),
-    withSession<NegativeTestFetchOutcome, ITestProps>(
-      req,
-      "configuration.tsx getServerSideProps"
-    )
+    withSession(req, "configuration.tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
 
 const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
