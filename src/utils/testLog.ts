@@ -62,12 +62,24 @@ const handle_0_0_1 = (i: any): Noramlized =>
             success: command.success,
             path: command.exchange[0].meta.path,
             method: command.exchange[0].request.method.toUpperCase(),
-            headers: JSON.stringify(
-              command.exchange[0].request.headers,
-              null,
-              2
-            ),
-            query: JSON.stringify(command.exchange[0].request.query, null, 2),
+            ...(Object.keys(command.exchange[0].request.headers).length > 0
+              ? {
+                  headers: JSON.stringify(
+                    command.exchange[0].request.headers,
+                    null,
+                    2
+                  ),
+                }
+              : {}),
+            ...(Object.keys(command.exchange[0].request.query).length > 0
+              ? {
+                  query: JSON.stringify(
+                    command.exchange[0].request.query,
+                    null,
+                    2
+                  ),
+                }
+              : {}),
           })),
       })
     ),
