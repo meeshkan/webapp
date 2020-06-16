@@ -187,7 +187,7 @@ export const getServerSideProps = ({
 
 const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
   "Could not find this test resource.",
-  ({ test: { log, location, commitHash, status } }) =>
+  ({ test: { log, location, commitHash, status }, teamName, projectName }) =>
     status === "In progress" ? (
       <div>Your tests are currently in progress.</div>
     ) : JSON.parse(log)["build-error"] ? (
@@ -218,7 +218,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                   key={index}
                   success={item.success}
                   path={item.exchange[0].meta.path}
-                  method={item.exchange[0].request.method}
+                  method={item.exchange[0].request.method.toUpperCase()}
                 />
               ))}
             </Card>
@@ -242,9 +242,16 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                       ? "red"
                       : null
                   }
-                >{`${location}@${commitHash.slice(0, 7)}`}</Code>
+                >
+                  {location}@
+                  <Link
+                    href={`https://github.com/${teamName}/${projectName}/commit/${commitHash}`}
+                  >
+                    {commitHash.slice(0, 7)}
+                  </Link>
+                </Code>
               </Heading>
-              <Accordion w="full" defaultIndex={[0]} allowMultiple>
+              <Accordion w="full" defaultIndex={[0, 1]} allowMultiple>
                 {failures.length > 0 ? (
                   failures.map((item, index) => (
                     <FailureMessage
