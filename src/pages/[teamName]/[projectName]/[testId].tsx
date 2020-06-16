@@ -222,7 +222,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                 />
               ))}
             </Card>
-            <Box gridArea="1 / 4 / 4 / 2">
+            <Box gridArea="1 / 4 / 4 / 2" maxH="80vh" overflow="auto">
               <Heading
                 mb={4}
                 color={`mode.${colorMode}.title`}
@@ -251,7 +251,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                   </Link>
                 </Code>
               </Heading>
-              <Accordion w="full" defaultIndex={[0, 1]} allowMultiple>
+              <Accordion w="full" defaultIndex={0} allowMultiple>
                 {failures.length > 0 ? (
                   failures.map((item, index) => (
                     <FailureMessage
