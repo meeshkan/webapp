@@ -8,6 +8,7 @@ import {
   useColorMode,
   Text,
   Flex,
+  Code,
 } from "@chakra-ui/core";
 import CodeBlock from "../molecules/codeBlock";
 import { ExchangeType } from "../../utils/testLog";
@@ -48,22 +49,24 @@ const FailureMessage = ({ exchange, error_message }: FailureProps) => {
         <AccordionIcon />
       </AccordionHeader>
       <AccordionPanel py={4}>
+        {exchange.response.statusCode && (
+          <Text mb={2} color={`mode.${colorMode}.text`}>
+            HTTP status code: {exchange.response.statusCode}
+          </Text>
+        )}
+        {error_message && (
+          <Code fontWeight={700} mb={2} variantColor="cyan">
+            {error_message}
+          </Code>
+        )}
+        {exchange.request.body && (
+          <CodeBlock className="json">{exchange.request.body}</CodeBlock>
+        )}
         {exchange.request.headers &&
           Object.keys(exchange.request.headers).length > 0 && (
             <Text mb={2} color={`mode.${colorMode}.text`}>
               {JSON.stringify(exchange.request.headers)}
             </Text>
-          )}
-        {exchange.request.query &&
-          Object.keys(exchange.request.query).length > 0 && (
-            <>
-              <Text mb={2} color={`mode.${colorMode}.text`}>
-                This bug was found while issuing the following command:
-              </Text>
-              <CodeBlock className="bash">
-                {JSON.stringify(exchange.request.query)}
-              </CodeBlock>
-            </>
           )}
       </AccordionPanel>
     </AccordionItem>

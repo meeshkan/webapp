@@ -8,11 +8,15 @@ import { pipe } from "fp-ts/lib/pipeable";
 const exchangeType = t.type({
   meta: t.type({
     path: t.string,
+    path_params: t.object,
+  }),
+  response: t.type({
+    statusCode: t.Integer,
   }),
   request: t.type({
+    body: t.union([t.string, t.undefined]),
     method: t.string,
     headers: t.record(t.string, t.union([t.array(t.string), t.string])),
-    query: t.record(t.string, t.union([t.array(t.string), t.string])),
   }),
 });
 
