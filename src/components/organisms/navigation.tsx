@@ -42,6 +42,7 @@ const Navigation = ({ session }: INavigationProps) => {
           align="center"
           backgroundColor={`mode.${colorMode}.card`}
           rounded="sm"
+          height="40px"
         >
           <Link href="/">
             <Icon
