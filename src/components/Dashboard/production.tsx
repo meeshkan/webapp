@@ -38,7 +38,7 @@ const Production = ({ tests, teamName, projectName }: ProductionProps) => {
         A.sort(newestTestFirst)(tests).map((test, index) => (
           <Test
             key={index}
-            branchName={"master"}
+            branchName={"default"}
             commitHash={test.commitHash}
             date={test.createdAt}
             status={test.status}
