@@ -45,7 +45,7 @@ const Project = t.type({
   tests: t.type({
     items: t.array(
       t.type({
-        location: t.union([t.literal("master"), t.literal("branch")]),
+        location: t.union([t.literal("default"), t.literal("branch")]),
         status: t.string,
         createdAt: t.string,
         commitHash: t.string,
@@ -168,7 +168,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, IProjectWithTeamName>(
           teamName={projectProps.teamName}
           projectName={projectProps.name}
           tests={projectProps.tests.items.filter(
-            (test) => test.location === "master"
+            (test) => test.location === "default"
           )}
         />
         <Branch
