@@ -12,6 +12,7 @@ const TTest = t.type({
   createdAt: t.string,
   commitHash: t.string,
   id: t.string,
+  location: t.string,
 });
 
 type ITTest = t.TypeOf<typeof TTest>;
@@ -30,7 +31,7 @@ export const newestTestFirst: Ord.Ord<ITTest> = {
 const Branch = ({ tests, teamName, projectName }: BranchProps) => {
   const { colorMode } = useColorMode();
   return (
-    <Card gridArea="1 / 3 / 3 / 4" heading="Branch tests">
+    <Card gridArea="1 / 3 / 3 / 4" heading="Continous tests">
       {!tests.length ? (
         <Text mt={2} color={`mode.${colorMode}.text`}>
           You haven't done any branch tests yet.
@@ -39,13 +40,14 @@ const Branch = ({ tests, teamName, projectName }: BranchProps) => {
         A.sort(newestTestFirst)(tests).map((test, index) => (
           <Test
             key={index}
-            branchName={"branch"}
+            branchName={test.location}
             commitHash={test.commitHash}
             date={test.createdAt}
             status={test.status}
             teamName={teamName}
             testId={test.id}
             projectName={projectName}
+            premium={false}
           />
         ))
       )}

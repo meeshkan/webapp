@@ -3,12 +3,11 @@ import { Grid } from "@chakra-ui/core";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as TE from "fp-ts/lib/TaskEither";
-import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
 import React from "react";
 import Branch from "../../components/Dashboard/branch";
 import Chart from "../../components/Dashboard/chart";
-import Production from "../../components/Dashboard/production";
+import Premium from "../../components/Dashboard/premium";
 import Settings from "../../components/Dashboard/settings";
 import { withError } from "../../components/molecules/error";
 import * as _E from "../../fp-ts/Either";
@@ -45,11 +44,12 @@ const Project = t.type({
   tests: t.type({
     items: t.array(
       t.type({
-        location: t.union([t.literal("default"), t.literal("branch")]),
+        location: t.string,
         status: t.string,
         createdAt: t.string,
         commitHash: t.string,
         id: t.string,
+        testType: t.string,
       })
     ),
   }),
@@ -164,18 +164,18 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, IProjectWithTeamName>(
           repositoryName={projectProps.name}
           configured={projectProps.configuration ? true : false}
         />
-        <Production
+        <Premium
           teamName={projectProps.teamName}
           projectName={projectProps.name}
           tests={projectProps.tests.items.filter(
-            (test) => test.location === "default"
+            (test) => test.testType == "Premium"
           )}
         />
         <Branch
           teamName={projectProps.teamName}
           projectName={projectProps.name}
           tests={projectProps.tests.items.filter(
-            (test) => test.location === "branch"
+            (test) => test.testType == "Standard"
           )}
         />
         <Chart />

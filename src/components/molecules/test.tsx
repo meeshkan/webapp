@@ -1,4 +1,4 @@
-import { Badge, Box, Stack, Text, useColorMode } from "@chakra-ui/core";
+import { Badge, Box, Stack, Text, useColorMode, Icon } from "@chakra-ui/core";
 import dayjs from "dayjs";
 import Link from "next/link";
 import React from "react";
@@ -11,6 +11,7 @@ type TestProps = {
   testId: string;
   teamName: string;
   projectName: string;
+  premium: boolean;
 };
 
 export const Test = ({
@@ -21,6 +22,7 @@ export const Test = ({
   testId,
   teamName,
   projectName,
+  premium,
 }: TestProps) => {
   const { colorMode } = useColorMode();
   return (
@@ -61,6 +63,20 @@ export const Test = ({
           >
             {status}
           </Badge>
+          {premium && (
+            <Badge
+              fontWeight={600}
+              rounded="sm"
+              padding="0px 4px"
+              minH="auto"
+              mb={3}
+              textTransform="none"
+              variantColor="yellow"
+            >
+              <Icon mr={2} name="star" size="10px" />
+              Premium
+            </Badge>
+          )}
         </Stack>
 
         <Text
