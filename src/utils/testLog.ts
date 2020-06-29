@@ -12,11 +12,12 @@ const exchangeType = t.type({
   }),
   response: t.type({
     statusCode: t.Integer,
+    body: t.union([t.string, t.undefined]),
   }),
   request: t.type({
     body: t.union([t.string, t.undefined]),
     method: t.string,
-    headers: t.record(t.string, t.union([t.array(t.string), t.string])),
+    // headers: t.record(t.string, t.union([t.array(t.string), t.string])),
   }),
 });
 
@@ -27,6 +28,8 @@ const v1 = t.type({
     t.type({
       success: t.boolean,
       error_message: t.string,
+      comment: t.union([t.string, t.undefined]),
+      priority: t.union([t.Integer, t.undefined]),
       exchange: t.array(exchangeType),
     })
   ),
