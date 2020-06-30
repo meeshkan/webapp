@@ -8,6 +8,7 @@ import {
   Text,
   useColorMode,
   Link,
+  Icon,
 } from "@chakra-ui/core";
 import * as E from "fp-ts/lib/Either";
 import { flow } from "fp-ts/lib/function";
@@ -58,6 +59,7 @@ const TestT = t.type({
   status: t.string,
   location: t.string,
   log: t.union([t.string, t.null]),
+  testType: t.string,
 });
 
 type ITestT = t.TypeOf<typeof TestT>;
@@ -187,7 +189,11 @@ export const getServerSideProps = ({
 
 const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
   "Could not find this test resource.",
-  ({ test: { log, location, commitHash, status }, teamName, projectName }) =>
+  ({
+    test: { log, location, commitHash, status, testType },
+    teamName,
+    projectName,
+  }) =>
     status === "In progress" ? (
       <div>Your tests are currently in progress.</div>
     ) : JSON.parse(log)["build-error"] ? (
@@ -201,6 +207,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
         {
           colorMode: useColorMode().colorMode,
           logs: versionTriage(JSON.parse(log)),
+          priority: {},
         },
         (p) => ({
           ...p,
@@ -229,27 +236,35 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                 fontWeight={900}
                 fontSize="xl"
               >
-                Test Failures
-                <Code
-                  ml={2}
-                  fontSize="inherit"
-                  variantColor={
-                    status === "In progress"
-                      ? "yellow"
-                      : status === "Passing"
-                      ? "cyan"
-                      : status === "Failed"
-                      ? "red"
-                      : null
-                  }
-                >
-                  {location}@
-                  <Link
-                    href={`https://github.com/${teamName}/${projectName}/commit/${commitHash}`}
+                {failures.length} Test Failure
+                {failures.length === 1 ? null : "s"}
+                {testType === "Premium" ? (
+                  <Code ml={2} fontSize="inherit" variantColor="yellow">
+                    <Icon mr={2} name="star" />
+                    {testType}
+                  </Code>
+                ) : (
+                  <Code
+                    ml={2}
+                    fontSize="inherit"
+                    variantColor={
+                      status === "In progress"
+                        ? "yellow"
+                        : status === "Passing"
+                        ? "cyan"
+                        : status === "Failed"
+                        ? "red"
+                        : null
+                    }
                   >
-                    {commitHash.slice(0, 7)}
-                  </Link>
-                </Code>
+                    {location}@
+                    <Link
+                      href={`https://github.com/${teamName}/${projectName}/commit/${commitHash}`}
+                    >
+                      {commitHash.slice(0, 7)}
+                    </Link>
+                  </Code>
+                )}
               </Heading>
               <Accordion w="full" defaultIndex={0} allowMultiple>
                 {failures.length > 0 ? (
@@ -257,6 +272,8 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                     <FailureMessage
                       key={index}
                       error_message={item.error_message}
+                      priority={item.priority}
+                      comment={item.comment}
                       exchange={item.exchange[0]}
                     />
                   ))

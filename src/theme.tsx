@@ -14,7 +14,7 @@ const customTheme = {
       600: "#52606D",
       700: "#3E4C59",
       800: "#323F4B",
-      900: "#1F2933"
+      900: "#1F2933",
     },
     red: {
       50: "#FCE8EE",
@@ -26,7 +26,7 @@ const customTheme = {
       600: "#B81445",
       700: "#A1123D",
       800: "#8A0F34",
-      900: "#5C0A23"
+      900: "#5C0A23",
     },
     blue: {
       50: "#E9EDFB",
@@ -38,7 +38,7 @@ const customTheme = {
       600: "#1F3BAD",
       700: "#1B3498",
       800: "#172C82",
-      900: "#0F1E57"
+      900: "#0F1E57",
     },
     cyan: {
       50: "#E9FBF8",
@@ -50,7 +50,7 @@ const customTheme = {
       600: "#29A38B",
       700: "#248F79",
       800: "#1F7A68",
-      900: "#145246"
+      900: "#145246",
     },
     mode: {
       light: {
@@ -61,7 +61,7 @@ const customTheme = {
         text: "#3E4C59", // gray.700
         tertiary: "#616E7C", // gray.500
         icon: "#E4E7EB", // gray.100
-        link: "#264AD9" // blue.500
+        link: "#264AD9", // blue.500
       },
       dark: {
         background: "#323F4B", // gray.800
@@ -71,9 +71,9 @@ const customTheme = {
         text: "#CBD2D9", // gray.200
         tertiary: "#7B8794", // gray.400
         icon: "#323F4B", // gray.800
-        link: "#7D92E8" // blue.300
-      }
-    }
+        link: "#7D92E8", // blue.300
+      },
+    },
   },
   icons: {
     ...theme.icons,
@@ -94,7 +94,7 @@ const customTheme = {
           <path d="M144.029 13.464C142.445 13.464 141.245 14.04 140.597 14.928V13.8H136.997V25.8H140.597V19.248C140.597 17.544 141.509 16.776 142.829 16.776C143.981 16.776 144.917 17.472 144.917 18.96V25.8H148.517V18.432C148.517 15.192 146.453 13.464 144.029 13.464Z" />
         </g>
       ),
-      viewBox: "0 0 149 30"
+      viewBox: "0 0 149 30",
     },
     add: {
       path: (
@@ -105,7 +105,7 @@ const customTheme = {
           strokeLinecap="round"
         />
       ),
-      viewBox: "0 0 24 24"
+      viewBox: "0 0 24 24",
     },
     slack: {
       path: (
@@ -115,7 +115,7 @@ const customTheme = {
           fill="currentColor"
         />
       ),
-      viewBox: "0 0 16 16"
+      viewBox: "0 0 16 16",
     },
     info: {
       path: (
@@ -127,7 +127,7 @@ const customTheme = {
           strokeLinejoin="round"
         />
       ),
-      viewBox: "0 0 12 12"
+      viewBox: "0 0 12 12",
     },
     github: {
       path: (
@@ -136,7 +136,7 @@ const customTheme = {
           fill="currentColor"
         />
       ),
-      viewBox: "0 0 16 16"
+      viewBox: "0 0 16 16",
     },
     checkmark: {
       path: (
@@ -149,7 +149,7 @@ const customTheme = {
           fill="none"
         />
       ),
-      viewBox: "0 0 18 16"
+      viewBox: "0 0 18 16",
     },
     xmark: {
       path: (
@@ -162,8 +162,17 @@ const customTheme = {
           fill="none"
         />
       ),
-      viewBox: "0 0 16 16"
-    }
+      viewBox: "0 0 16 16",
+    },
+    star: {
+      path: (
+        <path
+          d="M8.09478 0.928375C8.45471 0.161619 9.54529 0.16162 9.90522 0.928376L11.8635 5.10005C12.0051 5.40163 12.2875 5.6129 12.6168 5.66351L17.0777 6.34914C17.882 6.47275 18.2098 7.45394 17.6413 8.03614L14.3527 11.4042C14.1309 11.6314 14.0302 11.9505 14.0813 12.2638L14.8484 16.9672C14.9828 17.7911 14.1081 18.4073 13.3776 18.0033L9.48392 15.8501C9.1828 15.6836 8.8172 15.6836 8.51608 15.8501L4.62245 18.0033C3.89189 18.4073 3.01718 17.7911 3.15157 16.9672L3.91872 12.2638C3.96983 11.9505 3.86909 11.6314 3.64727 11.4042L0.358694 8.03614C-0.209758 7.45394 0.118038 6.47275 0.922286 6.34914L5.38318 5.66351C5.71247 5.6129 5.99492 5.40163 6.13649 5.10005L8.09478 0.928375Z"
+          fill="currentColor"
+        />
+      ),
+      viewBox: "0 0 20 20",
+    },
   },
   opacity: {
     "0": "0",
@@ -171,12 +180,12 @@ const customTheme = {
     "40%": "0.4",
     "60%": "0.6",
     "80%": "0.8",
-    "100%": "1"
+    "100%": "1",
   },
   fonts: {
     body: `Inter, sans-serif`,
     heading: `Inter, sans-serif`,
-    mono: "Fira Code, monospace"
+    mono: "Fira Code, monospace",
   },
   fontWeights: {
     ...theme.fontWeights,
@@ -188,8 +197,8 @@ const customTheme = {
     600: 600,
     700: 700,
     800: 800,
-    900: 900
-  }
+    900: 900,
+  },
 };
 
 export default customTheme;

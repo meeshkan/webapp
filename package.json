@@ -42,6 +42,7 @@
     "react-dom": "16.13.1",
     "react-ga": "^2.7.0",
     "react-hook-form": "^5.7.2",
+    "react-markdown": "^4.3.1",
     "snyk": "^1.327.0",
     "ts-node": "^8.10.1",
     "unmock": "^0.3.18",

@@ -28,6 +28,7 @@ export const GET_PROJECT_QUERY = `query(
                 status
                 createdAt
                 commitHash
+                testType
               }
             }
           }

@@ -1,6 +1,7 @@
 import React from "react";
-import darkTheme from "prism-react-renderer/themes/dracula";
+import darkTheme from "../molecules/codeTheme";
 import Highlight, { defaultProps } from "prism-react-renderer";
+import { useColorMode } from "@chakra-ui/core";
 
 const highlightStyle = {
   padding: 16,
@@ -8,22 +9,29 @@ const highlightStyle = {
   overflow: "auto",
   lineHeight: "1.5",
   fontFamily: "Menlo,monospace",
+  maxHeight: 300,
+  borderRadius: "4px",
 };
 
 const CodeBlock = ({ className, children }) => {
-  const theme = darkTheme;
   const language = className && className.replace(/language-/, "");
+  const { colorMode } = useColorMode();
   return (
     <Highlight
       {...defaultProps}
-      theme={theme}
+      // @ts-expect-error
+      theme={darkTheme}
       code={children.trim()}
       language={language}
     >
       {({ className, style, tokens, getLineProps, getTokenProps }) => (
         <pre
           className={className}
-          style={{ ...style, borderRadius: "2px", ...highlightStyle }}
+          style={{
+            ...style,
+            ...highlightStyle,
+            border: `1px solid mode.${colorMode}.icon`,
+          }}
         >
           {tokens.map((line, i) => (
             <div key={i} {...getLineProps({ line, key: i })}>

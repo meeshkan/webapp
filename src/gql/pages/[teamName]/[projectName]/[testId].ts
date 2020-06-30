@@ -31,6 +31,7 @@ export const GET_TEST_QUERY = `query(
                 status
                 location
                 log
+                testType
               }
             }
           }

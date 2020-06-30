@@ -12,11 +12,12 @@ const TTest = t.type({
   createdAt: t.string,
   commitHash: t.string,
   id: t.string,
+  location: t.string,
 });
 
 type ITTest = t.TypeOf<typeof TTest>;
 
-type ProductionProps = {
+type PremiumProps = {
   tests: ITTest[];
   teamName: string;
   projectName: string;
@@ -26,25 +27,26 @@ export const newestTestFirst: Ord.Ord<ITTest> = {
   equals: (d0, d1) => newestDateFirst.equals(d0.createdAt, d1.createdAt),
 };
 
-const Production = ({ tests, teamName, projectName }: ProductionProps) => {
+const Premium = ({ tests, teamName, projectName }: PremiumProps) => {
   const { colorMode } = useColorMode();
   return (
-    <Card gridArea="1 / 2 / 2 / 3" heading="Production tests" minH="35vh">
+    <Card gridArea="1 / 2 / 2 / 3" heading="Premium tests" minH="35vh">
       {!tests.length ? (
         <Text mt={2} color={`mode.${colorMode}.text`}>
-          You haven't done any production tests yet.
+          You don't have any premium tests completed yet.
         </Text>
       ) : (
         A.sort(newestTestFirst)(tests).map((test, index) => (
           <Test
             key={index}
-            branchName={"default"}
+            branchName={test.location}
             commitHash={test.commitHash}
             date={test.createdAt}
             status={test.status}
             testId={test.id}
             teamName={teamName}
             projectName={projectName}
+            premium={true}
           />
         ))
       )}
@@ -52,4 +54,4 @@ const Production = ({ tests, teamName, projectName }: ProductionProps) => {
   );
 };
 
-export default Production;
+export default Premium;
