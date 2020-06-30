@@ -19,6 +19,7 @@ const CodeBlock = ({ className, children }) => {
   return (
     <Highlight
       {...defaultProps}
+      // @ts-expect-error
       theme={darkTheme}
       code={children.trim()}
       language={language}
