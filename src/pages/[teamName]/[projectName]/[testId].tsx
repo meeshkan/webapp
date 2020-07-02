@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import {
   Accordion,
@@ -18,7 +19,6 @@ import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as _RTE from "../../../fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
-import React from "react";
 import Card from "../../../components/molecules/card";
 import { withError } from "../../../components/molecules/error";
 import FailureMessage from "../../../components/molecules/failureMessage";
@@ -208,13 +208,28 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
         {
           colorMode: useColorMode().colorMode,
           logs: versionTriage(JSON.parse(log)),
-          priority: {},
+          index: useState(1),
         },
         (p) => ({
           ...p,
           failures: p.logs.commands.filter((a) => a.success === false),
         }),
-        ({ colorMode, logs, failures }) => (
+        (p) => ({
+          ...p,
+          restFailures: p.failures.filter(
+            (b) => b.exchange[0].meta.apiType === "rest"
+          ),
+          graphqlFailures: p.failures.filter(
+            (b) => b.exchange[0].meta.apiType === "graphql"
+          ),
+        }),
+        ({
+          colorMode,
+          logs,
+          restFailures,
+          graphqlFailures,
+          index: [index, setIndex],
+        }) => (
           <Grid
             templateColumns="repeat(3, 1fr)"
             templateRows="repeat(2, minmax(204px, 45%))"
@@ -233,15 +248,21 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
 
             <Box gridArea="1 / 4 / 4 / 2" maxH="80vh" overflow="auto">
               <Flex justify="space-between">
-                <SegmentedControl options={["RESTful", "GraphQL"]} />
+                <SegmentedControl
+                  currentIndex={index}
+                  options={["RESTful", "GraphQL"]}
+                  // onValueChange={}
+                />
                 <Heading
                   mb={4}
                   color={`mode.${colorMode}.title`}
                   fontWeight={900}
                   fontSize="xl"
                 >
-                  {failures.length} Test Failure
-                  {failures.length === 1 ? null : "s"}
+                  {restFailures.length + graphqlFailures.length} Test Failure
+                  {restFailures.length + graphqlFailures.length === 1
+                    ? null
+                    : "s"}
                   {testType === "Premium" ? (
                     <Code ml={2} fontSize="inherit" variantColor="yellow">
                       <Icon mr={2} name="star" />
@@ -271,22 +292,40 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                   )}
                 </Heading>
               </Flex>
-              <Accordion w="full" defaultIndex={0} allowMultiple>
-                {failures.length > 0 ? (
-                  failures.map((item, index) => (
-                    <FailureMessage
-                      key={index}
-                      error_message={item.error_message}
-                      priority={item.priority}
-                      comment={item.comment}
-                      exchange={item.exchange[0]}
-                    />
-                  ))
-                ) : (
-                  <Text color={`mode.${colorMode}.text`}>
-                    No bugs found here!
-                  </Text>
-                )}
+              <Accordion w="full" defaultIndex={[0]}>
+                {index === 0 ? (
+                  restFailures.length > 0 ? (
+                    restFailures.map((item, index) => (
+                      <FailureMessage
+                        key={index}
+                        error_message={item.error_message}
+                        priority={item.priority}
+                        comment={item.comment}
+                        exchange={item.exchange[0]}
+                      />
+                    ))
+                  ) : (
+                    <Text color={`mode.${colorMode}.text`}>
+                      No bugs found here!
+                    </Text>
+                  )
+                ) : index === 1 ? (
+                  graphqlFailures.length > 0 ? (
+                    graphqlFailures.map((item, index) => (
+                      <FailureMessage
+                        key={index}
+                        error_message={item.error_message}
+                        priority={item.priority}
+                        comment={item.comment}
+                        exchange={item.exchange[0]}
+                      />
+                    ))
+                  ) : (
+                    <Text color={`mode.${colorMode}.text`}>
+                      No bugs found here!
+                    </Text>
+                  )
+                ) : null}
               </Accordion>
             </Box>
           </Grid>

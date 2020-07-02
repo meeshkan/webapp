@@ -8,7 +8,6 @@ const MotionBox = motion.custom(Box);
 type Props = Partial<BoxProps> &
   Partial<{
     // Optional props
-    mode: boolean;
     setCurrentBy: boolean;
     currentIndex: number;
     currentOption: string;
@@ -23,7 +22,6 @@ export function SegmentedControl(props: Props) {
   // Splitting up the props
   const {
     width,
-    mode,
     setCurrentBy,
     currentIndex,
     options,
@@ -60,7 +58,7 @@ export function SegmentedControl(props: Props) {
   };
 
   // Handle Tap event
-  const handleTap = (newIndex) => {
+  const handleClick = (newIndex) => {
     changeSelectedIndex(newIndex);
   };
 
@@ -91,12 +89,11 @@ export function SegmentedControl(props: Props) {
       <MotionBox
         // name="Selection Indicator"
         width={widthSegment - 4}
-        ml="2px"
+        mx="2px"
         height={28}
         backgroundColor={colorMode === "light" ? "white" : "gray.800"}
         borderRadius="sm"
         mt="2px"
-        left={2}
         shadow="0px 3px 8px rgba(0,0,0,.12), 0px 3px 1px rgba(0,0,0,.04)"
         animate={selectionIndicator}
         initial={{ x: index * widthSegment + index * 1 }}
@@ -109,7 +106,7 @@ export function SegmentedControl(props: Props) {
             key={`${props.id}_option_${i}`}
             width={widthSegment}
             height="100%"
-            backgroundColor=""
+            backgroundColor="transparent"
             left={i * widthSegment + i * 1}
             color={`mode.${colorMode}.title`}
             fontWeight={i === index ? 900 : 700}
@@ -118,7 +115,7 @@ export function SegmentedControl(props: Props) {
             justifyContent="center"
             alignItems="center"
             cursor="pointer"
-            onClick={() => handleTap(i)}
+            onClick={() => handleClick(i)}
           >
             {option}
           </MotionBox>
@@ -129,9 +126,8 @@ export function SegmentedControl(props: Props) {
 }
 
 SegmentedControl.defaultProps = {
-  width: 204,
+  width: 256,
   height: 32,
-  mode: true,
   setCurrentBy: true,
   currentIndex: 0,
   currentOption: "RESTful",
