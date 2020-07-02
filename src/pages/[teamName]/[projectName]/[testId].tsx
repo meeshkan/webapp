@@ -9,6 +9,7 @@ import {
   useColorMode,
   Link,
   Icon,
+  Flex,
 } from "@chakra-ui/core";
 import * as E from "fp-ts/lib/Either";
 import { flow } from "fp-ts/lib/function";
@@ -16,7 +17,6 @@ import { pipe } from "fp-ts/lib/pipeable";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as _RTE from "../../../fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
-import { GraphQLClient } from "graphql-request";
 import * as t from "io-ts";
 import React from "react";
 import Card from "../../../components/molecules/card";
@@ -43,6 +43,7 @@ import { confirmOrCreateUser } from "../../../utils/user";
 import { GET_TEST_QUERY } from "../../../gql/pages/[teamName]/[projectName]/[testId]";
 import { eightBaseClient } from "../../../utils/graphql";
 import Error from "../../../components/molecules/error";
+import { SegmentedControl } from "../../../components/molecules/switch";
 
 type NegativeTestFetchOutcome =
   | NOT_LOGGED_IN
@@ -229,43 +230,47 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                 />
               ))}
             </Card>
+
             <Box gridArea="1 / 4 / 4 / 2" maxH="80vh" overflow="auto">
-              <Heading
-                mb={4}
-                color={`mode.${colorMode}.title`}
-                fontWeight={900}
-                fontSize="xl"
-              >
-                {failures.length} Test Failure
-                {failures.length === 1 ? null : "s"}
-                {testType === "Premium" ? (
-                  <Code ml={2} fontSize="inherit" variantColor="yellow">
-                    <Icon mr={2} name="star" />
-                    {testType}
-                  </Code>
-                ) : (
-                  <Code
-                    ml={2}
-                    fontSize="inherit"
-                    variantColor={
-                      status === "In progress"
-                        ? "yellow"
-                        : status === "Passing"
-                        ? "cyan"
-                        : status === "Failed"
-                        ? "red"
-                        : null
-                    }
-                  >
-                    {location}@
-                    <Link
-                      href={`https://github.com/${teamName}/${projectName}/commit/${commitHash}`}
+              <Flex justify="space-between">
+                <SegmentedControl options={["RESTful", "GraphQL"]} />
+                <Heading
+                  mb={4}
+                  color={`mode.${colorMode}.title`}
+                  fontWeight={900}
+                  fontSize="xl"
+                >
+                  {failures.length} Test Failure
+                  {failures.length === 1 ? null : "s"}
+                  {testType === "Premium" ? (
+                    <Code ml={2} fontSize="inherit" variantColor="yellow">
+                      <Icon mr={2} name="star" />
+                      {testType}
+                    </Code>
+                  ) : (
+                    <Code
+                      ml={2}
+                      fontSize="inherit"
+                      variantColor={
+                        status === "In progress"
+                          ? "yellow"
+                          : status === "Passing"
+                          ? "cyan"
+                          : status === "Failed"
+                          ? "red"
+                          : null
+                      }
                     >
-                      {commitHash.slice(0, 7)}
-                    </Link>
-                  </Code>
-                )}
-              </Heading>
+                      {location}@
+                      <Link
+                        href={`https://github.com/${teamName}/${projectName}/commit/${commitHash}`}
+                      >
+                        {commitHash.slice(0, 7)}
+                      </Link>
+                    </Code>
+                  )}
+                </Heading>
+              </Flex>
               <Accordion w="full" defaultIndex={0} allowMultiple>
                 {failures.length > 0 ? (
                   failures.map((item, index) => (
