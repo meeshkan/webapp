@@ -10,9 +10,12 @@ const exchangeType = t.type({
     path: t.string,
     path_params: t.object,
   }),
-  response: t.intersection([t.type({
-    statusCode: t.Integer,
-  }), t.partial({ body: t.string })]),
+  response: t.intersection([
+    t.type({
+      statusCode: t.Integer,
+    }),
+    t.partial({ body: t.string }),
+  ]),
   request: t.type({
     body: t.union([t.string, t.undefined]),
     method: t.string,
@@ -25,15 +28,16 @@ export type ExchangeType = t.TypeOf<typeof exchangeType>;
 const v1 = t.type({
   commands: t.array(
     t.intersection([
-    t.type({
-      success: t.boolean,
-      error_message: t.string,
-      exchange: t.array(exchangeType),
-    }),
-    t.partial({
-      comment: t.string,
-      priority: t.Integer
-    })])
+      t.type({
+        success: t.boolean,
+        exchange: t.array(exchangeType),
+      }),
+      t.partial({
+        comment: t.string,
+        priority: t.Integer,
+        error_message: t.string,
+      }),
+    ])
   ),
 });
 
