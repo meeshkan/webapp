@@ -212,6 +212,12 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
         },
         (p) => ({
           ...p,
+          restLogs: p.logs.commands.filter(
+            (a) => a.exchange[0].meta.apiType === "rest"
+          ),
+          graphqlLogs: p.logs.commands.filter(
+            (a) => a.exchange[0].meta.apiType === "graphql"
+          ),
           failures: p.logs.commands.filter((a) => a.success === false),
         }),
         (p) => ({
@@ -228,6 +234,8 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
           logs,
           restFailures,
           graphqlFailures,
+          graphqlLogs,
+          restLogs,
           index: [index, setIndex],
         }) => (
           <Grid
@@ -236,14 +244,27 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
             gap={8}
           >
             <Card gridArea="1 / 2 / 4 / 1" heading="Tests">
-              {logs.commands.map((item, index) => (
-                <LogItem
-                  key={index}
-                  success={item.success}
-                  path={item.exchange[0].meta.path}
-                  method={item.exchange[0].request.method.toUpperCase()}
-                />
-              ))}
+              {index === 0 ? (
+                restLogs.map((item, index) => (
+                  <LogItem
+                    key={index}
+                    success={item.success}
+                    path={item.exchange[0].meta.path}
+                    method={item.exchange[0].request.method.toUpperCase()}
+                  />
+                ))
+              ) : index === 1 ? (
+                graphqlLogs.map((item, index) => (
+                  <LogItem
+                    key={index}
+                    success={item.success}
+                    path={item.exchange[0].meta.path}
+                    method={item.exchange[0].request.method.toUpperCase()}
+                  />
+                ))
+              ) : (
+                <div>No endpoints were picked up during this test.</div>
+              )}
             </Card>
 
             <Box gridArea="1 / 4 / 4 / 2" maxH="80vh" overflow="auto">
@@ -251,7 +272,8 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                 <SegmentedControl
                   currentIndex={index}
                   options={["RESTful", "GraphQL"]}
-                  // onValueChange={}
+                  index={index}
+                  setIndex={setIndex}
                 />
                 <Heading
                   mb={4}

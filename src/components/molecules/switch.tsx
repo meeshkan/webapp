@@ -15,6 +15,8 @@ type Props = Partial<BoxProps> &
   }> & {
     // Required props
     options: string[];
+    index: number;
+    setIndex: React.Dispatch<React.SetStateAction<number>>;
   };
 
 // passing the `Props` type alias to the component
@@ -27,6 +29,8 @@ export function SegmentedControl(props: Props) {
     options,
     currentOption,
     onValueChange,
+    index,
+    setIndex,
   } = props;
 
   // The initial selected index is set by prop.currentIndex or prop.currentOption
@@ -37,7 +41,6 @@ export function SegmentedControl(props: Props) {
   } else {
     initialIndex = options.indexOf(currentOption);
   }
-  const [index, setIndex] = React.useState(initialIndex); // The ‘index’ state
 
   // An AnimationControls object for the Selection Indicator
   const selectionIndicator = useAnimation();
