@@ -231,7 +231,6 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
         }),
         ({
           colorMode,
-          logs,
           restFailures,
           graphqlFailures,
           graphqlLogs,

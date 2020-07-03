@@ -111,7 +111,17 @@ const FailureMessage = ({
             >
               Request body that caused this error:
             </Heading>
-            <CodeBlock className="json">{exchange.request.body}</CodeBlock>
+            <CodeBlock
+              className={
+                exchange.meta.apiType === "rest"
+                  ? "json"
+                  : exchange.meta.apiType === "graphql"
+                  ? "graphql"
+                  : "json"
+              }
+            >
+              {exchange.request.body}
+            </CodeBlock>
           </>
         )}
         {comment && (
