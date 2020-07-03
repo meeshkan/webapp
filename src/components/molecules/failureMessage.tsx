@@ -21,6 +21,7 @@ type FailureProps = {
   error_message: string;
   priority: number;
   comment: string;
+  method: string;
 };
 
 const FailureMessage = ({
@@ -28,6 +29,7 @@ const FailureMessage = ({
   error_message,
   priority,
   comment,
+  method,
 }: FailureProps) => {
   const { colorMode } = useColorMode();
   const red = { light: "red.500", dark: "red.300" };
@@ -61,7 +63,7 @@ const FailureMessage = ({
         <Box flex="1" textAlign="left">
           <Flex>
             <Text fontWeight={600} mr={2}>
-              {exchange.request.method.toUpperCase()}
+              {method}
             </Text>
             <Text fontWeight={600} color={`mode.${colorMode}.text`}>
               {exchange.meta.path}
@@ -111,7 +113,19 @@ const FailureMessage = ({
             >
               Request body that caused this error:
             </Heading>
-            <CodeBlock className="json">{exchange.request.body}</CodeBlock>
+            <CodeBlock
+              className={
+                exchange.meta.apiType === "rest"
+                  ? "json"
+                  : exchange.meta.apiType === "graphql"
+                  ? "graphql"
+                  : "json"
+              }
+            >
+              {exchange.meta.apiType === "rest"
+                ? exchange.request.body
+                : JSON.parse(exchange.request.body)["query"]}
+            </CodeBlock>
           </>
         )}
         {comment && (
