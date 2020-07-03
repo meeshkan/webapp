@@ -258,7 +258,21 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                     key={index}
                     success={item.success}
                     path={item.exchange[0].meta.path}
-                    method={item.exchange[0].request.method.toUpperCase()}
+                    method={
+                      JSON.parse(item.exchange[0].request.body)[
+                        "query"
+                      ].startsWith("query")
+                        ? "QUERY"
+                        : JSON.parse(item.exchange[0].request.body)[
+                            "query"
+                          ].startsWith("mutation")
+                        ? "MUTATION"
+                        : JSON.parse(item.exchange[0].request.body)[
+                            "query"
+                          ].startsWith("subscription")
+                        ? "SUBSCRIPTION"
+                        : item.exchange[0].request.method.toUpperCase()
+                    }
                   />
                 ))
               ) : (
@@ -323,6 +337,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                         priority={item.priority}
                         comment={item.comment}
                         exchange={item.exchange[0]}
+                        method={item.exchange[0].request.method}
                       />
                     ))
                   ) : (
@@ -339,6 +354,21 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                         priority={item.priority}
                         comment={item.comment}
                         exchange={item.exchange[0]}
+                        method={
+                          JSON.parse(item.exchange[0].request.body)[
+                            "query"
+                          ].startsWith("query")
+                            ? "QUERY"
+                            : JSON.parse(item.exchange[0].request.body)[
+                                "query"
+                              ].startsWith("mutation")
+                            ? "MUTATION"
+                            : JSON.parse(item.exchange[0].request.body)[
+                                "query"
+                              ].startsWith("subscription")
+                            ? "SUBSCRIPTION"
+                            : item.exchange[0].request.method.toUpperCase()
+                        }
                       />
                     ))
                   ) : (
