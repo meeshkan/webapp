@@ -213,7 +213,9 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
         (p) => ({
           ...p,
           restLogs: p.logs.commands.filter(
-            (a) => a.exchange[0].meta.apiType === "rest"
+            (a) =>
+              a.exchange[0].meta.apiType === "rest" ||
+              a.exchange[0].meta.apiType === undefined
           ),
           graphqlLogs: p.logs.commands.filter(
             (a) => a.exchange[0].meta.apiType === "graphql"
@@ -223,7 +225,9 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
         (p) => ({
           ...p,
           restFailures: p.failures.filter(
-            (b) => b.exchange[0].meta.apiType === "rest"
+            (b) =>
+              b.exchange[0].meta.apiType === "rest" ||
+              b.exchange[0].meta.apiType === undefined
           ),
           graphqlFailures: p.failures.filter(
             (b) => b.exchange[0].meta.apiType === "graphql"
@@ -281,7 +285,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
             </Card>
 
             <Box gridArea="1 / 4 / 4 / 2" maxH="80vh" overflow="auto">
-              <Flex justify="space-between">
+              <Flex justify="space-between" wrap="wrap">
                 <SegmentedControl
                   currentIndex={index}
                   options={["RESTful", "GraphQL"]}

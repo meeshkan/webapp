@@ -63,7 +63,7 @@ const FailureMessage = ({
         <Box flex="1" textAlign="left">
           <Flex>
             <Text fontWeight={600} mr={2}>
-              {method}
+              {method.toUpperCase()}
             </Text>
             <Text fontWeight={600} color={`mode.${colorMode}.text`}>
               {exchange.meta.path}
@@ -124,7 +124,9 @@ const FailureMessage = ({
             >
               {exchange.meta.apiType === "rest"
                 ? exchange.request.body
-                : JSON.parse(exchange.request.body)["query"]}
+                : exchange.meta.apiType === "graphql"
+                ? JSON.parse(exchange.request.body)["query"]
+                : exchange.request.body}
             </CodeBlock>
           </>
         )}
