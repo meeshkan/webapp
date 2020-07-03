@@ -122,7 +122,9 @@ const FailureMessage = ({
                   : "json"
               }
             >
-              {exchange.request.body}
+              {exchange.meta.apiType === "rest"
+                ? exchange.request.body
+                : JSON.parse(exchange.request.body)["query"]}
             </CodeBlock>
           </>
         )}
