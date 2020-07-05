@@ -23,7 +23,7 @@ const SignIn = () => {
       p={8}
       backgroundColor={`mode.${colorMode}.card`}
       maxW="750px"
-      rounded="sm"
+      borderRadius="sm"
     >
       <Heading
         as="h2"
@@ -56,11 +56,11 @@ const SignIn = () => {
       <Flex justify="center">
         <LightMode>
           <Button
-            rounded="sm"
+            borderRadius="sm"
             px={4}
             fontWeight={900}
             letterSpacing="wide"
-            variantColor="red"
+            colorScheme="red"
             onClick={() => router.push("/api/login")}
           >
             Sign in

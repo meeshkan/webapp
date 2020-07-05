@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, useColorMode, Heading, Icon, Stack, Link } from "@chakra-ui/core";
+import { Box, useColorMode, Heading, Stack, Link } from "@chakra-ui/core";
+import { ArrowForwardIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/router";
 
 type CardProps = {
@@ -46,7 +47,7 @@ const Card = ({
             p={4}
             maxH="80vh"
             minH={minH && minH}
-            rounded="sm"
+            borderRadius="sm"
             gridArea={gridArea}
             overflow="auto"
           >
@@ -77,7 +78,7 @@ const Card = ({
           p={4}
           maxH="80vh"
           minH={minH && minH}
-          rounded="sm"
+          borderRadius="sm"
           gridArea={gridArea}
           overflow="auto"
         >
@@ -91,7 +92,7 @@ const Card = ({
             >
               <a>
                 <Stack
-                  isInline
+                  direction="row"
                   justify="space-between"
                   borderBottom="1px solid"
                   borderColor={`mode.${colorMode}.icon`}
@@ -106,7 +107,7 @@ const Card = ({
                   >
                     {heading}
                   </Heading>
-                  <Icon name="arrow-forward" />
+                  <ArrowForwardIcon />
                 </Stack>
               </a>
             </Link>

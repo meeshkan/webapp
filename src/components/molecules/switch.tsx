@@ -97,7 +97,7 @@ export function SegmentedControl(props: Props) {
         backgroundColor={colorMode === "light" ? "white" : "gray.800"}
         borderRadius="sm"
         mt="2px"
-        shadow="0px 3px 8px rgba(0,0,0,.12), 0px 3px 1px rgba(0,0,0,.04)"
+        boxShadow="0px 3px 8px rgba(0,0,0,.12), 0px 3px 1px rgba(0,0,0,.04)"
         animate={selectionIndicator}
         initial={{ x: index * widthSegment + index * 1 }}
         transition="spring 20 0.3"

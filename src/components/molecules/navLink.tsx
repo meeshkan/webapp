@@ -1,5 +1,5 @@
 import React, { forwardRef, cloneElement } from "react";
-import { PseudoBox, Box, useColorMode } from "@chakra-ui/core";
+import { Box, useColorMode } from "@chakra-ui/core";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -30,7 +30,8 @@ type SideNavLinkProps = {
 export const SideNavLink = forwardRef(
   ({ children, ...props }: SideNavLinkProps, ref) => {
     return (
-      <PseudoBox
+      <Box
+        // @ts-expect-error
         ref={ref}
         mx={-2}
         display="flex"
@@ -41,12 +42,12 @@ export const SideNavLink = forwardRef(
         transition="all 0.2s"
         fontWeight={700}
         outline="none"
-        _focus={{ shadow: "outline", fontWeight: 900 }}
+        _focus={{ boxShadow: "outline", fontWeight: 900 }}
         _notFirst={{ mt: 1 }}
         {...props}
       >
         <Box>{children}</Box>
-      </PseudoBox>
+      </Box>
     );
   }
 );
@@ -73,7 +74,7 @@ export const ItemLink = forwardRef(
             }}
             {...(isActive && {
               bg: `mode.${colorMode}.bg`,
-              rounded: "sm",
+              borderRadius: "sm",
               color: `mode.${colorMode}.titleHover`,
               _hover: {
                 transform: "translateX(2px)",

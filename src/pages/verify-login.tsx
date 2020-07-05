@@ -1,12 +1,6 @@
 import React from "react";
-import {
-  Stack,
-  Heading,
-  Text,
-  Button,
-  Icon,
-  useColorMode,
-} from "@chakra-ui/core";
+import { Stack, Heading, Text, Button, useColorMode } from "@chakra-ui/core";
+import { GithubIcon } from "../theme/icons";
 
 const VerifyLoginPage = () => {
   const { colorMode } = useColorMode();
@@ -14,7 +8,7 @@ const VerifyLoginPage = () => {
     <Stack mt={12} justify="center" align="center">
       <Heading
         as="h1"
-        size="xl"
+        fontSize="xl"
         fontWeight={900}
         color={`mode.${colorMode}.title`}
       >
@@ -34,15 +28,14 @@ const VerifyLoginPage = () => {
       </Text>
       <Button
         as="a"
-        // @ts-ignore
         href=""
-        rounded="sm"
+        borderRadius="sm"
         fontWeight={900}
         px={4}
         mt={10}
-        variantColor="red"
+        colorScheme="red"
       >
-        <Icon name="github" mr={2} />
+        <GithubIcon mr={2} />
         Sign in to GitHub
       </Button>
     </Stack>

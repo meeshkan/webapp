@@ -1,7 +1,7 @@
 import React from "react";
 import {
   AccordionItem,
-  AccordionHeader,
+  AccordionButton,
   Box,
   AccordionIcon,
   AccordionPanel,
@@ -39,11 +39,11 @@ const FailureMessage = ({
     <AccordionItem
       border="none"
       mb={8}
-      rounded="sm"
+      borderRadius="sm"
       color={`mode.${colorMode}.text`}
       backgroundColor={`mode.${colorMode}.card`}
     >
-      <AccordionHeader
+      <AccordionButton
         color={`mode.${colorMode}.title`}
         _hover={{
           backgroundColor: "none",
@@ -57,7 +57,7 @@ const FailureMessage = ({
           borderBottom: "1px solid",
           borderBottomColor: `mode.${colorMode}.icon`,
         }}
-        rounded="sm"
+        borderRadius="sm"
         p={4}
       >
         <Box flex="1" textAlign="left">
@@ -88,7 +88,7 @@ const FailureMessage = ({
           </Flex>
         </Box>
         <AccordionIcon />
-      </AccordionHeader>
+      </AccordionButton>
       <AccordionPanel py={4}>
         <Flex>
           {error_message && (
@@ -97,7 +97,7 @@ const FailureMessage = ({
             </Text>
           )}
           {exchange.response.statusCode && (
-            <Code fontWeight={700} mb={2} fontSize="md" variantColor="gray">
+            <Code fontWeight={700} mb={2} fontSize="md" colorScheme="gray">
               HTTP status code: {exchange.response.statusCode}
             </Code>
           )}

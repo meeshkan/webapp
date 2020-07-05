@@ -23,7 +23,7 @@ const ErrorComponent = ({ errorMessage }: ErrorProps) => {
       h="82.5vh"
       w="100%"
       backgroundColor={`mode.${colorMode}.card`}
-      rounded="sm"
+      borderRadius="sm"
       pt={96}
     >
       <Alert
@@ -31,7 +31,7 @@ const ErrorComponent = ({ errorMessage }: ErrorProps) => {
         status="error"
         flexDirection="column"
         backgroundColor={colorMode === "light" ? "red.50" : "red.900"}
-        rounded="sm"
+        borderRadius="sm"
         maxW="750px"
         mx="auto"
       >

@@ -1,11 +1,6 @@
 import { AppProps } from "next/app";
 import "../components/layout.css";
-import {
-  ThemeProvider,
-  CSSReset,
-  ColorModeProvider,
-  Skeleton,
-} from "@chakra-ui/core";
+import { ChakraProvider, CSSReset, Skeleton } from "@chakra-ui/core";
 import customTheme from "../theme";
 import Navigation from "../components/organisms/navigation";
 import Head from "next/head";
@@ -55,23 +50,21 @@ function MyApp({ Component, pageProps }: AppProps) {
           }}
         ></script>
       </Head>
-      <ThemeProvider theme={customTheme}>
+      <ChakraProvider theme={customTheme}>
         <CSSReset />
-        <ColorModeProvider>
-          <Layout>
-            <Navigation session={sessionAndThunk[0]} />
-            <Skeleton isLoaded={isRight(sessionAndThunk[0])}>
-              {isLeft(sessionAndThunk[0]) ? (
-                <></>
-              ) : isLeft(sessionAndThunk[0].right) ? (
-                <SignIn />
-              ) : (
-                <Component {...pageProps} />
-              )}
-            </Skeleton>
-          </Layout>
-        </ColorModeProvider>
-      </ThemeProvider>
+        <Layout>
+          <Navigation session={sessionAndThunk[0]} />
+          <Skeleton isLoaded={isRight(sessionAndThunk[0])}>
+            {isLeft(sessionAndThunk[0]) ? (
+              <></>
+            ) : isLeft(sessionAndThunk[0].right) ? (
+              <SignIn />
+            ) : (
+              <Component {...pageProps} />
+            )}
+          </Skeleton>
+        </Layout>
+      </ChakraProvider>
     </>
   );
 }

@@ -10,8 +10,11 @@ import {
   useColorMode,
   Image,
   Text,
-  Icon,
+  Portal,
+  Avatar,
 } from "@chakra-ui/core";
+import { ChevronDownIcon, MoonIcon, SunIcon } from "@chakra-ui/icons";
+import { FallbackIcon } from "../../theme/icons";
 import Link from "next/link";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import { useTeams } from "../../utils/teams";
@@ -33,93 +36,99 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
     : fetchedTeamsAndThunk[0].right.right;
   return (
     <>
-      <Menu closeOnSelect={false}>
+      <Menu closeOnSelect={false} placement="bottom-end">
         <MenuButton
           display="flex"
           alignItems="center"
           backgroundColor={`mode.${colorMode}.background`}
-          rounded="sm"
+          borderRadius="sm"
+          p={0}
         >
-          <Image
+          <Avatar
             src={session.user.picture}
-            fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
-            alt={`${session.user.name}'s headshot`}
-            size={10}
-            roundedLeft="sm"
-            border="1px solid"
+            showBorder={true}
             borderColor={`mode.${colorMode}.background`}
+            backgroundColor="transparent"
+            icon={<FallbackIcon color={`mode.${colorMode}.icon`} />}
+            name={session.user.name}
+            h={10}
+            w={10}
+            borderRadius="sm"
           />
           <Text ml={2} mr={8} color={`mode.${colorMode}.text`}>
             {session.user.nickname}
           </Text>
-          <Icon name="chevron-down" mr={2} color={`mode.${colorMode}.text`} />
+          <ChevronDownIcon mr={2} color={`mode.${colorMode}.text`} />
         </MenuButton>
-        <MenuList
-          border="none"
-          placement="bottom-end"
-          backgroundColor={`mode.${colorMode}.card`}
-        >
-          <MenuGroup title="Settings" color={`mode.${colorMode}.title`}>
-            <MenuItem
-              aria-label={`Switch to ${
-                colorMode === "light" ? "dark" : "light"
-              } mode`}
-              color={`mode.${colorMode}.text`}
-              onClick={toggleColorMode}
-              transition="all 0.2s"
-            >
-              <Icon name={colorMode === "light" ? "moon" : "sun"} mr={3} />
-              {colorMode === "light" ? "Dark mode" : "Light mode"}
-            </MenuItem>
-          </MenuGroup>
-          <MenuDivider borderColor={`mode.${colorMode}.icon`} />
-          <MenuGroup title="Teams" color={`mode.${colorMode}.title`}>
-            {teams.map((team, index) => (
-              <Link href={`/${team.name}`} key={index}>
-                <MenuItem
-                  color={`mode.${colorMode}.text`}
-                  d="flex"
-                  alignContent="center"
-                  aria-label={`Links to ${team.name}'s dashboard`}
-                >
-                  <Image
-                    src={team.image && team.image.downloadUrl}
-                    fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
-                    alt={`${team.name}'s organization image`}
-                    rounded="sm"
-                    border="1px solid"
-                    borderColor={`mode.${colorMode}.icon`}
-                    h={4}
-                    w={4}
-                    mr={2}
-                  />
-                  {team.name}
-                </MenuItem>
-              </Link>
-            ))}
-          </MenuGroup>
-
-          <MenuDivider borderColor={`mode.${colorMode}.icon`} />
-
-          <MenuGroup title="Other" color={`mode.${colorMode}.title`}>
-            <MenuItem color={`mode.${colorMode}.text`}>
-              <ChakraLink
-                href="https://meeshkan.com/docs/"
-                aria-label="The documentation for how to use Meeshkan"
-                isExternal
+        <Portal>
+          <MenuList border="none" backgroundColor={`mode.${colorMode}.card`}>
+            <MenuGroup title="Settings" color={`mode.${colorMode}.title`}>
+              <MenuItem
+                aria-label={`Switch to ${
+                  colorMode === "light" ? "dark" : "light"
+                } mode`}
                 color={`mode.${colorMode}.text`}
-                _hover={{ textDecor: "none" }}
+                onClick={toggleColorMode}
+                transition="all 0.2s"
               >
-                Docs
-              </ChakraLink>
-            </MenuItem>
-            <MenuItem color={`mode.${colorMode}.text`}>
-              <Link href="/api/logout">
-                <Text>Log out</Text>
-              </Link>
-            </MenuItem>
-          </MenuGroup>
-        </MenuList>
+                {colorMode === "light" ? (
+                  <MoonIcon mr={3} />
+                ) : (
+                  <SunIcon mr={3} />
+                )}
+                {colorMode === "light" ? "Dark mode" : "Light mode"}
+              </MenuItem>
+            </MenuGroup>
+            <MenuDivider borderColor={`mode.${colorMode}.icon`} />
+            <MenuGroup title="Teams" color={`mode.${colorMode}.title`}>
+              {teams.map((team, index) => (
+                <Link href={`/${team.name}`} key={index}>
+                  <MenuItem
+                    color={`mode.${colorMode}.text`}
+                    d="flex"
+                    alignContent="center"
+                    aria-label={`Links to ${team.name}'s dashboard`}
+                    // command={`⌘${index}`}
+                  >
+                    <Image
+                      src={team.image && team.image.downloadUrl}
+                      fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
+                      alt={`${team.name}'s organization image`}
+                      borderRadius="sm"
+                      border="1px solid"
+                      borderColor={`mode.${colorMode}.icon`}
+                      h={4}
+                      w={4}
+                      mr={2}
+                    />
+                    {team.name}
+                  </MenuItem>
+                </Link>
+              ))}
+            </MenuGroup>
+
+            <MenuDivider borderColor={`mode.${colorMode}.icon`} />
+
+            <MenuGroup title="Other" color={`mode.${colorMode}.title`}>
+              <MenuItem color={`mode.${colorMode}.text`}>
+                <ChakraLink
+                  href="https://meeshkan.com/docs/"
+                  aria-label="The documentation for how to use Meeshkan"
+                  isExternal
+                  color={`mode.${colorMode}.text`}
+                  _hover={{ textDecor: "none" }}
+                >
+                  Docs
+                </ChakraLink>
+              </MenuItem>
+              <MenuItem color={`mode.${colorMode}.text`}>
+                <Link href="/api/logout">
+                  <Text>Log out</Text>
+                </Link>
+              </MenuItem>
+            </MenuGroup>
+          </MenuList>
+        </Portal>
       </Menu>
     </>
   );

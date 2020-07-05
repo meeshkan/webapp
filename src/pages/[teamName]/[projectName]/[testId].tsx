@@ -9,9 +9,9 @@ import {
   Text,
   useColorMode,
   Link,
-  Icon,
   Flex,
 } from "@chakra-ui/core";
+import { StarIcon } from "../../../theme/icons";
 import * as E from "fp-ts/lib/Either";
 import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
@@ -303,15 +303,15 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                     ? null
                     : "s"}
                   {testType === "Premium" ? (
-                    <Code ml={2} fontSize="inherit" variantColor="yellow">
-                      <Icon mr={2} name="star" />
+                    <Code ml={2} fontSize="inherit" colorScheme="yellow">
+                      <StarIcon mr={2} />
                       {testType}
                     </Code>
                   ) : (
                     <Code
                       ml={2}
                       fontSize="inherit"
-                      variantColor={
+                      colorScheme={
                         status === "In progress"
                           ? "yellow"
                           : status === "Passing"

@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Icon,
   Flex,
   useColorMode,
   Stack,
@@ -9,6 +8,8 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
 } from "@chakra-ui/core";
+import { MoonIcon, SunIcon } from "@chakra-ui/icons";
+import { LogoIcon } from "../../theme/icons";
 import Project from "../molecules/project";
 import Link from "next/link";
 import { Either, isLeft } from "fp-ts/lib/Either";
@@ -33,7 +34,7 @@ const Navigation = ({ session }: INavigationProps) => {
         align="center"
         justify="space-between"
         backgroundColor={`mode.${colorMode}.card`}
-        rounded="sm"
+        borderRadius="sm"
         mb={8}
         pos="sticky"
         top={8}
@@ -41,24 +42,18 @@ const Navigation = ({ session }: INavigationProps) => {
         <Flex
           align="center"
           backgroundColor={`mode.${colorMode}.card`}
-          rounded="sm"
+          borderRadius="sm"
           height="40px"
         >
           <Link href="/">
-            <Icon
-              name="Logo"
+            <LogoIcon
               color={`mode.${colorMode}.title`}
               h={8}
               w="auto"
               cursor="pointer"
             />
           </Link>
-          <Breadcrumb
-            ml={3}
-            mt={2}
-            addSeparator={true}
-            color={`mode.${colorMode}.text`}
-          >
+          <Breadcrumb ml={3} mt={2} separator=">">
             {pathForBreadcrumbs.map((crumb, i, pathForBreadcrumbs) => {
               if (pathForBreadcrumbs.length - 1 === i) {
                 return (
@@ -87,7 +82,7 @@ const Navigation = ({ session }: INavigationProps) => {
         {!isLeft(session) && (
           <section>
             {isLeft(session.right) ? (
-              <Stack isInline spacing={4}>
+              <Stack direction="row" spacing={4}>
                 <IconButton
                   aria-label={`Switch to ${
                     colorMode === "light" ? "dark" : "light"
@@ -95,7 +90,7 @@ const Navigation = ({ session }: INavigationProps) => {
                   color={`mode.${colorMode}.text`}
                   onClick={toggleColorMode}
                   transition="all 0.2s"
-                  icon={colorMode === "light" ? "moon" : "sun"}
+                  icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
                   mr={2}
                 />
               </Stack>
