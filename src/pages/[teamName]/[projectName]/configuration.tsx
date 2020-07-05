@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import {
   Box,
@@ -21,14 +22,13 @@ import { Alert, AlertIcon, AlertDescription } from "@chakra-ui/alert";
 import { InfoIcon, SlackIcon } from "../../../theme/icons";
 import * as E from "fp-ts/lib/Either";
 import * as _RTE from "../../../fp-ts/ReaderTaskEither";
-import { constant, constNull, constVoid, flow } from "fp-ts/lib/function";
+import { constNull, constVoid, flow } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import { Lens } from "monocle-ts";
-import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import Card from "../../../components/molecules/card";
 import { withError } from "../../../components/molecules/error";
@@ -471,6 +471,7 @@ const ConfigurationPage = withError<
               status="warning"
               alignItems="flex-start"
               borderRadius="sm"
+              __css={{}}
             >
               <AlertIcon mt={0.75} />
               <Box>

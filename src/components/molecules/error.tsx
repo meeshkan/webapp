@@ -31,6 +31,7 @@ const ErrorComponent = ({ errorMessage }: ErrorProps) => {
         borderRadius="sm"
         maxW="750px"
         mx="auto"
+        __css={{}}
       >
         <Flex mb={8}>
           <AlertIcon color={colorMode === "light" ? "red.500" : "red.200"} />
