@@ -4,7 +4,7 @@ import styles from "./styles";
 
 const config = {
   useSystemColorMode: false,
-  initialColorMode: "light",
+  initialColorMode: "dark",
 };
 
 const theme = {
