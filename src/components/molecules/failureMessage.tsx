@@ -42,6 +42,7 @@ const FailureMessage = ({
       borderRadius="sm"
       color={`mode.${colorMode}.text`}
       backgroundColor={`mode.${colorMode}.card`}
+      __css={{}}
     >
       <AccordionButton
         color={`mode.${colorMode}.title`}
@@ -59,6 +60,7 @@ const FailureMessage = ({
         }}
         borderRadius="sm"
         p={4}
+        __css={{}}
       >
         <Box flex="1" textAlign="left">
           <Flex>
@@ -89,7 +91,7 @@ const FailureMessage = ({
         </Box>
         <AccordionIcon />
       </AccordionButton>
-      <AccordionPanel py={4}>
+      <AccordionPanel py={4} __css={{}}>
         <Flex>
           {error_message && (
             <Text mb={2} mr={2} color={`mode.${colorMode}.text`}>

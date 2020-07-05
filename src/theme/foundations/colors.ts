@@ -179,21 +179,21 @@ const colors = {
     light: {
       background: "#F5F7FA", // gray.50
       card: "#FFFFFF", // white
-      title: "#1F2933", // gray.900
+      title: "#131A20", // gray.900
       titleHover: "#DC1853", // red.500
-      text: "#3E4C59", // gray.700
+      text: "#323F4B", // gray.700
       tertiary: "#616E7C", // gray.500
       icon: "#E4E7EB", // gray.100
       link: "#264AD9", // blue.500
     },
     dark: {
-      background: "#323F4B", // gray.800
-      card: "#1F2933", // gray.900
+      background: "#1F2933", // gray.800
+      card: "#131A20", // gray.900
       title: "#FFFFFF", // white
       titleHover: "#F0759A", // red.300
       text: "#CBD2D9", // gray.200
       tertiary: "#7B8794", // gray.400
-      icon: "#323F4B", // gray.800
+      icon: "#1F2933", // gray.800
       link: "#7D92E8", // blue.300
     },
   },

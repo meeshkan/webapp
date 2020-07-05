@@ -331,7 +331,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                   )}
                 </Heading>
               </Flex>
-              <Accordion w="full" defaultIndex={[0]}>
+              <Accordion w="full" defaultIndex={[0]} __css={{}}>
                 {index === 0 ? (
                   restFailures.length > 0 ? (
                     restFailures.map((item, index) => (

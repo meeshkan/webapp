@@ -4,7 +4,6 @@ import {
   Button,
   Grid,
   Heading,
-  Image,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -24,8 +23,9 @@ import {
   LightMode,
   Box,
   UseToastOptions,
+  Avatar,
 } from "@chakra-ui/core";
-import { AddIcon } from "../theme/icons";
+import { AddIcon, FallbackIcon } from "../theme/icons";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
@@ -52,7 +52,6 @@ import { CREATE_TEAM_MUTATION } from "../gql/pages";
 import { eightBaseClient } from "../utils/graphql";
 
 type NegativeCreateTeamOutcome = UNDEFINED_ERROR | INCORRECT_TYPE_SAFETY;
-type TeamsMutationType = t.TypeOf<typeof teamsMutationType>;
 type ITeamCreate = t.TypeOf<typeof TeamCreate>;
 const TeamCreate = t.type({
   teamName: t.union([t.null, t.string]),
@@ -217,7 +216,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                 linkLabel={`Links to ${team.name}'s dashboard`}
               >
                 <Stack spacing={4} direction="row">
-                  <Image
+                  <Avatar
                     h={10}
                     w={10}
                     src={
@@ -225,9 +224,9 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                         ? team.image.downloadUrl
                         : "https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
                     }
-                    fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
-                    alt={`${team.name}'s organization image`}
-                    bg="gray.50"
+                    icon={<FallbackIcon color={`mode.${colorMode}.icon`} />}
+                    name={team.name}
+                    bg={`mode.${colorMode}.background`}
                     border="1px solid"
                     borderColor={`mode.${colorMode}.icon`}
                     borderRadius="sm"
