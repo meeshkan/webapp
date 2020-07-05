@@ -15,11 +15,9 @@ import {
   useColorMode,
   useToast,
   UseToastOptions,
-  Alert,
-  AlertDescription,
-  AlertIcon,
   CloseButton,
 } from "@chakra-ui/core";
+import { Alert, AlertIcon, AlertDescription } from "@chakra-ui/alert";
 import { InfoIcon, SlackIcon } from "../../../theme/icons";
 import * as E from "fp-ts/lib/Either";
 import * as _RTE from "../../../fp-ts/ReaderTaskEither";
@@ -473,7 +471,6 @@ const ConfigurationPage = withError<
               status="warning"
               alignItems="flex-start"
               borderRadius="sm"
-              __css={{}}
             >
               <AlertIcon mt={0.75} />
               <Box>

@@ -1,14 +1,11 @@
 import React from "react";
+import { Box, useColorMode, Flex, Link } from "@chakra-ui/core";
 import {
-  Box,
   Alert,
   AlertIcon,
   AlertTitle,
   AlertDescription,
-  useColorMode,
-  Flex,
-  Link,
-} from "@chakra-ui/core";
+} from "@chakra-ui/alert";
 import * as E from "fp-ts/lib/Either";
 import NextLink from "next/link";
 

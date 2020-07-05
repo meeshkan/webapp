@@ -1111,7 +1111,7 @@
   dependencies:
     "@chakra-ui/modal" "^1.0.0-next.4"
 
-"@chakra-ui/alert@^1.0.0-next.2251+57db7fd9", "@chakra-ui/alert@^1.0.0-next.4":
+"@chakra-ui/alert@^1.0.0-next.2251", "@chakra-ui/alert@^1.0.0-next.2251+57db7fd9", "@chakra-ui/alert@^1.0.0-next.4":
   version "1.0.0-next.2251"
   resolved "https://registry.yarnpkg.com/@chakra-ui/alert/-/alert-1.0.0-next.2251.tgz#728a0e81c5b950969a9a7e1a1b9b2666edfdd4ec"
   integrity sha512-oPEV/+UOaGO73LY9g0/CuY2qBZIj3j9498mLVB9+fzG1sFo3zB91/TMu7+R0HuMUf4HLvDttYVNMTN4h1V89zw==
