@@ -10,6 +10,10 @@ import {
   useColorMode,
   Link,
   Flex,
+  AccordionItem,
+  AccordionButton,
+  AccordionIcon,
+  AccordionPanel,
 } from "@chakra-ui/core";
 import { StarIcon } from "../../../theme/icons";
 import * as E from "fp-ts/lib/Either";
@@ -208,7 +212,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
         {
           colorMode: useColorMode().colorMode,
           logs: versionTriage(JSON.parse(log)),
-          index: useState(1),
+          index: useState(0),
         },
         (p) => ({
           ...p,
@@ -324,6 +328,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                       {location}@
                       <Link
                         href={`https://github.com/${teamName}/${projectName}/commit/${commitHash}`}
+                        color="inherit"
                       >
                         {commitHash.slice(0, 7)}
                       </Link>
@@ -331,57 +336,56 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                   )}
                 </Heading>
               </Flex>
-              <Accordion w="full" defaultIndex={[0]} __css={{}}>
-                {index === 0 ? (
-                  restFailures.length > 0 ? (
-                    restFailures.map((item, index) => (
-                      <FailureMessage
-                        key={index}
-                        error_message={item.error_message}
-                        priority={item.priority}
-                        comment={item.comment}
-                        exchange={item.exchange[0]}
-                        method={item.exchange[0].request.method}
-                      />
-                    ))
-                  ) : (
-                    <Text color={`mode.${colorMode}.text`}>
-                      No bugs found here!
-                    </Text>
-                  )
-                ) : index === 1 ? (
-                  graphqlFailures.length > 0 ? (
-                    graphqlFailures.map((item, index) => (
-                      <FailureMessage
-                        key={index}
-                        error_message={item.error_message}
-                        priority={item.priority}
-                        comment={item.comment}
-                        exchange={item.exchange[0]}
-                        method={
-                          JSON.parse(item.exchange[0].request.body)[
-                            "query"
-                          ].startsWith("query")
-                            ? "QUERY"
-                            : JSON.parse(item.exchange[0].request.body)[
-                                "query"
-                              ].startsWith("mutation")
-                            ? "MUTATION"
-                            : JSON.parse(item.exchange[0].request.body)[
-                                "query"
-                              ].startsWith("subscription")
-                            ? "SUBSCRIPTION"
-                            : item.exchange[0].request.method.toUpperCase()
-                        }
-                      />
-                    ))
-                  ) : (
-                    <Text color={`mode.${colorMode}.text`}>
-                      No bugs found here!
-                    </Text>
-                  )
-                ) : null}
-              </Accordion>
+
+              {index === 0 ? (
+                restFailures.length > 0 ? (
+                  restFailures.map((item, index) => (
+                    <FailureMessage
+                      key={index}
+                      error_message={item.error_message}
+                      priority={item.priority}
+                      comment={item.comment}
+                      exchange={item.exchange[0]}
+                      method={item.exchange[0].request.method}
+                    />
+                  ))
+                ) : (
+                  <Text color={`mode.${colorMode}.text`}>
+                    No bugs found here!
+                  </Text>
+                )
+              ) : index === 1 ? (
+                graphqlFailures.length > 0 ? (
+                  graphqlFailures.map((item, index) => (
+                    <FailureMessage
+                      key={index}
+                      error_message={item.error_message}
+                      priority={item.priority}
+                      comment={item.comment}
+                      exchange={item.exchange[0]}
+                      method={
+                        JSON.parse(item.exchange[0].request.body)[
+                          "query"
+                        ].startsWith("query")
+                          ? "QUERY"
+                          : JSON.parse(item.exchange[0].request.body)[
+                              "query"
+                            ].startsWith("mutation")
+                          ? "MUTATION"
+                          : JSON.parse(item.exchange[0].request.body)[
+                              "query"
+                            ].startsWith("subscription")
+                          ? "SUBSCRIPTION"
+                          : item.exchange[0].request.method.toUpperCase()
+                      }
+                    />
+                  ))
+                ) : (
+                  <Text color={`mode.${colorMode}.text`}>
+                    No bugs found here!
+                  </Text>
+                )
+              ) : null}
             </Box>
           </Grid>
         )

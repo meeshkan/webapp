@@ -1,4 +1,4 @@
-import { ComponentTheme } from "@chakra-ui/theme-tools"
+import { ComponentTheme } from "@chakra-ui/theme-tools";
 
 const Accordion: ComponentTheme = {
   baseStyle: {
@@ -27,9 +27,9 @@ const Accordion: ComponentTheme = {
     Panel: {
       paddingTop: 2,
       paddingX: 4,
-      paddingBottom: 5,
+      paddingBottom: 4,
     },
   },
-}
+};
 
-export default Accordion
+export default Accordion;

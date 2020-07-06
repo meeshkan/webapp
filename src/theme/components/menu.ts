@@ -1,6 +1,6 @@
-import { Props, mode, ComponentTheme, copy } from "@chakra-ui/theme-tools"
-import { SystemProps } from "@chakra-ui/system"
-import Button from "./button"
+import { Props, mode, ComponentTheme, copy } from "@chakra-ui/theme-tools";
+import { SystemProps } from "@chakra-ui/system";
+import Button from "./button";
 
 const getMenuListStyle = (props: Props): SystemProps => {
   return {
@@ -11,44 +11,58 @@ const getMenuListStyle = (props: Props): SystemProps => {
     minWidth: "3xs",
     paddingY: "2",
     zIndex: "1",
-    borderRadius: "md",
+    borderRadius: "sm",
     border: "1px solid",
     borderColor: "inherit",
-  }
-}
+  };
+};
 
 const getMenuItemStyle = (props: Props): SystemProps => ({
   width: "100%",
   outline: 0,
   textDecoration: "none",
-  paddingY: "0.4rem",
-  paddingX: "0.8rem",
+  paddingY: 2,
+  paddingX: 3,
   transition: "background 50ms ease-in 0s",
   _focus: {
-    bg: mode(`gray.100`, `whiteAlpha.100`)(props),
+    bg: mode(`gray.50`, `gray.800`)(props),
   },
   _active: {
-    bg: mode(`gray.200`, `whiteAlpha.200`)(props),
+    bg: mode(`gray.50`, `gray.800`)(props),
   },
   _expanded: {
-    bg: mode(`gray.100`, `whiteAlpha.100`)(props),
+    bg: mode(`gray.50`, `gray.800`)(props),
   },
   _disabled: {
     opacity: 0.4,
     cursor: "not-allowed",
   },
-})
+});
 
 const Menu: ComponentTheme = {
   defaultProps: Button.defaultProps,
   baseStyle: (props) => ({
-    MenuButton: Button.baseStyle as SystemProps,
+    MenuButton: {
+      ...(Button.baseStyle as SystemProps),
+      _hover: {
+        bg: mode(`gray.100`, `gray.700`)(props),
+      },
+      _focus: {
+        bg: mode(`gray.50`, `gray.800`)(props),
+      },
+      _active: {
+        bg: mode(`gray.50`, `gray.800`)(props),
+      },
+      _expanded: {
+        bg: mode(`gray.50`, `gray.800`)(props),
+      },
+    },
     MenuList: getMenuListStyle(props),
     MenuItem: getMenuItemStyle(props),
     MenuGroupTitle: {
       marginX: 4,
       marginY: 2,
-      fontWeight: "semibold",
+      fontWeight: 400,
       fontSize: "sm",
     },
   }),
@@ -80,6 +94,6 @@ const Menu: ComponentTheme = {
      */
     ...copy(Button.sizes, "MenuButton"),
   },
-}
+};
 
-export default Menu
+export default Menu;

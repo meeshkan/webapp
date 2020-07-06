@@ -830,10 +830,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                                   overflow="hidden"
                                 >
                                   <Avatar
-                                    src={
-                                      owner.right.right.value.avatar_url ||
-                                      "https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
-                                    }
+                                    src={owner.right.right.value.avatar_url}
                                     backgroundColor="transparent"
                                     icon={
                                       <FallbackIcon

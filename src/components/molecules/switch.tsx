@@ -136,6 +136,6 @@ SegmentedControl.defaultProps = {
   setCurrentBy: true,
   currentIndex: 0,
   currentOption: "RESTful",
-  options: ["Cherry", "Kiwi", "Banana", "Mango", "Lemon"],
+  options: ["Option 1", "Option 2"],
   onValueChange: (option, index) => null,
 };

@@ -1,49 +1,49 @@
-import sizes from "../foundations/sizes"
+import sizes from "../foundations/sizes";
 import {
   randomColor,
   isDark,
   ComponentTheme,
   mode,
   Props,
-} from "@chakra-ui/theme-tools"
-import { SystemProps } from "@chakra-ui/system"
+} from "@chakra-ui/theme-tools";
+import { SystemProps } from "@chakra-ui/system";
 
 function getSize(size: string) {
-  const themeSize = sizes[size as keyof typeof sizes]
+  const themeSize = sizes[size as keyof typeof sizes];
 
   const styles: SystemProps = {
     width: size,
     height: size,
     fontSize: `calc(${themeSize || size} / 2.5)`,
-  }
+  };
 
   if (size !== "100%") {
-    styles.lineHeight = themeSize || size
+    styles.lineHeight = themeSize || size;
   }
 
   return {
     Root: styles,
     ExcessLabel: styles,
-  }
+  };
 }
 
 function getRootStyle(props: Props & { name?: string }) {
-  const { name, theme: t } = props
+  const { name, theme: t } = props;
 
-  const bg = name ? randomColor({ string: name }) : "gray.400"
-  const isBgDark = isDark(bg)(t)
+  const bg = name ? randomColor({ string: name }) : "gray.400";
+  const isBgDark = isDark(bg)(t);
 
-  const color = name ? (isBgDark ? "white" : "gray.800") : "white"
-  const borderColor = mode("white", "gray.800")(props)
+  const color = name ? (isBgDark ? "white" : "gray.800") : "white";
+  const borderColor = mode("gray.100", "gray.800")(props);
 
   return {
     bg,
     color,
     borderColor,
-  }
+  };
 }
 
-type AvatarProps = { name?: string }
+type AvatarProps = { name?: string };
 
 const Avatar: ComponentTheme<AvatarProps> = {
   defaultProps: {
@@ -52,13 +52,13 @@ const Avatar: ComponentTheme<AvatarProps> = {
   baseStyle: (props) => ({
     Root: {
       verticalAlign: "top",
+      border: "1px solid",
       ...getRootStyle(props),
     },
     Badge: {
       transform: "translate(25%, 25%)",
       borderRadius: "full",
-      border: "0.2em solid",
-      borderColor: mode("white", "gray.800")(props),
+      border: "1px solid",
     },
     ExcessLabel: {
       bg: mode("gray.200", "whiteAlpha.400")(props),
@@ -74,7 +74,7 @@ const Avatar: ComponentTheme<AvatarProps> = {
     "2xl": getSize("32"),
     full: getSize("100%"),
   },
-}
+};
 
 export const AvatarSizes = {
   "2xs": "2xs",
@@ -85,6 +85,6 @@ export const AvatarSizes = {
   xl: "xl",
   "2xl": "2xl",
   full: "full",
-}
+};
 
-export default Avatar
+export default Avatar;

@@ -219,16 +219,10 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                   <Avatar
                     h={10}
                     w={10}
-                    src={
-                      team.image
-                        ? team.image.downloadUrl
-                        : "https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
-                    }
+                    src={team.image && team.image.downloadUrl}
                     icon={<FallbackIcon color={`mode.${colorMode}.icon`} />}
-                    name={team.name}
                     bg={`mode.${colorMode}.background`}
-                    border="1px solid"
-                    borderColor={`mode.${colorMode}.icon`}
+                    showBorder={true}
                     borderRadius="sm"
                   />
                   <Stack spacing={2}>
