@@ -67,9 +67,7 @@ const FailureMessage = ({
             <Text fontWeight={600} mr={2}>
               {method.toUpperCase()}
             </Text>
-            <Text fontWeight={600} color={`mode.${colorMode}.text`}>
-              {exchange.meta.path}
-            </Text>
+            <Text fontWeight={600}>{exchange.meta.path}</Text>
             {priority && (
               <Text
                 color={
@@ -94,7 +92,7 @@ const FailureMessage = ({
       <AccordionPanel py={4} __css={{}}>
         <Flex>
           {error_message && (
-            <Text mb={2} mr={2} color={`mode.${colorMode}.text`}>
+            <Text mb={2} mr={2}>
               {error_message}
             </Text>
           )}

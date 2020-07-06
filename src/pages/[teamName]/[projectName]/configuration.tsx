@@ -614,7 +614,6 @@ const ConfigurationPage = withError<
                 />
               </Flex>
               <Link
-                color={colorMode === "light" ? "blue.500" : "blue.200"}
                 href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_OAUTH_APP_CLIENT_ID}&scope=incoming-webhook&state=${slackOauthState}&redirect_uri=${process.env.SLACK_OAUTH_REDIRECT_URI}`}
                 aria-label="Link to slack to authorize posting notifications from Meeshkan"
                 verticalAlign="middle"

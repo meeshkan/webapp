@@ -944,9 +944,6 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                               <ChakraLink
                                 href={`https://github.com/apps/meeshkan/installations/new?state=${ghOauthState}`}
                                 aria-label="Link to GitHub to install meeshkan on a repository"
-                                color={
-                                  colorMode == "light" ? "red.500" : "red.200"
-                                }
                               >
                                 Configure on GitHub.
                               </ChakraLink>

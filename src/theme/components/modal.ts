@@ -1,4 +1,4 @@
-import { ComponentTheme, mode } from "@chakra-ui/theme-tools"
+import { ComponentTheme, mode } from "@chakra-ui/theme-tools";
 
 /**
  * Since the `maxWidth` prop references theme.sizes internally,
@@ -9,11 +9,11 @@ function getSize(value: string) {
     Content: {
       maxWidth: value,
     },
-  }
+  };
 }
 
 export interface Props {
-  scrollBehavior?: "inside" | "outside"
+  scrollBehavior?: "inside" | "outside";
 }
 
 const Modal: ComponentTheme<Props> = {
@@ -22,7 +22,7 @@ const Modal: ComponentTheme<Props> = {
   },
   baseStyle: (props) => ({
     Overlay: {
-      bg: "rgba(0,0,0,0.4)",
+      bg: "rgba(0,0,0,0.7)",
     },
     Content: {
       borderRadius: "md",
@@ -33,7 +33,7 @@ const Modal: ComponentTheme<Props> = {
         props.scrollBehavior === "inside" ? "calc(100vh - 7.5rem)" : undefined,
       boxShadow: mode(
         "0 7px 14px 0 rgba(0,0,0, 0.1), 0 3px 6px 0 rgba(0, 0, 0, .07)",
-        "dark-lg",
+        "dark-lg"
       )(props),
     },
     Header: {
@@ -64,7 +64,7 @@ const Modal: ComponentTheme<Props> = {
     "6xl": getSize("6xl"),
     full: getSize("full"),
   },
-}
+};
 
 export const ModalSizes = {
   xs: "xs",
@@ -78,6 +78,6 @@ export const ModalSizes = {
   "5xl": "5xl",
   "6xl": "6xl",
   full: "full",
-}
+};
 
-export default Modal
+export default Modal;

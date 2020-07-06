@@ -23,21 +23,21 @@ const Settings = ({
       minH="35vh"
     >
       <Stack direction="row" my={2}>
-        <Text color={`mode.${colorMode}.text`}>Repository:</Text>
+        <Text>Repository:</Text>
         <Text color={`mode.${colorMode}.title`} fontWeight={600}>
           {`${organizationName}/${repositoryName}`}
         </Text>
       </Stack>
 
       <Stack direction="row" my={2}>
-        <Text color={`mode.${colorMode}.text`}>Current plan:</Text>
+        <Text>Current plan:</Text>
         <Text color={`mode.${colorMode}.title`} fontWeight={600}>
           Free
         </Text>
       </Stack>
 
       <Stack direction="row" my={2}>
-        <Text color={`mode.${colorMode}.text`}>Configured:</Text>
+        <Text>Configured:</Text>
         <Text color={`mode.${colorMode}.title`} fontWeight={600}>
           {configured.toString()}
         </Text>

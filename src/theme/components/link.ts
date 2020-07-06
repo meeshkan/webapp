@@ -1,12 +1,12 @@
-import { ComponentTheme } from "@chakra-ui/theme-tools"
+import { ComponentTheme, Props, mode } from "@chakra-ui/theme-tools";
 
-const Link: ComponentTheme = {
-  baseStyle: {
+const Link: ComponentTheme<Props> = {
+  baseStyle: (props) => ({
     transition: `all 0.15s ease-out`,
     cursor: "pointer",
     textDecoration: "none",
     outline: "none",
-    color: "inherit",
+    color: mode("blue.500", "blue.200")(props),
     _hover: {
       textDecoration: "underline",
     },
@@ -18,7 +18,7 @@ const Link: ComponentTheme = {
       cursor: "not-allowed",
       textDecoration: "none",
     },
-  },
-}
+  }),
+};
 
-export default Link
+export default Link;

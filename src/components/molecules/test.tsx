@@ -38,11 +38,7 @@ export const Test = ({
         cursor="pointer"
       >
         <Stack direction="row">
-          <Text
-            fontWeight={600}
-            lineHeight="normal"
-            color={`mode.${colorMode}.title`}
-          >
+          <Text fontWeight={600} color={`mode.${colorMode}.title`}>
             {`${branchName}@${commitHash.slice(0, 7)}`}
           </Text>
           <Badge
@@ -80,12 +76,7 @@ export const Test = ({
           )}
         </Stack>
 
-        <Text
-          color={`mode.${colorMode}.text`}
-          fontSize="sm"
-          lineHeight="normal"
-          mb={4}
-        >
+        <Text fontSize="sm" lineHeight="normal" mb={4}>
           {dayjs(date).format("MMM D hh:mma")}
         </Text>
       </Box>

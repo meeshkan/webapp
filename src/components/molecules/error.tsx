@@ -55,7 +55,6 @@ const ErrorComponent = ({ errorMessage }: ErrorProps) => {
       <Flex justify="center" mt={8}>
         <NextLink href="/">
           <Link
-            color={`mode.${colorMode}.link`}
             aria-label="Error page linking back to the safety of the home page"
             fontWeight={900}
             _hover={{ textDecor: "none" }}

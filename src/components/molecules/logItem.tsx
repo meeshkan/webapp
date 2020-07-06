@@ -43,12 +43,7 @@ const LogItem = ({ method, path, success }: LogProps) => {
         )}
       </Box>
       <Flex alignItems="center" mb={4}>
-        <Text
-          fontWeight={600}
-          lineHeight="normal"
-          color={`mode.${colorMode}.text`}
-          mr={1}
-        >
+        <Text fontWeight={600} mr={1}>
           {method}
         </Text>
         <Text color={`mode.${colorMode}.tertiary`}>{path}</Text>

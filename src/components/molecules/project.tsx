@@ -55,10 +55,15 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
             w={10}
             borderRadius="sm"
           />
-          <Text ml={2} mr={8} color={`mode.${colorMode}.text`}>
+          <Text
+            ml={2}
+            mr={8}
+            fontWeight={500}
+            color={`mode.${colorMode}.tertiary`}
+          >
             {session.user.nickname}
           </Text>
-          <ChevronDownIcon mr={2} color={`mode.${colorMode}.text`} />
+          <ChevronDownIcon mr={2} color={`mode.${colorMode}.tertiary`} />
         </MenuButton>
         <Portal>
           <MenuList border="none" backgroundColor={`mode.${colorMode}.card`}>

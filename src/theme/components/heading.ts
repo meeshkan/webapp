@@ -1,4 +1,4 @@
-import { ComponentTheme } from "@chakra-ui/theme-tools"
+import { ComponentTheme } from "@chakra-ui/theme-tools";
 
 const Heading: ComponentTheme = {
   defaultProps: {
@@ -6,8 +6,8 @@ const Heading: ComponentTheme = {
   },
   baseStyle: {
     fontFamily: "heading",
-    lineHeight: "shorter",
-    fontWeight: "bold",
+    lineHeight: "1.2",
+    fontWeight: 900,
   },
   sizes: {
     "2xl": { fontSize: ["4xl", null, "5xl"] },
@@ -17,7 +17,7 @@ const Heading: ComponentTheme = {
     sm: { fontSize: "md" },
     xs: { fontSize: "sm" },
   },
-}
+};
 
 export const HeadingSizes = {
   "2xl": "2xl",
@@ -26,6 +26,6 @@ export const HeadingSizes = {
   md: "md",
   sm: "sm",
   xs: "xs",
-}
+};
 
-export default Heading
+export default Heading;

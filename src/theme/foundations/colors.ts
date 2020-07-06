@@ -184,7 +184,6 @@ const colors = {
       text: "#323F4B", // gray.700
       tertiary: "#616E7C", // gray.500
       icon: "#E4E7EB", // gray.100
-      link: "#264AD9", // blue.500
     },
     dark: {
       background: "#1F2933", // gray.800
@@ -194,7 +193,6 @@ const colors = {
       text: "#CBD2D9", // gray.200
       tertiary: "#7B8794", // gray.400
       icon: "#1F2933", // gray.800
-      link: "#7D92E8", // blue.300
     },
   },
 };

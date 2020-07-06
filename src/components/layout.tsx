@@ -8,12 +8,7 @@ export default function Layout({ children }) {
   return (
     <>
       <InitializeColorMode />
-      <Stack
-        minH="100vh"
-        p={8}
-        spacing={0}
-        backgroundColor={brandColorTheme.background}
-      >
+      <Stack minH="100vh" p={8} spacing={0}>
         {children}
       </Stack>
     </>

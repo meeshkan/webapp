@@ -3,8 +3,8 @@ import components from "./components";
 import styles from "./styles";
 
 const config = {
-  useSystemColorMode: false,
-  initialColorMode: "dark",
+  useSystemColorMode: true,
+  // initialColorMode: "dark",
 };
 
 const theme = {

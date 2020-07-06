@@ -40,15 +40,10 @@ const SignIn = () => {
         fontSize="xl"
         fontStyle="italic"
         fontWeight={500}
-        color={`mode.${colorMode}.text`}
       >
         Meeshkan is currently in alpha and by invitation only.
         <br />
-        <Link
-          color={colorMode === "light" ? "blue.500" : "blue.300"}
-          href="https://meeshkan.com/"
-          isExternal
-        >
+        <Link href="https://meeshkan.com/" isExternal>
           Request alpha access
         </Link>{" "}
         if you're interested.
