@@ -238,7 +238,6 @@ const ImportProject = ({ repoName, onClick }: ImportProps) => {
     <Button
       w="full"
       variant="ghost"
-      borderRadius="sm"
       onClick={() => onClick()}
       justifyContent="space-between"
       color={`mode.${colorMode}.text`}
@@ -608,9 +607,6 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                       type="submit"
                       size="sm"
                       mt={4}
-                      px={4}
-                      borderRadius="sm"
-                      fontWeight={900}
                       colorScheme="blue"
                       isLoading={formState.isSubmitting}
                     >
@@ -647,9 +643,6 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                       onClick={onCopy}
                       ml={2}
                       size="sm"
-                      px={4}
-                      borderRadius="sm"
-                      fontWeight={900}
                       colorScheme="blue"
                     >
                       {hasCopied ? "Copied" : "Copy"}
@@ -732,10 +725,6 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                   p={4}
                   minH="72px"
                   justifyContent="start"
-                  borderRadius="sm"
-                  lineHeight="none"
-                  fontSize="md"
-                  fontWeight={900}
                   bg={`mode.${colorMode}.card`}
                   color={`mode.${colorMode}.title`}
                   _hover={{ color: `mode.${colorMode}.titleHover` }}
@@ -799,10 +788,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                           E.isLeft(repoListAndThunk[0].right) ? (
                           <Flex h="100%" justify="center" align="center">
                             <Button
-                              as={"a"}
-                              borderRadius="sm"
-                              fontWeight={900}
-                              px={4}
+                              as="a"
                               colorScheme="red"
                               onClick={() =>
                                 ReactGA.event({
@@ -834,7 +820,6 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                                   alignItems="center"
                                   justifyContent="space-between"
                                   minWidth="204px"
-                                  borderRadius="sm"
                                   ml={2}
                                   mb={4}
                                   border="1px solid"

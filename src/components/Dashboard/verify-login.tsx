@@ -30,9 +30,6 @@ export default ({ link }: { link: string }) => {
         as="a"
         href={link}
         aria-label="Sign in to GitHub to verify your credentials"
-        borderRadius="sm"
-        fontWeight={900}
-        px={4}
         mt={10}
         colorScheme="red"
       >

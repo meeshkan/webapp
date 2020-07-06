@@ -26,15 +26,7 @@ const VerifyLoginPage = () => {
         security measure. You will be able to use the Meeshkan web app again
         after this step.
       </Text>
-      <Button
-        as="a"
-        href=""
-        borderRadius="sm"
-        fontWeight={900}
-        px={4}
-        mt={10}
-        colorScheme="red"
-      >
+      <Button as="a" href="" mt={10} colorScheme="red">
         <GithubIcon mr={2} />
         Sign in to GitHub
       </Button>

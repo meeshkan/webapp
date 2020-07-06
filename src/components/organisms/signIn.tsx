@@ -55,14 +55,7 @@ const SignIn = () => {
       </Text>
       <Flex justify="center">
         <LightMode>
-          <Button
-            borderRadius="sm"
-            px={4}
-            fontWeight={900}
-            letterSpacing="wide"
-            colorScheme="red"
-            onClick={() => router.push("/api/login")}
-          >
+          <Button colorScheme="red" onClick={() => router.push("/api/login")}>
             Sign in
           </Button>
         </LightMode>

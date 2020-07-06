@@ -3,7 +3,7 @@ import {
   mode,
   ComponentTheme,
   transparentize,
-} from "@chakra-ui/theme-tools"
+} from "@chakra-ui/theme-tools";
 
 const grayGhostStyle = (props: Props) => ({
   color: mode(`inherit`, `whiteAlpha.900`)(props),
@@ -13,14 +13,14 @@ const grayGhostStyle = (props: Props) => ({
   _active: {
     bg: mode(`gray.200`, `whiteAlpha.300`)(props),
   },
-})
+});
 
 function getGhostStyle(props: Props) {
-  const { colorScheme: c, theme: t } = props
-  if (c === "gray") return grayGhostStyle(props)
+  const { colorScheme: c, theme: t } = props;
+  if (c === "gray") return grayGhostStyle(props);
 
-  const darkHover = transparentize(`${c}.200`, 0.12)(t)
-  const darkActive = transparentize(`${c}.200`, 0.24)(t)
+  const darkHover = transparentize(`${c}.200`, 0.12)(t);
+  const darkActive = transparentize(`${c}.200`, 0.24)(t);
 
   return {
     color: mode(`${c}.500`, `${c}.200`)(props),
@@ -31,18 +31,18 @@ function getGhostStyle(props: Props) {
     _active: {
       bg: mode(`${c}.100`, darkActive)(props),
     },
-  }
+  };
 }
 
 function getOutlineStyle(props: Props) {
-  const { colorScheme: c } = props
-  const borderColor = mode(`gray.200`, `whiteAlpha.300`)(props)
+  const { colorScheme: c } = props;
+  const borderColor = mode(`gray.200`, `whiteAlpha.300`)(props);
 
   return {
     border: "1px solid",
     borderColor: c === "gray" ? borderColor : "currentColor",
     ...getGhostStyle(props),
-  }
+  };
 }
 
 const graySolidStyle = (props: Props) => ({
@@ -53,23 +53,23 @@ const graySolidStyle = (props: Props) => ({
   _active: {
     bg: mode(`gray.300`, `whiteAlpha.400`)(props),
   },
-})
+});
 
 function getSolidStyle(props: Props) {
-  const { colorScheme: c } = props
+  const { colorScheme: c } = props;
 
-  if (c === "gray") return graySolidStyle(props)
+  if (c === "gray") return graySolidStyle(props);
 
   return {
     bg: mode(`${c}.500`, `${c}.200`)(props),
     color: mode(`white`, `gray.800`)(props),
     _hover: { bg: mode(`${c}.600`, `${c}.300`)(props) },
     _active: { bg: mode(`${c}.700`, `${c}.400`)(props) },
-  }
+  };
 }
 
 function getLinkStyle(props: Props) {
-  const { colorScheme: c } = props
+  const { colorScheme: c } = props;
   return {
     padding: 0,
     height: "auto",
@@ -81,7 +81,7 @@ function getLinkStyle(props: Props) {
     _active: {
       color: mode(`${c}.700`, `${c}.500`)(props),
     },
-  }
+  };
 }
 
 const sizes = {
@@ -109,7 +109,7 @@ const sizes = {
     fontSize: "xs",
     paddingX: 2,
   },
-}
+};
 
 const unstyled = {
   bg: "none",
@@ -120,7 +120,7 @@ const unstyled = {
   lineHeight: "inherit",
   margin: 0,
   padding: 0,
-}
+};
 
 const Button: ComponentTheme = {
   defaultProps: {
@@ -129,9 +129,11 @@ const Button: ComponentTheme = {
     colorScheme: "gray",
   },
   baseStyle: {
-    lineHeight: "1.2",
-    borderRadius: "md",
-    fontWeight: "semibold",
+    lineHeight: "1",
+    borderRadius: "sm",
+    fontWeight: 900,
+    px: 4,
+    letterSpacing: "wide",
     _focus: {
       boxShadow: "outline",
     },
@@ -149,19 +151,19 @@ const Button: ComponentTheme = {
     link: getLinkStyle,
     outline: getOutlineStyle,
   },
-}
+};
 
 export const ButtonSizes = {
   lg: "lg",
   sm: "sm",
   md: "md",
   xs: "xs",
-}
+};
 
 export const ButtonVariants = {
   solid: "solid",
   subtle: "subtle",
   outline: "outline",
-}
+};
 
-export default Button
+export default Button;

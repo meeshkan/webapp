@@ -591,9 +591,6 @@ const ConfigurationPage = withError<
                 <LightMode>
                   <Button
                     size="sm"
-                    px={4}
-                    borderRadius="sm"
-                    fontWeight={900}
                     colorScheme="blue"
                     type="submit"
                     isLoading={formState.isSubmitting}

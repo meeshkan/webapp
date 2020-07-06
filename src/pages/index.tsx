@@ -257,10 +257,6 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
               p={4}
               minH="72px"
               justifyContent="start"
-              borderRadius="sm"
-              lineHeight="none"
-              fontSize="md"
-              fontWeight={900}
               bg={`mode.${colorMode}.card`}
               color={`mode.${colorMode}.title`}
               _hover={{ color: `mode.${colorMode}.titleHover` }}
@@ -331,9 +327,6 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                       <LightMode>
                         <Button
                           size="sm"
-                          px={4}
-                          borderRadius="sm"
-                          fontWeight={900}
                           colorScheme="blue"
                           type="submit"
                           isLoading={formState.isSubmitting}
