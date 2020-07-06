@@ -7,7 +7,6 @@ import {
   ListItem,
   useColorMode,
   Link,
-  Code,
 } from "@chakra-ui/core";
 
 const HeadingComponent = (props) => {
@@ -28,11 +27,9 @@ const HeadingComponent = (props) => {
 };
 
 const LinkComponent = (props) => {
-  const { colorMode } = useColorMode();
   return (
     <Link
       {...props}
-      color={colorMode === "light" ? "blue.500" : "blue.300"}
       target="_blank"
       rel="noopener noreferrer"
       textDecor="underline"

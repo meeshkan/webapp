@@ -1,14 +1,11 @@
 import React from "react";
+import { Box, useColorMode, Flex, Link } from "@chakra-ui/core";
 import {
-  Box,
   Alert,
   AlertIcon,
   AlertTitle,
   AlertDescription,
-  useColorMode,
-  Flex,
-  Link,
-} from "@chakra-ui/core";
+} from "@chakra-ui/alert";
 import * as E from "fp-ts/lib/Either";
 import NextLink from "next/link";
 
@@ -23,7 +20,7 @@ const ErrorComponent = ({ errorMessage }: ErrorProps) => {
       h="82.5vh"
       w="100%"
       backgroundColor={`mode.${colorMode}.card`}
-      rounded="sm"
+      borderRadius="sm"
       pt={96}
     >
       <Alert
@@ -31,9 +28,10 @@ const ErrorComponent = ({ errorMessage }: ErrorProps) => {
         status="error"
         flexDirection="column"
         backgroundColor={colorMode === "light" ? "red.50" : "red.900"}
-        rounded="sm"
+        borderRadius="sm"
         maxW="750px"
         mx="auto"
+        __css={{}}
       >
         <Flex mb={8}>
           <AlertIcon color={colorMode === "light" ? "red.500" : "red.200"} />
@@ -57,7 +55,6 @@ const ErrorComponent = ({ errorMessage }: ErrorProps) => {
       <Flex justify="center" mt={8}>
         <NextLink href="/">
           <Link
-            color={`mode.${colorMode}.link`}
             aria-label="Error page linking back to the safety of the home page"
             fontWeight={900}
             _hover={{ textDecor: "none" }}

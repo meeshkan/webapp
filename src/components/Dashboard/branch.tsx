@@ -1,7 +1,7 @@
 import React from "react";
 import Card from "../molecules/card";
 import { Test } from "../molecules/test";
-import { Text, useColorMode } from "@chakra-ui/core";
+import { Text } from "@chakra-ui/core";
 import * as t from "io-ts";
 import { newestDateFirst } from "../../utils/date";
 import * as A from "fp-ts/lib/Array";
@@ -29,11 +29,10 @@ export const newestTestFirst: Ord.Ord<ITTest> = {
 };
 
 const Branch = ({ tests, teamName, projectName }: BranchProps) => {
-  const { colorMode } = useColorMode();
   return (
     <Card gridArea="1 / 3 / 3 / 4" heading="Continuous tests">
       {!tests.length ? (
-        <Text mt={2} color={`mode.${colorMode}.text`}>
+        <Text mt={2}>
           You made a commit to the project since importing, meaning there are no
           continuous tests yet.
         </Text>

@@ -81,6 +81,7 @@ export function SegmentedControl(props: Props) {
   return (
     <MotionBox
       // name="Segmented control"
+      // @ts-ignore
       width={width}
       height={8}
       backgroundColor={colorMode === "light" ? "gray.100" : "gray.900"}
@@ -91,22 +92,23 @@ export function SegmentedControl(props: Props) {
     >
       <MotionBox
         // name="Selection Indicator"
+        // @ts-ignore
         width={widthSegment - 4}
         mx="2px"
         height={28}
         backgroundColor={colorMode === "light" ? "white" : "gray.800"}
         borderRadius="sm"
         mt="2px"
-        shadow="0px 3px 8px rgba(0,0,0,.12), 0px 3px 1px rgba(0,0,0,.04)"
+        boxShadow="0px 3px 8px rgba(0,0,0,.12), 0px 3px 1px rgba(0,0,0,.04)"
         animate={selectionIndicator}
         initial={{ x: index * widthSegment + index * 1 }}
-        transition="spring 20 0.3"
       />
       {options.map((option, i) => {
         return (
           <MotionBox
             // name="Segment"
             key={`${props.id}_option_${i}`}
+            // @ts-ignore
             width={widthSegment}
             height="100%"
             backgroundColor="transparent"
@@ -134,6 +136,6 @@ SegmentedControl.defaultProps = {
   setCurrentBy: true,
   currentIndex: 0,
   currentOption: "RESTful",
-  options: ["Cherry", "Kiwi", "Banana", "Mango", "Lemon"],
+  options: ["Option 1", "Option 2"],
   onValueChange: (option, index) => null,
 };

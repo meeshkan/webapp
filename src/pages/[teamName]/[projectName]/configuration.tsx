@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import {
   Box,
@@ -6,7 +7,6 @@ import {
   FormControl,
   FormLabel,
   Grid,
-  Icon,
   Input,
   LightMode,
   Link,
@@ -15,23 +15,20 @@ import {
   Tooltip,
   useColorMode,
   useToast,
-  useToastOptions,
-  Alert,
-  AlertDescription,
-  AlertIcon,
+  UseToastOptions,
   CloseButton,
 } from "@chakra-ui/core";
+import { Alert, AlertIcon, AlertDescription } from "@chakra-ui/alert";
+import { InfoIcon, SlackIcon } from "../../../theme/icons";
 import * as E from "fp-ts/lib/Either";
 import * as _RTE from "../../../fp-ts/ReaderTaskEither";
-import { constant, constNull, constVoid, flow } from "fp-ts/lib/function";
+import { constNull, constVoid, flow } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import { Lens } from "monocle-ts";
-import { useRouter } from "next/router";
-import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import Card from "../../../components/molecules/card";
 import { withError } from "../../../components/molecules/error";
@@ -235,7 +232,7 @@ const updateConfigurationVariables = t.type({
 type UpdateConfigurationVariables = t.TypeOf<
   typeof updateConfigurationVariables
 > & {
-  toast: (props: useToastOptions) => void;
+  toast: (props: UseToastOptions) => void;
   setConfiguration: React.Dispatch<
     React.SetStateAction<
       E.Either<
@@ -449,7 +446,7 @@ const ConfigurationPage = withError<
         >
           <Box
             bg={`mode.${colorMode}.card`}
-            rounded="sm"
+            borderRadius="sm"
             pos="sticky"
             top={136}
             p={4}
@@ -473,7 +470,8 @@ const ConfigurationPage = withError<
               display={alert ? "flex" : "none"}
               status="warning"
               alignItems="flex-start"
-              rounded="sm"
+              borderRadius="sm"
+              __css={{}}
             >
               <AlertIcon mt={0.75} />
               <Box>
@@ -508,9 +506,8 @@ const ConfigurationPage = withError<
                     aria-label="Where is your app located in this repository?"
                     placement="right"
                   >
-                    <Icon
-                      name="info"
-                      size="12px"
+                    <InfoIcon
+                      boxSize="12px"
                       ml={2}
                       color={`mode.${colorMode}.text`}
                     />
@@ -519,7 +516,7 @@ const ConfigurationPage = withError<
                 <Input
                   borderColor={`mode.${colorMode}.icon`}
                   color={`mode.${colorMode}.text`}
-                  rounded="sm"
+                  borderRadius="sm"
                   size="sm"
                   name="directory"
                   ref={register}
@@ -541,9 +538,8 @@ const ConfigurationPage = withError<
                     aria-label="The command(s) your app framework provides for compiling your code."
                     placement="right"
                   >
-                    <Icon
-                      name="info"
-                      size="12px"
+                    <InfoIcon
+                      boxSize="12px"
                       ml={2}
                       color={`mode.${colorMode}.text`}
                     />
@@ -552,7 +548,7 @@ const ConfigurationPage = withError<
                 <Input
                   borderColor={`mode.${colorMode}.icon`}
                   color={`mode.${colorMode}.text`}
-                  rounded="sm"
+                  borderRadius="sm"
                   size="sm"
                   name="buildCommand"
                   ref={register}
@@ -574,9 +570,8 @@ const ConfigurationPage = withError<
                     aria-label="Where is your OpenAPI spec located in this repository?"
                     placement="right"
                   >
-                    <Icon
-                      name="info"
-                      size="12px"
+                    <InfoIcon
+                      boxSize="12px"
                       ml={2}
                       color={`mode.${colorMode}.text`}
                     />
@@ -585,7 +580,7 @@ const ConfigurationPage = withError<
                 <Input
                   borderColor={`mode.${colorMode}.icon`}
                   color={`mode.${colorMode}.text`}
-                  rounded="sm"
+                  borderRadius="sm"
                   size="sm"
                   name="openAPISpec"
                   ref={register}
@@ -596,10 +591,7 @@ const ConfigurationPage = withError<
                 <LightMode>
                   <Button
                     size="sm"
-                    px={4}
-                    rounded="sm"
-                    fontWeight={900}
-                    variantColor="blue"
+                    colorScheme="blue"
                     type="submit"
                     isLoading={formState.isSubmitting}
                   >
@@ -622,12 +614,11 @@ const ConfigurationPage = withError<
                 />
               </Flex>
               <Link
-                color={colorMode === "light" ? "blue.500" : "blue.200"}
                 href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_OAUTH_APP_CLIENT_ID}&scope=incoming-webhook&state=${slackOauthState}&redirect_uri=${process.env.SLACK_OAUTH_REDIRECT_URI}`}
                 aria-label="Link to slack to authorize posting notifications from Meeshkan"
                 verticalAlign="middle"
               >
-                <Icon name="slack" mr={2} />
+                <SlackIcon mr={2} />
                 Install the slack app here
               </Link>
             </Card>

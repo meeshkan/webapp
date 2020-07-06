@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, Icon, Flex, Text, useColorMode } from "@chakra-ui/core";
+import { Box, Flex, Text, useColorMode } from "@chakra-ui/core";
+import { CheckkmarkIcon, XmarkIcon } from "../../theme/icons";
 
 type LogProps = {
   method: string;
@@ -22,8 +23,8 @@ const LogItem = ({ method, path, success }: LogProps) => {
       borderColor={`mode.${colorMode}.icon`}
     >
       <Box
-        rounded="full"
-        size="32px"
+        borderRadius="full"
+        boxSize="32px"
         display="flex"
         justifyContent="center"
         alignItems="center"
@@ -35,20 +36,14 @@ const LogItem = ({ method, path, success }: LogProps) => {
             : redBackground[colorMode]
         }
       >
-        <Icon
-          name={success === true ? "checkmark" : "xmark"}
-          color={
-            success === true ? cyanBorder[colorMode] : redBorder[colorMode]
-          }
-        />
+        {success === true ? (
+          <CheckkmarkIcon color={cyanBorder[colorMode]} />
+        ) : (
+          <XmarkIcon color={redBorder[colorMode]} />
+        )}
       </Box>
       <Flex alignItems="center" mb={4}>
-        <Text
-          fontWeight={600}
-          lineHeight="normal"
-          color={`mode.${colorMode}.text`}
-          mr={1}
-        >
+        <Text fontWeight={600} mr={1}>
           {method}
         </Text>
         <Text color={`mode.${colorMode}.tertiary`}>{path}</Text>

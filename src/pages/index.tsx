@@ -4,8 +4,6 @@ import {
   Button,
   Grid,
   Heading,
-  Icon,
-  Image,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -24,8 +22,10 @@ import {
   Flex,
   LightMode,
   Box,
-  useToastOptions,
+  UseToastOptions,
+  Avatar,
 } from "@chakra-ui/core";
+import { AddIcon, FallbackIcon } from "../theme/icons";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
@@ -52,7 +52,6 @@ import { CREATE_TEAM_MUTATION } from "../gql/pages";
 import { eightBaseClient } from "../utils/graphql";
 
 type NegativeCreateTeamOutcome = UNDEFINED_ERROR | INCORRECT_TYPE_SAFETY;
-type TeamsMutationType = t.TypeOf<typeof teamsMutationType>;
 type ITeamCreate = t.TypeOf<typeof TeamCreate>;
 const TeamCreate = t.type({
   teamName: t.union([t.null, t.string]),
@@ -79,7 +78,7 @@ interface createTeamVariables {
   teamName: string;
   closeModal: () => void;
   router: NextRouter;
-  toast: (props: useToastOptions) => void;
+  toast: (props: UseToastOptions) => void;
   createTeamIsExecuting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -216,20 +215,15 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                 link={`/${team.name}`}
                 linkLabel={`Links to ${team.name}'s dashboard`}
               >
-                <Stack spacing={4} isInline>
-                  <Image
-                    size={10}
-                    src={
-                      team.image
-                        ? team.image.downloadUrl
-                        : "https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
-                    }
-                    fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
-                    alt={`${team.name}'s organization image`}
-                    bg="gray.50"
-                    border="1px solid"
-                    borderColor={`mode.${colorMode}.icon`}
-                    rounded="sm"
+                <Stack spacing={4} direction="row">
+                  <Avatar
+                    h={10}
+                    w={10}
+                    src={team.image && team.image.downloadUrl}
+                    icon={<FallbackIcon color={`mode.${colorMode}.icon`} />}
+                    bg={`mode.${colorMode}.background`}
+                    showBorder={true}
+                    borderRadius="sm"
                   />
                   <Stack spacing={2}>
                     <Heading
@@ -257,15 +251,11 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
               p={4}
               minH="72px"
               justifyContent="start"
-              rounded="sm"
-              lineHeight="none"
-              fontSize="md"
-              fontWeight={900}
               bg={`mode.${colorMode}.card`}
               color={`mode.${colorMode}.title`}
               _hover={{ color: `mode.${colorMode}.titleHover` }}
             >
-              <Icon h={10} w={10} mr={2} name="add" stroke="2px" />
+              <AddIcon boxSize={10} mr={2} stroke="2px" />
               Create a team
             </Button>
           </Grid>
@@ -278,73 +268,71 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
             closeOnOverlayClick={true}
             size="lg"
           >
-            <ModalOverlay />
-            <ModalContent
-              rounded="sm"
-              backgroundColor={`mode.${colorMode}.card`}
-            >
-              <ModalHeader
-                borderBottom="1px solid"
-                borderColor={`mode.${colorMode}.icon`}
-                mx={4}
-                px={0}
-                pt={4}
-                pb={2}
-                fontWeight={900}
-                color={`mode.${colorMode}.title`}
+            <ModalOverlay>
+              <ModalContent
+                borderRadius="sm"
+                backgroundColor={`mode.${colorMode}.card`}
               >
-                Create a team
-              </ModalHeader>
-              <ModalCloseButton
-                rounded="sm"
-                size="sm"
-                mt={2}
-                mr={0}
-                color={`mode.${colorMode}.text`}
-              />
-              <Box
-                as="form"
-                onSubmit={handleSubmit(onSubmit)}
-                w="100%"
-                overflow="auto"
-              >
-                <ModalBody p={4}>
-                  <FormControl isRequired>
-                    <FormLabel
-                      fontWeight={500}
-                      color={`mode.${colorMode}.title`}
-                    >
-                      Team name
-                    </FormLabel>
-                    <Input
-                      borderColor={`mode.${colorMode}.icon`}
-                      color={`mode.${colorMode}.text`}
-                      rounded="sm"
-                      size="sm"
-                      name="teamName"
-                      ref={register}
-                    />
-                  </FormControl>
-                </ModalBody>
-                <ModalFooter p={4}>
-                  <Flex justifyContent="flex-end">
-                    <LightMode>
-                      <Button
-                        size="sm"
-                        px={4}
-                        rounded="sm"
-                        fontWeight={900}
-                        variantColor="blue"
-                        type="submit"
-                        isLoading={formState.isSubmitting}
+                <ModalHeader
+                  borderBottom="1px solid"
+                  borderColor={`mode.${colorMode}.icon`}
+                  mx={4}
+                  px={0}
+                  pt={4}
+                  pb={2}
+                  fontWeight={900}
+                  color={`mode.${colorMode}.title`}
+                >
+                  Create a team
+                </ModalHeader>
+                <ModalCloseButton
+                  borderRadius="sm"
+                  size="sm"
+                  mt={2}
+                  mr={0}
+                  color={`mode.${colorMode}.text`}
+                />
+                <Box
+                  as="form"
+                  onSubmit={handleSubmit(onSubmit)}
+                  w="100%"
+                  overflow="auto"
+                >
+                  <ModalBody p={4}>
+                    <FormControl isRequired>
+                      <FormLabel
+                        fontWeight={500}
+                        color={`mode.${colorMode}.title`}
                       >
-                        Create team
-                      </Button>
-                    </LightMode>
-                  </Flex>
-                </ModalFooter>
-              </Box>
-            </ModalContent>
+                        Team name
+                      </FormLabel>
+                      <Input
+                        borderColor={`mode.${colorMode}.icon`}
+                        color={`mode.${colorMode}.text`}
+                        borderRadius="sm"
+                        size="sm"
+                        name="teamName"
+                        ref={register}
+                      />
+                    </FormControl>
+                  </ModalBody>
+                  <ModalFooter p={4}>
+                    <Flex justifyContent="flex-end">
+                      <LightMode>
+                        <Button
+                          size="sm"
+                          colorScheme="blue"
+                          type="submit"
+                          isLoading={formState.isSubmitting}
+                        >
+                          Create team
+                        </Button>
+                      </LightMode>
+                    </Flex>
+                  </ModalFooter>
+                </Box>
+              </ModalContent>
+            </ModalOverlay>
           </Modal>
         </>
       )

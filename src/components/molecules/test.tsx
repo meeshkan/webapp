@@ -1,4 +1,5 @@
-import { Badge, Box, Stack, Text, useColorMode, Icon } from "@chakra-ui/core";
+import { Badge, Box, Stack, Text, useColorMode } from "@chakra-ui/core";
+import { StarIcon } from "../../theme/icons";
 import dayjs from "dayjs";
 import Link from "next/link";
 import React from "react";
@@ -36,16 +37,12 @@ export const Test = ({
         borderColor={`mode.${colorMode}.icon`}
         cursor="pointer"
       >
-        <Stack isInline>
-          <Text
-            fontWeight={600}
-            lineHeight="normal"
-            color={`mode.${colorMode}.title`}
-          >
+        <Stack direction="row">
+          <Text fontWeight={600} color={`mode.${colorMode}.title`}>
             {`${branchName}@${commitHash.slice(0, 7)}`}
           </Text>
           <Badge
-            variantColor={
+            colorScheme={
               status === "In progress"
                 ? "yellow"
                 : status === "Passing"
@@ -55,7 +52,7 @@ export const Test = ({
                 : null
             }
             fontWeight={600}
-            rounded="sm"
+            borderRadius="sm"
             padding="0px 4px"
             minH="auto"
             mb={3}
@@ -66,25 +63,20 @@ export const Test = ({
           {premium && (
             <Badge
               fontWeight={600}
-              rounded="sm"
+              borderRadius="sm"
               padding="0px 4px"
               minH="auto"
               mb={3}
               textTransform="none"
-              variantColor="yellow"
+              colorScheme="yellow"
             >
-              <Icon mr={2} name="star" size="10px" />
+              <StarIcon mr={2} boxSize="10px" />
               Premium
             </Badge>
           )}
         </Stack>
 
-        <Text
-          color={`mode.${colorMode}.text`}
-          fontSize="sm"
-          lineHeight="normal"
-          mb={4}
-        >
+        <Text fontSize="sm" lineHeight="normal" mb={4}>
           {dayjs(date).format("MMM D hh:mma")}
         </Text>
       </Box>
