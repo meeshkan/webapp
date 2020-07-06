@@ -265,7 +265,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
               color={`mode.${colorMode}.title`}
               _hover={{ color: `mode.${colorMode}.titleHover` }}
             >
-              <AddIcon h={10} w={10} mr={2} stroke="2px" />
+              <AddIcon boxSize={10} mr={2} stroke="2px" />
               Create a team
             </Button>
           </Grid>

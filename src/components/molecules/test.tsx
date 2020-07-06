@@ -74,7 +74,7 @@ export const Test = ({
               textTransform="none"
               colorScheme="yellow"
             >
-              <StarIcon mr={2} size="10px" />
+              <StarIcon mr={2} boxSize="10px" />
               Premium
             </Badge>
           )}

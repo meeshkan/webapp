@@ -740,7 +740,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                   color={`mode.${colorMode}.title`}
                   _hover={{ color: `mode.${colorMode}.titleHover` }}
                 >
-                  <AddIcon h={10} w={10} mr={2} stroke="2px" />
+                  <AddIcon boxSize={10} mr={2} stroke="2px" />
                   Import a project
                 </Button>
 
@@ -864,7 +864,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                                     {owner.right.right.value.login}
                                   </Text>
                                   <ArrowUpDownIcon
-                                    size="12px"
+                                    boxSize="12px"
                                     color="gray.500"
                                     mr={2}
                                   />

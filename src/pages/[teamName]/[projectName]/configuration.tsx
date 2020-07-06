@@ -507,7 +507,7 @@ const ConfigurationPage = withError<
                     placement="right"
                   >
                     <InfoIcon
-                      size="12px"
+                      boxSize="12px"
                       ml={2}
                       color={`mode.${colorMode}.text`}
                     />
@@ -539,7 +539,7 @@ const ConfigurationPage = withError<
                     placement="right"
                   >
                     <InfoIcon
-                      size="12px"
+                      boxSize="12px"
                       ml={2}
                       color={`mode.${colorMode}.text`}
                     />
@@ -571,7 +571,7 @@ const ConfigurationPage = withError<
                     placement="right"
                   >
                     <InfoIcon
-                      size="12px"
+                      boxSize="12px"
                       ml={2}
                       color={`mode.${colorMode}.text`}
                     />
