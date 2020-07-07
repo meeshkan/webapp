@@ -3,10 +3,11 @@ import ReactMarkdown from "react-markdown";
 import {
   Text,
   Heading,
-  List,
+  UnorderedList,
   ListItem,
   useColorMode,
   Link,
+  Code,
 } from "@chakra-ui/core";
 
 const HeadingComponent = (props) => {
@@ -46,23 +47,22 @@ const Renderers: ReactMarkdown.Renderers = {
   ),
   heading: HeadingComponent,
   list: (props) => (
-    <List styleType="disc" spacing={2} mb={4} {...props}>
+    <UnorderedList spacing={2} mb={4} {...props}>
       {props.children}
-    </List>
+    </UnorderedList>
   ),
   listItem: (props) => <ListItem {...props}>{props.children}</ListItem>,
   link: LinkComponent,
   inlineCode: (props) => (
-    <Text
+    <Code
       mt={4}
       fontWeight={600}
       lineHeight="tall"
-      fontFamily="mono"
-      d="inline"
+      backgroundColor="transparent"
       {...props}
     >
       `{props.children}`
-    </Text>
+    </Code>
   ),
 };
 

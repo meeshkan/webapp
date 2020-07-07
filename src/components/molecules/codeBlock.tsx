@@ -8,7 +8,7 @@ const highlightStyle = {
   fontSize: 16,
   overflow: "auto",
   lineHeight: "1.5",
-  fontFamily: "Menlo,monospace",
+  fontFamily: `'Operator Mono Lig', Fira Code, SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New", monospace`,
   maxHeight: 300,
   borderRadius: "4px",
 };
