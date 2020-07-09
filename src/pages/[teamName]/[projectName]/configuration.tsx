@@ -4,22 +4,19 @@ import {
   Box,
   Button,
   Flex,
-  FormControl,
   FormLabel,
   Grid,
-  Input,
   LightMode,
   Link,
   Stack,
   Switch,
-  Tooltip,
   useColorMode,
   useToast,
   UseToastOptions,
   CloseButton,
 } from "@chakra-ui/core";
 import { Alert, AlertIcon, AlertDescription } from "@chakra-ui/alert";
-import { InfoIcon, SlackIcon } from "../../../theme/icons";
+import { SlackIcon } from "../../../theme/icons";
 import * as E from "fp-ts/lib/Either";
 import * as _RTE from "../../../fp-ts/ReaderTaskEither";
 import { constNull, constVoid, flow } from "fp-ts/lib/function";
@@ -63,6 +60,7 @@ import { SEPARATOR } from "../../../utils/separator";
 import { confirmOrCreateUser, getUserIdFromIdOrEnv } from "../../../utils/user";
 import { withSession } from "../../api/session";
 import { getSlackOAuthState } from "../../../utils/oauth";
+import FormItem from "../../../components/molecules/formItem";
 
 type NegativeConfigurationFetchOutcome =
   | NOT_LOGGED_IN
@@ -496,135 +494,32 @@ const ConfigurationPage = withError<
               />
             </Alert>
             <Card heading="Build settings" id={`build-settings`}>
-              <FormControl d="flex" alignItems="center" mt={4}>
-                <FormLabel
-                  fontWeight={500}
-                  color={`mode.${colorMode}.title`}
-                  minW="180px"
-                  mr={4}
-                  p={0}
-                >
-                  Root directory
-                  <Tooltip
-                    hasArrow
-                    label="Where is your app located in this repository?"
-                    aria-label="Where is your app located in this repository?"
-                    placement="right"
-                  >
-                    <InfoIcon
-                      boxSize="12px"
-                      ml={2}
-                      color={`mode.${colorMode}.text`}
-                    />
-                  </Tooltip>
-                </FormLabel>
-                <Input
-                  borderColor={`mode.${colorMode}.icon`}
-                  color={`mode.${colorMode}.text`}
-                  borderRadius="sm"
-                  size="sm"
-                  name="directory"
-                  ref={register}
-                />
-              </FormControl>
+              <FormItem
+                label="Root directory"
+                name="directory"
+                description="Where is your app located in this repository?"
+                register={register}
+              />
+              <FormItem
+                label="Build command"
+                name="buildCommand"
+                description="The command(s) your app framework provides for compiling your code."
+                register={register}
+              />
+              <FormItem
+                label="OpenAPI location"
+                name="openAPISpec"
+                description="Where is your OpenAPI spec located in this repository?"
+                register={register}
+              />
+              <FormItem
+                label="GraphQL endpoint"
+                name="graphQLSchema"
+                description="Where is your Where is the GraphQL schema for this project located? This can be a location in the repository or an external link"
+                register={register}
+              />
 
-              <FormControl d="flex" alignItems="center" mt={4}>
-                <FormLabel
-                  fontWeight={500}
-                  color={`mode.${colorMode}.title`}
-                  minW="180px"
-                  mr={4}
-                  p={0}
-                >
-                  Build command
-                  <Tooltip
-                    hasArrow
-                    label="The command(s) your app framework provides for compiling your code."
-                    aria-label="The command(s) your app framework provides for compiling your code."
-                    placement="right"
-                  >
-                    <InfoIcon
-                      boxSize="12px"
-                      ml={2}
-                      color={`mode.${colorMode}.text`}
-                    />
-                  </Tooltip>
-                </FormLabel>
-                <Input
-                  borderColor={`mode.${colorMode}.icon`}
-                  color={`mode.${colorMode}.text`}
-                  borderRadius="sm"
-                  size="sm"
-                  name="buildCommand"
-                  ref={register}
-                />
-              </FormControl>
-
-              <FormControl d="flex" alignItems="center" mt={4}>
-                <FormLabel
-                  fontWeight={500}
-                  color={`mode.${colorMode}.title`}
-                  minW="180px"
-                  mr={4}
-                  p={0}
-                >
-                  OpenAPI location
-                  <Tooltip
-                    hasArrow
-                    label="Where is your OpenAPI spec located in this repository?"
-                    aria-label="Where is your OpenAPI spec located in this repository?"
-                    placement="right"
-                  >
-                    <InfoIcon
-                      boxSize="12px"
-                      ml={2}
-                      color={`mode.${colorMode}.text`}
-                    />
-                  </Tooltip>
-                </FormLabel>
-                <Input
-                  borderColor={`mode.${colorMode}.icon`}
-                  color={`mode.${colorMode}.text`}
-                  borderRadius="sm"
-                  size="sm"
-                  name="openAPISpec"
-                  ref={register}
-                />
-              </FormControl>
-
-              <FormControl d="flex" alignItems="center" my={4}>
-                <FormLabel
-                  fontWeight={500}
-                  color={`mode.${colorMode}.title`}
-                  minW="180px"
-                  mr={4}
-                  p={0}
-                >
-                  GraphQL endpoint
-                  <Tooltip
-                    hasArrow
-                    label="Where is your Where is the GraphQL schema for this project located? This can be a location in the repository or an external link"
-                    aria-label="Where is your Where is the GraphQL schema for this project located? This can be a location in the repository or an external link"
-                    placement="right"
-                  >
-                    <InfoIcon
-                      boxSize="12px"
-                      ml={2}
-                      color={`mode.${colorMode}.text`}
-                    />
-                  </Tooltip>
-                </FormLabel>
-                <Input
-                  borderColor={`mode.${colorMode}.icon`}
-                  color={`mode.${colorMode}.text`}
-                  borderRadius="sm"
-                  size="sm"
-                  name="graphQLSchema"
-                  ref={register}
-                />
-              </FormControl>
-
-              <Flex justifyContent="flex-end">
+              <Flex justifyContent="flex-end" mt={4}>
                 <LightMode>
                   <Button
                     size="sm"
