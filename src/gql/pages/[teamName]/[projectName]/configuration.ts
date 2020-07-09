@@ -38,8 +38,8 @@ export const CREATE_CONFIGURATION = `mutation CREATE_CONFIGURATION(
   $teamName: String!
   $namePlusTeamName:String!
   $buildCommand:String!
-  $openAPISpec:String!
-  $graphQLSchema:String!
+  $openAPISpec:String
+  $graphQLSchema:String
   $directory:String!
   $teamNameAsPredicate:StringPredicate!
   $projectNameAsPredicate:StringPredicate!
@@ -105,8 +105,8 @@ export const UPDATE_CONFIGURATION = `mutation UPDATE_CONFIGURATION(
   $teamName: String!
   $namePlusTeamName:String!
   $buildCommand:String!
-  $openAPISpec:String!
-  $graphQLSchema:String!
+  $openAPISpec:String
+  $graphQLSchema:String
   $directory:String!
   $teamNameAsPredicate:StringPredicate!
   $projectNameAsPredicate:StringPredicate!
