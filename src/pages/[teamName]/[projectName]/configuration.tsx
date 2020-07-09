@@ -426,7 +426,12 @@ const ConfigurationPage = withError<
             ? p.useGetConfiguration[0].right.right
             : configuration
             ? configuration
-            : { openAPISpec: null, buildCommand: null, directory: null },
+            : {
+                openAPISpec: null,
+                buildCommand: null,
+                directory: null,
+                graphQLSchema: null,
+              },
       }),
       ({
         useColorMode: { colorMode },
@@ -495,7 +500,7 @@ const ConfigurationPage = withError<
                 <FormLabel
                   fontWeight={500}
                   color={`mode.${colorMode}.title`}
-                  minW="160px"
+                  minW="180px"
                   mr={4}
                   p={0}
                 >
@@ -527,7 +532,7 @@ const ConfigurationPage = withError<
                 <FormLabel
                   fontWeight={500}
                   color={`mode.${colorMode}.title`}
-                  minW="160px"
+                  minW="180px"
                   mr={4}
                   p={0}
                 >
@@ -555,11 +560,11 @@ const ConfigurationPage = withError<
                 />
               </FormControl>
 
-              <FormControl d="flex" alignItems="center" my={4}>
+              <FormControl d="flex" alignItems="center" mt={4}>
                 <FormLabel
                   fontWeight={500}
                   color={`mode.${colorMode}.title`}
-                  minW="160px"
+                  minW="180px"
                   mr={4}
                   p={0}
                 >
@@ -587,6 +592,38 @@ const ConfigurationPage = withError<
                 />
               </FormControl>
 
+              <FormControl d="flex" alignItems="center" my={4}>
+                <FormLabel
+                  fontWeight={500}
+                  color={`mode.${colorMode}.title`}
+                  minW="180px"
+                  mr={4}
+                  p={0}
+                >
+                  GraphQL endpoint
+                  <Tooltip
+                    hasArrow
+                    label="Where is your Where is the GraphQL schema for this project located? This can be a location in the repository or an external link"
+                    aria-label="Where is your Where is the GraphQL schema for this project located? This can be a location in the repository or an external link"
+                    placement="right"
+                  >
+                    <InfoIcon
+                      boxSize="12px"
+                      ml={2}
+                      color={`mode.${colorMode}.text`}
+                    />
+                  </Tooltip>
+                </FormLabel>
+                <Input
+                  borderColor={`mode.${colorMode}.icon`}
+                  color={`mode.${colorMode}.text`}
+                  borderRadius="sm"
+                  size="sm"
+                  name="graphQLSchema"
+                  ref={register}
+                />
+              </FormControl>
+
               <Flex justifyContent="flex-end">
                 <LightMode>
                   <Button
@@ -594,6 +631,7 @@ const ConfigurationPage = withError<
                     colorScheme="blue"
                     type="submit"
                     isLoading={formState.isSubmitting}
+                    loadingText="Saving"
                   >
                     Save
                   </Button>
