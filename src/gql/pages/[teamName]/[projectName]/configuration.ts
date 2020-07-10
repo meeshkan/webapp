@@ -24,6 +24,7 @@ export const GET_CONFIGURATION_QUERY = `query(
               buildCommand
               openAPISpec
               directory
+              graphQLSchema
             }
           }
         }
@@ -37,7 +38,8 @@ export const CREATE_CONFIGURATION = `mutation CREATE_CONFIGURATION(
   $teamName: String!
   $namePlusTeamName:String!
   $buildCommand:String!
-  $openAPISpec:String!
+  $openAPISpec:String
+  $graphQLSchema:String
   $directory:String!
   $teamNameAsPredicate:StringPredicate!
   $projectNameAsPredicate:StringPredicate!
@@ -63,6 +65,7 @@ export const CREATE_CONFIGURATION = `mutation CREATE_CONFIGURATION(
                     buildCommand:$buildCommand
                     openAPISpec:$openAPISpec
                     directory:$directory
+                    graphQLSchema: $graphQLSchema
                   }
                 }
               }
@@ -88,6 +91,7 @@ export const CREATE_CONFIGURATION = `mutation CREATE_CONFIGURATION(
                 buildCommand
                 directory
                 openAPISpec
+                graphQLSchema
             }
           }
         }
@@ -101,7 +105,8 @@ export const UPDATE_CONFIGURATION = `mutation UPDATE_CONFIGURATION(
   $teamName: String!
   $namePlusTeamName:String!
   $buildCommand:String!
-  $openAPISpec:String!
+  $openAPISpec:String
+  $graphQLSchema:String
   $directory:String!
   $teamNameAsPredicate:StringPredicate!
   $projectNameAsPredicate:StringPredicate!
@@ -127,6 +132,7 @@ export const UPDATE_CONFIGURATION = `mutation UPDATE_CONFIGURATION(
                     buildCommand:$buildCommand
                     openAPISpec:$openAPISpec
                     directory:$directory
+                    graphQLSchema:$graphQLSchema
                   }
                 }
               }
@@ -149,9 +155,10 @@ export const UPDATE_CONFIGURATION = `mutation UPDATE_CONFIGURATION(
           items {
             name
             configuration {
-                buildCommand
-                directory
-                openAPISpec
+              buildCommand
+              directory
+              openAPISpec
+              graphQLSchema
             }
           }
         }
