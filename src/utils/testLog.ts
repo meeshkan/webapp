@@ -38,7 +38,7 @@ const v1 = t.type({
       t.partial({
         comment: t.string,
         priority: t.Integer,
-        error_message: t.string,
+        error_message: t.union([t.string, t.null]),
       }),
     ])
   ),
