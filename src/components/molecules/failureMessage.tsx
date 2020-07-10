@@ -131,7 +131,7 @@ const FailureMessage = ({
                         plugins: [parserGraphql],
                       }
                     )
-                  : exchange.request.body}
+                  : JSON.stringify(JSON.parse(exchange.request.body), null, 2)}
               </CodeBlock>
             </>
           )}
