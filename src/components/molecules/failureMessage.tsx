@@ -121,7 +121,7 @@ const FailureMessage = ({
                 }
               >
                 {exchange.meta.apiType === "rest"
-                  ? exchange.request.body
+                  ? JSON.stringify(JSON.parse(exchange.request.body), null, 2)
                   : exchange.meta.apiType === "graphql"
                   ? prettier.format(
                       JSON.parse(exchange.request.body)["query"],
