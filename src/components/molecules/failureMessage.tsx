@@ -11,6 +11,7 @@ import CodeBlock from "../molecules/codeBlock";
 import { ExchangeType } from "../../utils/testLog";
 import ReactMarkdown from "react-markdown";
 import Renderers from "./markdownComponents";
+import prettier from "prettier";
 
 type FailureProps = {
   exchange: ExchangeType;
@@ -122,7 +123,10 @@ const FailureMessage = ({
                 {exchange.meta.apiType === "rest"
                   ? exchange.request.body
                   : exchange.meta.apiType === "graphql"
-                  ? JSON.parse(exchange.request.body)["query"]
+                  ? prettier.format(
+                      JSON.parse(exchange.request.body)["query"],
+                      { parser: "graphql" }
+                    )
                   : exchange.request.body}
               </CodeBlock>
             </>
