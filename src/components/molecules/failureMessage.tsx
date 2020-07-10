@@ -124,13 +124,19 @@ const FailureMessage = ({
                 {exchange.meta.apiType === "rest"
                   ? JSON.stringify(JSON.parse(exchange.request.body), null, 2)
                   : exchange.meta.apiType === "graphql"
-                  ? prettier.format(
-                      JSON.parse(exchange.request.body)["query"],
-                      {
-                        parser: "graphql",
-                        plugins: [parserGraphql],
+                  ? (() => {
+                      try {
+                        return prettier.format(
+                          JSON.parse(exchange.request.body)["query"],
+                          {
+                            parser: "graphql",
+                            plugins: [parserGraphql],
+                          }
+                        );
+                      } catch {
+                        return JSON.parse(exchange.request.body)["query"];
                       }
-                    )
+                    })()
                   : JSON.stringify(JSON.parse(exchange.request.body), null, 2)}
               </CodeBlock>
             </>

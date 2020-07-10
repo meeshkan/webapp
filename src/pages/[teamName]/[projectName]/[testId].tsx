@@ -218,11 +218,13 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
           ...p,
           restLogs: p.logs.commands.filter(
             (a) =>
-              a.exchange[0].meta.apiType === "rest" ||
-              a.exchange[0].meta.apiType === undefined
+              a.exchange.length > 0 &&
+              (a.exchange[0].meta.apiType === "rest" ||
+                a.exchange[0].meta.apiType === undefined)
           ),
           graphqlLogs: p.logs.commands.filter(
-            (a) => a.exchange[0].meta.apiType === "graphql"
+            (a) =>
+              a.exchange.length > 0 && a.exchange[0].meta.apiType === "graphql"
           ),
           failures: p.logs.commands.filter((a) => a.success === false),
         }),
@@ -230,11 +232,13 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
           ...p,
           restFailures: p.failures.filter(
             (b) =>
-              b.exchange[0].meta.apiType === "rest" ||
-              b.exchange[0].meta.apiType === undefined
+              b.exchange.length > 0 &&
+              (b.exchange[0].meta.apiType === "rest" ||
+                b.exchange[0].meta.apiType === undefined)
           ),
           graphqlFailures: p.failures.filter(
-            (b) => b.exchange[0].meta.apiType === "graphql"
+            (b) =>
+              b.exchange.length > 0 && b.exchange[0].meta.apiType === "graphql"
           ),
         }),
         ({
