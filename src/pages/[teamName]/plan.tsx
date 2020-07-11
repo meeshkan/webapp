@@ -158,6 +158,12 @@ const Checkout = (props) => {
           "Weekly audit reporting",
           "30 day history",
         ]}
+        noFeatures={[
+          "GitLab & Bitbucket",
+          "Jira/Linear integration",
+          "Auth flow testing UI",
+          "Custom build pipelines",
+        ]}
         hasCTA={true}
         handleSubmit={handleSubmit}
         loading={loading}
