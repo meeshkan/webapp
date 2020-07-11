@@ -72,7 +72,7 @@ import { eightBaseClient } from "../utils/graphql";
 import { confirmOrCreateUser, getUserIdFromIdOrEnv } from "../utils/user";
 import { getGHOAuthState } from "../utils/oauth";
 import { SEPARATOR } from "../utils/separator";
-import { useTeams, NegativeTeamsFetchOutcome } from "../utils/teams";
+import { useTeams } from "../utils/teams";
 import {
   Loading,
   hookNeedingFetch,
@@ -89,6 +89,7 @@ import ReactGA from "react-ga";
 import Card from "../components/molecules/card";
 import { withError } from "../components/molecules/error";
 import { useForm } from "react-hook-form";
+import Link from "next/link";
 
 type NegativeTeamFetchOutcome =
   | NOT_LOGGED_IN
@@ -132,6 +133,7 @@ const Team = t.type({
     }),
   ]),
   inviteLink: t.string,
+  plan: t.string,
   users: t.type({
     items: t.array(
       t.type({
@@ -597,11 +599,25 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                 <FormControl d="flex" mt={4}>
                   <FormLabel color={`mode.${colorMode}.text`}>Plan:</FormLabel>
                   <Text color={`mode.${colorMode}.title`} fontWeight={600}>
-                    Free
+                    {team.plan}
                   </Text>
+                  {team.plan === "Free" ? (
+                    <Link passHref href={`/${team.name}/plan`}>
+                      <ChakraLink fontWeight={600} ml={2}>
+                        Upgrade
+                      </ChakraLink>
+                    </Link>
+                  ) : null}
                 </FormControl>
-                <Divider mt={4} />
-                <Flex justify="flex-end">
+                <Flex
+                  justify="flex-end"
+                  pos="absolute"
+                  bottom={4}
+                  right={4}
+                  left={4}
+                  borderTop="1px solid"
+                  borderTopColor={`mode.${colorMode}.icon`}
+                >
                   <LightMode>
                     <Button
                       type="submit"
