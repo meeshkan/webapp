@@ -64,8 +64,9 @@ const ExchangeMessage = ({ command }: ExchangeProps) => {
           </Box>
           {"Command exchange size " + command.exchange.length}
         </Box>
-        {command.exchange.map((exchange) => (
+        {command.exchange.map((exchange, index) => (
           <Box
+            key={index}
             border="none"
             mb={8}
             borderRadius="sm"
