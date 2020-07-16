@@ -187,9 +187,6 @@ export const getServerSideProps = ({
     withSession(req, "configuration.tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
 
-/**              a.exchange.length > 0 &&
-              (a.exchange[0].meta.apiType === "rest" ||
-                a.exchange[0].meta.apiType === undefined) */
 const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
   "Could not find this test resource.",
   ({
@@ -224,7 +221,12 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
             templateRows="repeat(2, minmax(204px, 45%))"
             gap={8}
           >
-            <Card gridArea="1 / 2 / 4 / 1" heading="Tests">
+            <Card
+              gridArea="1 / 2 / 4 / 1"
+              heading={`${testType} test cases — ${failures.length} failure${
+                failures.length === 1 ? "" : "s"
+              }`}
+            >
               {logs.commands.length > 0 ? (
                 logs.commands.map((item, i) => (
                   <LogItem
@@ -241,44 +243,31 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
             </Card>
 
             <Box gridArea="1 / 4 / 4 / 2" maxH="80vh" overflow="auto">
-              <Flex justify="space-between" wrap="wrap">
-                <Heading
+              {testType !== "Premium" && (
+                <Code
                   mb={4}
-                  color={`mode.${colorMode}.title`}
-                  fontWeight={900}
                   fontSize="xl"
+                  fontWeight={900}
+                  colorScheme={
+                    status === "In progress"
+                      ? "yellow"
+                      : status === "Passing"
+                      ? "cyan"
+                      : status === "Failed"
+                      ? "red"
+                      : "gray"
+                  }
                 >
-                  {testType === "Premium" ? (
-                    <Code ml={2} fontSize="inherit" colorScheme="yellow">
-                      <StarIcon mr={2} />
-                      {testType}
-                    </Code>
-                  ) : (
-                    <Code
-                      ml={2}
-                      fontSize="inherit"
-                      colorScheme={
-                        status === "In progress"
-                          ? "yellow"
-                          : status === "Passing"
-                          ? "cyan"
-                          : status === "Failed"
-                          ? "red"
-                          : null
-                      }
-                    >
-                      {location}@
-                      <Link
-                        href={`https://github.com/${teamName}/${projectName}/commit/${commitHash}`}
-                        color="inherit"
-                      >
-                        {commitHash.slice(0, 7)}
-                      </Link>
-                    </Code>
-                  )}
-                </Heading>
-              </Flex>
-
+                  {location}
+                  {` branch -> commit `}
+                  <Link
+                    href={`https://github.com/${teamName}/${projectName}/commit/${commitHash}`}
+                    color="inherit"
+                  >
+                    {commitHash.slice(0, 7)}
+                  </Link>
+                </Code>
+              )}
               {logs.commands[index] ? (
                 <Exchange key={index} command={logs.commands[index]} />
               ) : (

@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Flex, Text, useColorMode } from "@chakra-ui/core";
-import { CheckkmarkIcon, XmarkIcon } from "../../theme/icons";
+import { CheckmarkIcon, XmarkIcon } from "../../theme/icons";
 
 type LogProps = {
   i: number;
@@ -41,7 +41,7 @@ const LogItem = ({ i, path, success, setIndex }: LogProps) => {
         }
       >
         {success === true ? (
-          <CheckkmarkIcon color={cyanBorder[colorMode]} />
+          <CheckmarkIcon color={cyanBorder[colorMode]} />
         ) : (
           <XmarkIcon color={redBorder[colorMode]} />
         )}

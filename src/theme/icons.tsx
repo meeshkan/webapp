@@ -71,8 +71,8 @@ export const GithubIcon = createIcon({
   ),
 });
 
-export const CheckkmarkIcon = createIcon({
-  displayName: "CheckkmarkIcon",
+export const CheckmarkIcon = createIcon({
+  displayName: "CheckmarkIcon",
   viewBox: "0 0 18 16",
   path: (
     <path
