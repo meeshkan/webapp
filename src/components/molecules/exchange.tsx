@@ -15,7 +15,7 @@ import {
 import { CheckmarkIcon, XmarkIcon } from "../../theme/icons";
 
 import CodeBlock from "../molecules/codeBlock";
-import { ExchangeType, CommandType } from "../../utils/testLog";
+import { CommandType } from "../../utils/testLog";
 import ReactMarkdown from "react-markdown";
 import Renderers from "./markdownComponents";
 import prettier from "prettier/standalone";
@@ -23,9 +23,10 @@ import parserGraphql from "prettier/parser-graphql";
 
 type ExchangeProps = {
   command: CommandType;
+  commands: boolean;
 };
 
-const ExchangeMessage = ({ command }: ExchangeProps) => {
+const ExchangeMessage = ({ command, commands }: ExchangeProps) => {
   const { colorMode } = useColorMode();
   const red = { light: "red.500", dark: "red.300" };
   const yellow = { light: "yellow.500", dark: "yellow.300" };
@@ -105,9 +106,18 @@ const ExchangeMessage = ({ command }: ExchangeProps) => {
         )}
       </Box>
 
-      {command.length > 0 ? (
-        <Heading>Stateful steps in this test and their results:</Heading>
-      ) : null}
+      {commands && (
+        <Heading
+          as="h2"
+          fontSize="lg"
+          mt={8}
+          mb={4}
+          fontWeight={900}
+          color={`mode.${colorMode}.title`}
+        >
+          Stateful steps in this test and their results:
+        </Heading>
+      )}
 
       <Accordion defaultIndex={[0]} allowMultiple __css={{}}>
         {command.exchange.map((exchange, index) => (

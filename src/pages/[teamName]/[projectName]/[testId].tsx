@@ -286,7 +286,11 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
               )}
 
               {logs.commands[index] ? (
-                <Exchange key={index} command={logs.commands[index]} />
+                <Exchange
+                  key={index}
+                  command={logs.commands[index]}
+                  commands={logs.commands.length > 0}
+                />
               ) : (
                 <Text color={`mode.${colorMode}.text`}>
                   No bugs found here!
