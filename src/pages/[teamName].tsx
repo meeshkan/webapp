@@ -604,7 +604,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                   {team.plan === "Free" ? (
                     <Link passHref href={`/${team.name}/plan`}>
                       <ChakraLink fontWeight={600} ml={2}>
-                        Upgrade
+                        {`-> Upgrade`}
                       </ChakraLink>
                     </Link>
                   ) : null}
