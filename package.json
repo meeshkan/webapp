@@ -27,7 +27,6 @@
     "dayjs": "^1.8.27",
     "express": "^4.17.1",
     "fp-ts": "^2.6.1",
-    "framer-motion": "^1.11.1",
     "graphql-request": "^1.8.2",
     "io-ts": "^2.2.3",
     "isomorphic-unfetch": "^3.0.0",
