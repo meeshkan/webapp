@@ -1,12 +1,6 @@
 import React from "react";
 import { Box, useColorMode, Text, Flex, Code, Heading } from "@chakra-ui/core";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionIcon,
-  AccordionPanel,
-} from "@chakra-ui/accordion";
+
 import CodeBlock from "../molecules/codeBlock";
 import { ExchangeType, CommandType } from "../../utils/testLog";
 import ReactMarkdown from "react-markdown";
@@ -25,15 +19,16 @@ const ExchangeMessage = ({ command }: ExchangeProps) => {
   const cyan = { light: "cyan.500", dark: "cyan.300" };
   return (
     <Box>
-      <Box
-        border="none"
-        mb={8}
-        borderRadius="sm"
-        color={`mode.${colorMode}.text`}
-        backgroundColor={`mode.${colorMode}.card`}
-      >
-        <Box>
-          <Box flex="1" textAlign="left">
+      <Box>
+        <Box
+          border="none"
+          mb={8}
+          borderRadius="sm"
+          color={`mode.${colorMode}.text`}
+          backgroundColor={`mode.${colorMode}.card`}
+        >
+          <Box textAlign="left">
+            <Flex>{command.success ? "Test Passed" : "Test Failed"}</Flex>
             <Flex>
               {command.error_message && (
                 <Text mb={2} mr={2}>
@@ -59,20 +54,24 @@ const ExchangeMessage = ({ command }: ExchangeProps) => {
                 </Text>
               )}
             </Flex>
-            <Flex>
-              {command.comment && (
-                <ReactMarkdown
-                  source={command.comment}
-                  // @ts-expect-error
-                  renderers={Renderers}
-                />
-              )}
-            </Flex>
+            {command.comment && (
+              <ReactMarkdown
+                source={command.comment}
+                // @ts-expect-error
+                renderers={Renderers}
+              />
+            )}
           </Box>
-          <AccordionIcon />
+          {"Command exchange size " + command.exchange.length}
         </Box>
-        {command.exchange.map((exchange) => {
-          <Box py={4}>
+        {command.exchange.map((exchange) => (
+          <Box
+            border="none"
+            mb={8}
+            borderRadius="sm"
+            color={`mode.${colorMode}.text`}
+            backgroundColor={`mode.${colorMode}.card`}
+          >
             <Flex>
               <Text fontWeight={600} mr={2}>
                 {exchange.meta.apiType === "graphql"
@@ -109,7 +108,7 @@ const ExchangeMessage = ({ command }: ExchangeProps) => {
                   fontWeight={900}
                   color={`mode.${colorMode}.title`}
                 >
-                  Request body that caused this error:
+                  Request body:
                 </Heading>
                 <CodeBlock
                   className={
@@ -144,8 +143,24 @@ const ExchangeMessage = ({ command }: ExchangeProps) => {
                 </CodeBlock>
               </>
             )}
-          </Box>;
-        })}
+            {exchange.response.body && (
+              <>
+                <Heading
+                  as="h4"
+                  fontSize="lg"
+                  my={4}
+                  fontWeight={900}
+                  color={`mode.${colorMode}.title`}
+                >
+                  Response body:
+                </Heading>
+                <CodeBlock className={"json"}>
+                  {JSON.stringify(JSON.parse(exchange.response.body), null, 2)}
+                </CodeBlock>
+              </>
+            )}
+          </Box>
+        ))}
       </Box>
     </Box>
   );
