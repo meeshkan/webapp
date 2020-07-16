@@ -3,12 +3,13 @@ import { Box, Flex, Text, useColorMode } from "@chakra-ui/core";
 import { CheckkmarkIcon, XmarkIcon } from "../../theme/icons";
 
 type LogProps = {
-  method: string;
+  i: number;
   path: string;
   success: boolean;
+  setter: React.Dispatch<React.SetStateAction<number>>;
 };
 
-const LogItem = ({ method, path, success }: LogProps) => {
+const LogItem = ({ i, path, success, setter }: LogProps) => {
   const { colorMode } = useColorMode();
   const cyanBackground = { light: "cyan.50", dark: "cyan.900" };
   const cyanBorder = { light: "cyan.700", dark: "cyan.200" };
@@ -19,6 +20,9 @@ const LogItem = ({ method, path, success }: LogProps) => {
       d="flex"
       alignItems="center"
       my={3}
+      onClick={() => {
+        setter(i);
+      }}
       borderBottom="1px solid"
       borderColor={`mode.${colorMode}.icon`}
     >
@@ -43,9 +47,6 @@ const LogItem = ({ method, path, success }: LogProps) => {
         )}
       </Box>
       <Flex alignItems="center" mb={4}>
-        <Text fontWeight={600} mr={1}>
-          {method}
-        </Text>
         <Text color={`mode.${colorMode}.tertiary`}>{path}</Text>
       </Flex>
     </Box>

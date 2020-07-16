@@ -28,20 +28,22 @@ const exchangeType = t.type({
 
 export type ExchangeType = t.TypeOf<typeof exchangeType>;
 
+const commandType = t.intersection([
+  t.type({
+    success: t.boolean,
+    exchange: t.array(exchangeType),
+  }),
+  t.partial({
+    comment: t.string,
+    priority: t.Integer,
+    error_message: t.union([t.string, t.null]),
+  }),
+]);
+
+export type CommandType = t.TypeOf<typeof commandType>;
+
 const v1 = t.type({
-  commands: t.array(
-    t.intersection([
-      t.type({
-        success: t.boolean,
-        exchange: t.array(exchangeType),
-      }),
-      t.partial({
-        comment: t.string,
-        priority: t.Integer,
-        error_message: t.union([t.string, t.null]),
-      }),
-    ])
-  ),
+  commands: t.array(commandType),
 });
 
 // for now, our UI expects the format of v0

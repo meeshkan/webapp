@@ -25,7 +25,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import Card from "../../../components/molecules/card";
 import { withError } from "../../../components/molecules/error";
-import FailureMessage from "../../../components/molecules/failureMessage";
+import Exchange from "../../../components/molecules/exchange";
 import LogItem from "../../../components/molecules/logItem";
 import * as _E from "../../../fp-ts/Either";
 import { LensTaskEither, lensTaskEitherHead } from "../../../monocle-ts";
@@ -192,6 +192,9 @@ export const getServerSideProps = ({
     withSession(req, "configuration.tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
 
+/**              a.exchange.length > 0 &&
+              (a.exchange[0].meta.apiType === "rest" ||
+                a.exchange[0].meta.apiType === undefined) */
 const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
   "Could not find this test resource.",
   ({
@@ -216,75 +219,25 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
         },
         (p) => ({
           ...p,
-          restLogs: p.logs.commands.filter(
-            (a) =>
-              a.exchange.length > 0 &&
-              (a.exchange[0].meta.apiType === "rest" ||
-                a.exchange[0].meta.apiType === undefined)
-          ),
-          graphqlLogs: p.logs.commands.filter(
-            (a) =>
-              a.exchange.length > 0 && a.exchange[0].meta.apiType === "graphql"
-          ),
-          failures: p.logs.commands.filter((a) => a.success === false),
+          index: p.index[0],
+          setIndex: p.index[1],
+          failures: p.logs.commands.filter((c) => !c.success),
         }),
-        (p) => ({
-          ...p,
-          restFailures: p.failures.filter(
-            (b) =>
-              b.exchange.length > 0 &&
-              (b.exchange[0].meta.apiType === "rest" ||
-                b.exchange[0].meta.apiType === undefined)
-          ),
-          graphqlFailures: p.failures.filter(
-            (b) =>
-              b.exchange.length > 0 && b.exchange[0].meta.apiType === "graphql"
-          ),
-        }),
-        ({
-          colorMode,
-          restFailures,
-          graphqlFailures,
-          graphqlLogs,
-          restLogs,
-          index: [index, setIndex],
-        }) => (
+        ({ colorMode, logs, failures, index, setIndex }) => (
           <Grid
             templateColumns="repeat(3, 1fr)"
             templateRows="repeat(2, minmax(204px, 45%))"
             gap={8}
           >
             <Card gridArea="1 / 2 / 4 / 1" heading="Tests">
-              {index === 0 ? (
-                restLogs.map((item, index) => (
+              {logs.commands.length > 0 ? (
+                logs.commands.map((item, i) => (
                   <LogItem
-                    key={index}
+                    key={i}
+                    i={i}
                     success={item.success}
-                    path={item.exchange[0].meta.path}
-                    method={item.exchange[0].request.method.toUpperCase()}
-                  />
-                ))
-              ) : index === 1 ? (
-                graphqlLogs.map((item, index) => (
-                  <LogItem
-                    key={index}
-                    success={item.success}
-                    path={item.exchange[0].meta.path}
-                    method={
-                      JSON.parse(item.exchange[0].request.body)[
-                        "query"
-                      ].startsWith("query")
-                        ? "QUERY"
-                        : JSON.parse(item.exchange[0].request.body)[
-                            "query"
-                          ].startsWith("mutation")
-                        ? "MUTATION"
-                        : JSON.parse(item.exchange[0].request.body)[
-                            "query"
-                          ].startsWith("subscription")
-                        ? "SUBSCRIPTION"
-                        : item.exchange[0].request.method.toUpperCase()
-                    }
+                    path={"Test case " + i}
+                    setter={setIndex}
                   />
                 ))
               ) : (
@@ -294,22 +247,12 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
 
             <Box gridArea="1 / 4 / 4 / 2" maxH="80vh" overflow="auto">
               <Flex justify="space-between" wrap="wrap">
-                <SegmentedControl
-                  currentIndex={index}
-                  options={["RESTful", "GraphQL"]}
-                  index={index}
-                  setIndex={setIndex}
-                />
                 <Heading
                   mb={4}
                   color={`mode.${colorMode}.title`}
                   fontWeight={900}
                   fontSize="xl"
                 >
-                  {restFailures.length + graphqlFailures.length} Test Failure
-                  {restFailures.length + graphqlFailures.length === 1
-                    ? null
-                    : "s"}
                   {testType === "Premium" ? (
                     <Code ml={2} fontSize="inherit" colorScheme="yellow">
                       <StarIcon mr={2} />
@@ -341,55 +284,13 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                 </Heading>
               </Flex>
 
-              {index === 0 ? (
-                restFailures.length > 0 ? (
-                  restFailures.map((item, index) => (
-                    <FailureMessage
-                      key={index}
-                      error_message={item.error_message}
-                      priority={item.priority}
-                      comment={item.comment}
-                      exchange={item.exchange[0]}
-                      method={item.exchange[0].request.method}
-                    />
-                  ))
-                ) : (
-                  <Text color={`mode.${colorMode}.text`}>
-                    No bugs found here!
-                  </Text>
-                )
-              ) : index === 1 ? (
-                graphqlFailures.length > 0 ? (
-                  graphqlFailures.map((item, index) => (
-                    <FailureMessage
-                      key={index}
-                      error_message={item.error_message}
-                      priority={item.priority}
-                      comment={item.comment}
-                      exchange={item.exchange[0]}
-                      method={
-                        JSON.parse(item.exchange[0].request.body)[
-                          "query"
-                        ].startsWith("query")
-                          ? "QUERY"
-                          : JSON.parse(item.exchange[0].request.body)[
-                              "query"
-                            ].startsWith("mutation")
-                          ? "MUTATION"
-                          : JSON.parse(item.exchange[0].request.body)[
-                              "query"
-                            ].startsWith("subscription")
-                          ? "SUBSCRIPTION"
-                          : item.exchange[0].request.method.toUpperCase()
-                      }
-                    />
-                  ))
-                ) : (
-                  <Text color={`mode.${colorMode}.text`}>
-                    No bugs found here!
-                  </Text>
-                )
-              ) : null}
+              {logs.commands[index] ? (
+                <Exchange key={index} command={logs.commands[index]} />
+              ) : (
+                <Text color={`mode.${colorMode}.text`}>
+                  No bugs found here!
+                </Text>
+              )}
             </Box>
           </Grid>
         )
