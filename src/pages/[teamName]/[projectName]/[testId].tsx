@@ -284,6 +284,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                   </Link>
                 </Code>
               )}
+
               {logs.commands[index] ? (
                 <Exchange key={index} command={logs.commands[index]} />
               ) : (

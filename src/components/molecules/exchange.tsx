@@ -20,7 +20,6 @@ import ReactMarkdown from "react-markdown";
 import Renderers from "./markdownComponents";
 import prettier from "prettier/standalone";
 import parserGraphql from "prettier/parser-graphql";
-import { gqlOperatorName } from "../../utils/graphql";
 
 type ExchangeProps = {
   command: CommandType;
@@ -105,6 +104,10 @@ const ExchangeMessage = ({ command }: ExchangeProps) => {
           />
         )}
       </Box>
+
+      {command.length > 0 ? (
+        <Heading>Stateful steps in this test and their results:</Heading>
+      ) : null}
 
       <Accordion defaultIndex={[0]} allowMultiple __css={{}}>
         {command.exchange.map((exchange, index) => (
