@@ -122,6 +122,7 @@ const ExchangeMessage = ({ command, commands }: ExchangeProps) => {
       <Accordion defaultIndex={[0]} allowMultiple __css={{}}>
         {command.exchange.map((exchange, index) => (
           <AccordionItem
+            key={index}
             border="none"
             mb={8}
             borderRadius="sm"
