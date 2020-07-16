@@ -231,7 +231,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                     key={i}
                     i={i}
                     success={item.success}
-                    path={"Test case " + i}
+                    path={item.test_case || "Test case " + i}
                     setIndex={setIndex}
                   />
                 ))
