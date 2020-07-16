@@ -6,10 +6,10 @@ type LogProps = {
   i: number;
   path: string;
   success: boolean;
-  setter: React.Dispatch<React.SetStateAction<number>>;
+  setIndex: React.Dispatch<React.SetStateAction<number>>;
 };
 
-const LogItem = ({ i, path, success, setter }: LogProps) => {
+const LogItem = ({ i, path, success, setIndex }: LogProps) => {
   const { colorMode } = useColorMode();
   const cyanBackground = { light: "cyan.50", dark: "cyan.900" };
   const cyanBorder = { light: "cyan.700", dark: "cyan.200" };
@@ -21,7 +21,7 @@ const LogItem = ({ i, path, success, setter }: LogProps) => {
       alignItems="center"
       my={3}
       onClick={() => {
-        setter(i);
+        setIndex(i);
       }}
       borderBottom="1px solid"
       borderColor={`mode.${colorMode}.icon`}

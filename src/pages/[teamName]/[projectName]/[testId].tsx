@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import {
-  Accordion,
   Box,
   Code,
   Grid,
@@ -10,10 +9,6 @@ import {
   useColorMode,
   Link,
   Flex,
-  AccordionItem,
-  AccordionButton,
-  AccordionIcon,
-  AccordionPanel,
 } from "@chakra-ui/core";
 import { StarIcon } from "../../../theme/icons";
 import * as E from "fp-ts/lib/Either";
@@ -237,7 +232,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                     i={i}
                     success={item.success}
                     path={"Test case " + i}
-                    setter={setIndex}
+                    setIndex={setIndex}
                   />
                 ))
               ) : (
