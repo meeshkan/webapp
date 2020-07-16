@@ -1,19 +1,8 @@
 import React, { useState } from "react";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
-import {
-  Box,
-  Code,
-  Grid,
-  Heading,
-  Text,
-  useColorMode,
-  Link,
-  Flex,
-} from "@chakra-ui/core";
-import { StarIcon } from "../../../theme/icons";
+import { Box, Code, Grid, Text, useColorMode, Link } from "@chakra-ui/core";
 import * as E from "fp-ts/lib/Either";
 import * as NEA from "fp-ts/lib/NonEmptyArray";
-import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
@@ -44,7 +33,6 @@ import { confirmOrCreateUser } from "../../../utils/user";
 import { GET_TEST_QUERY } from "../../../gql/pages/[teamName]/[projectName]/[testId]";
 import { eightBaseClient, gqlOperatorName } from "../../../utils/graphql";
 import Error from "../../../components/molecules/error";
-import { SegmentedControl } from "../../../components/molecules/switch";
 
 type NegativeTestFetchOutcome =
   | NOT_LOGGED_IN
