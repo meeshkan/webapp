@@ -570,6 +570,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                       color={`mode.${colorMode}.text`}
                       fontSize="sm"
                       p="0 0 4px 0"
+                      mb={0}
                     >
                       Logo
                     </FormLabel>

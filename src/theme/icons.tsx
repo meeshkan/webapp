@@ -122,3 +122,17 @@ export const FallbackIcon = createIcon({
     />
   ),
 });
+
+export const ArrowRightIcon = createIcon({
+  displayName: "ArrowRightIcon",
+  viewBox: "0 0 16 16",
+  path: (
+    <path
+      d="M9.2001 4L14.0002 8M14.0002 8L9.2001 12M14.0002 8L2.00021 8"
+      stroke="currentColor"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+});

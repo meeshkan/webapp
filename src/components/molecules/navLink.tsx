@@ -62,7 +62,7 @@ export const ItemLink = forwardRef(
     const { colorMode } = useColorMode();
 
     return (
-      <NavLink href={href} aria-label={`Menu item linking to ${children}`}>
+      <NavLink href={href}>
         {(isActive) => (
           <SideNavLink
             ref={ref}

@@ -1,35 +1,21 @@
 import React, { useState } from "react";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
-import {
-  Accordion,
-  Box,
-  Code,
-  Grid,
-  Heading,
-  Text,
-  useColorMode,
-  Link,
-  Flex,
-  AccordionItem,
-  AccordionButton,
-  AccordionIcon,
-  AccordionPanel,
-} from "@chakra-ui/core";
-import { StarIcon } from "../../../theme/icons";
+import { Box, Code, Grid, Text, useColorMode, Link } from "@chakra-ui/core";
 import * as E from "fp-ts/lib/Either";
-import { flow } from "fp-ts/lib/function";
+import * as NEA from "fp-ts/lib/NonEmptyArray";
 import { pipe } from "fp-ts/lib/pipeable";
+import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as _RTE from "../../../fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import Card from "../../../components/molecules/card";
 import { withError } from "../../../components/molecules/error";
-import FailureMessage from "../../../components/molecules/failureMessage";
+import Exchange from "../../../components/molecules/exchange";
 import LogItem from "../../../components/molecules/logItem";
 import * as _E from "../../../fp-ts/Either";
 import { LensTaskEither, lensTaskEitherHead } from "../../../monocle-ts";
-import { versionTriage } from "../../../utils/testLog";
+import { versionTriage, CommandType } from "../../../utils/testLog";
 import { withSession } from "../../../pages/api/session";
 import {
   defaultGQLErrorHandler,
@@ -45,9 +31,8 @@ import {
 } from "../../../utils/error";
 import { confirmOrCreateUser } from "../../../utils/user";
 import { GET_TEST_QUERY } from "../../../gql/pages/[teamName]/[projectName]/[testId]";
-import { eightBaseClient } from "../../../utils/graphql";
+import { eightBaseClient, gqlOperatorName } from "../../../utils/graphql";
 import Error from "../../../components/molecules/error";
-import { SegmentedControl } from "../../../components/molecules/switch";
 
 type NegativeTestFetchOutcome =
   | NOT_LOGGED_IN
@@ -192,6 +177,20 @@ export const getServerSideProps = ({
     withSession(req, "configuration.tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
 
+const smartItemTestCase = (ct: CommandType, i: number): string =>
+  pipe(
+    NEA.fromArray(ct.exchange),
+    O.fold(
+      () => "Test case " + i,
+      (a) =>
+        NEA.head(a).meta.apiType === "graphql"
+          ? gqlOperatorName(NEA.head(a).request.body)
+          : NEA.head(a).request.method.toUpperCase() +
+            " " +
+            NEA.head(a).meta.path
+    )
+  );
+
 const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
   "Could not find this test resource.",
   ({
@@ -216,71 +215,30 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
         },
         (p) => ({
           ...p,
-          restLogs: p.logs.commands.filter(
-            (a) =>
-              a.exchange[0].meta.apiType === "rest" ||
-              a.exchange[0].meta.apiType === undefined
-          ),
-          graphqlLogs: p.logs.commands.filter(
-            (a) => a.exchange[0].meta.apiType === "graphql"
-          ),
-          failures: p.logs.commands.filter((a) => a.success === false),
+          index: p.index[0],
+          setIndex: p.index[1],
+          failures: p.logs.commands.filter((c) => !c.success),
         }),
-        (p) => ({
-          ...p,
-          restFailures: p.failures.filter(
-            (b) =>
-              b.exchange[0].meta.apiType === "rest" ||
-              b.exchange[0].meta.apiType === undefined
-          ),
-          graphqlFailures: p.failures.filter(
-            (b) => b.exchange[0].meta.apiType === "graphql"
-          ),
-        }),
-        ({
-          colorMode,
-          restFailures,
-          graphqlFailures,
-          graphqlLogs,
-          restLogs,
-          index: [index, setIndex],
-        }) => (
+        ({ colorMode, logs, failures, index, setIndex }) => (
           <Grid
             templateColumns="repeat(3, 1fr)"
             templateRows="repeat(2, minmax(204px, 45%))"
             gap={8}
           >
-            <Card gridArea="1 / 2 / 4 / 1" heading="Tests">
-              {index === 0 ? (
-                restLogs.map((item, index) => (
+            <Card
+              gridArea="1 / 2 / 4 / 1"
+              heading={`${testType} test cases — ${failures.length} failure${
+                failures.length === 1 ? "" : "s"
+              }`}
+            >
+              {logs.commands.length > 0 ? (
+                logs.commands.map((item, i) => (
                   <LogItem
-                    key={index}
+                    key={i}
+                    i={i}
                     success={item.success}
-                    path={item.exchange[0].meta.path}
-                    method={item.exchange[0].request.method.toUpperCase()}
-                  />
-                ))
-              ) : index === 1 ? (
-                graphqlLogs.map((item, index) => (
-                  <LogItem
-                    key={index}
-                    success={item.success}
-                    path={item.exchange[0].meta.path}
-                    method={
-                      JSON.parse(item.exchange[0].request.body)[
-                        "query"
-                      ].startsWith("query")
-                        ? "QUERY"
-                        : JSON.parse(item.exchange[0].request.body)[
-                            "query"
-                          ].startsWith("mutation")
-                        ? "MUTATION"
-                        : JSON.parse(item.exchange[0].request.body)[
-                            "query"
-                          ].startsWith("subscription")
-                        ? "SUBSCRIPTION"
-                        : item.exchange[0].request.method.toUpperCase()
-                    }
+                    path={item.test_case || smartItemTestCase(item, i)}
+                    setIndex={setIndex}
                   />
                 ))
               ) : (
@@ -289,103 +247,43 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
             </Card>
 
             <Box gridArea="1 / 4 / 4 / 2" maxH="80vh" overflow="auto">
-              <Flex justify="space-between" wrap="wrap">
-                <SegmentedControl
-                  currentIndex={index}
-                  options={["RESTful", "GraphQL"]}
-                  index={index}
-                  setIndex={setIndex}
-                />
-                <Heading
+              {testType !== "Premium" && (
+                <Code
                   mb={4}
-                  color={`mode.${colorMode}.title`}
-                  fontWeight={900}
                   fontSize="xl"
+                  fontWeight={900}
+                  colorScheme={
+                    status === "In progress"
+                      ? "yellow"
+                      : status === "Passing"
+                      ? "cyan"
+                      : status === "Failed"
+                      ? "red"
+                      : "gray"
+                  }
                 >
-                  {restFailures.length + graphqlFailures.length} Test Failure
-                  {restFailures.length + graphqlFailures.length === 1
-                    ? null
-                    : "s"}
-                  {testType === "Premium" ? (
-                    <Code ml={2} fontSize="inherit" colorScheme="yellow">
-                      <StarIcon mr={2} />
-                      {testType}
-                    </Code>
-                  ) : (
-                    <Code
-                      ml={2}
-                      fontSize="inherit"
-                      colorScheme={
-                        status === "In progress"
-                          ? "yellow"
-                          : status === "Passing"
-                          ? "cyan"
-                          : status === "Failed"
-                          ? "red"
-                          : null
-                      }
-                    >
-                      {location}@
-                      <Link
-                        href={`https://github.com/${teamName}/${projectName}/commit/${commitHash}`}
-                        color="inherit"
-                      >
-                        {commitHash.slice(0, 7)}
-                      </Link>
-                    </Code>
-                  )}
-                </Heading>
-              </Flex>
+                  {location}
+                  {` branch -> commit `}
+                  <Link
+                    href={`https://github.com/${teamName}/${projectName}/commit/${commitHash}`}
+                    color="inherit"
+                  >
+                    {commitHash.slice(0, 7)}
+                  </Link>
+                </Code>
+              )}
 
-              {index === 0 ? (
-                restFailures.length > 0 ? (
-                  restFailures.map((item, index) => (
-                    <FailureMessage
-                      key={index}
-                      error_message={item.error_message}
-                      priority={item.priority}
-                      comment={item.comment}
-                      exchange={item.exchange[0]}
-                      method={item.exchange[0].request.method}
-                    />
-                  ))
-                ) : (
-                  <Text color={`mode.${colorMode}.text`}>
-                    No bugs found here!
-                  </Text>
-                )
-              ) : index === 1 ? (
-                graphqlFailures.length > 0 ? (
-                  graphqlFailures.map((item, index) => (
-                    <FailureMessage
-                      key={index}
-                      error_message={item.error_message}
-                      priority={item.priority}
-                      comment={item.comment}
-                      exchange={item.exchange[0]}
-                      method={
-                        JSON.parse(item.exchange[0].request.body)[
-                          "query"
-                        ].startsWith("query")
-                          ? "QUERY"
-                          : JSON.parse(item.exchange[0].request.body)[
-                              "query"
-                            ].startsWith("mutation")
-                          ? "MUTATION"
-                          : JSON.parse(item.exchange[0].request.body)[
-                              "query"
-                            ].startsWith("subscription")
-                          ? "SUBSCRIPTION"
-                          : item.exchange[0].request.method.toUpperCase()
-                      }
-                    />
-                  ))
-                ) : (
-                  <Text color={`mode.${colorMode}.text`}>
-                    No bugs found here!
-                  </Text>
-                )
-              ) : null}
+              {logs.commands[index] ? (
+                <Exchange
+                  key={index}
+                  command={logs.commands[index]}
+                  commands={logs.commands.length > 0}
+                />
+              ) : (
+                <Text color={`mode.${colorMode}.text`}>
+                  No bugs found here!
+                </Text>
+              )}
             </Box>
           </Grid>
         )
