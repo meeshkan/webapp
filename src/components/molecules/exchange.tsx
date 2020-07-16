@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 import Renderers from "./markdownComponents";
 import prettier from "prettier/standalone";
 import parserGraphql from "prettier/parser-graphql";
+import { gqlOperatorName } from "../../utils/graphql";
 
 type ExchangeProps = {
   command: CommandType;
@@ -76,19 +77,7 @@ const ExchangeMessage = ({ command }: ExchangeProps) => {
             <Flex>
               <Text fontWeight={600} mr={2}>
                 {exchange.meta.apiType === "graphql"
-                  ? JSON.parse(exchange.request.body)["query"].startsWith(
-                      "query"
-                    )
-                    ? "QUERY"
-                    : JSON.parse(exchange.request.body)["query"].startsWith(
-                        "mutation"
-                      )
-                    ? "MUTATION"
-                    : JSON.parse(exchange.request.body)["query"].startsWith(
-                        "subscription"
-                      )
-                    ? "SUBSCRIPTION"
-                    : exchange.request.method.toUpperCase()
+                  ? gqlOperatorName(exchange.request.body)
                   : exchange.request.method.toUpperCase()}
               </Text>
               <Text fontWeight={600}>{exchange.meta.path}</Text>
