@@ -20,6 +20,7 @@ import ReactMarkdown from "react-markdown";
 import Renderers from "./markdownComponents";
 import prettier from "prettier/standalone";
 import parserGraphql from "prettier/parser-graphql";
+import { gqlOperatorName } from "../../utils/graphql";
 
 type ExchangeProps = {
   command: CommandType;

@@ -12,8 +12,10 @@ import {
 } from "@chakra-ui/core";
 import { StarIcon } from "../../../theme/icons";
 import * as E from "fp-ts/lib/Either";
+import * as NEA from "fp-ts/lib/NonEmptyArray";
 import { flow } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
+import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as _RTE from "../../../fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -24,7 +26,7 @@ import Exchange from "../../../components/molecules/exchange";
 import LogItem from "../../../components/molecules/logItem";
 import * as _E from "../../../fp-ts/Either";
 import { LensTaskEither, lensTaskEitherHead } from "../../../monocle-ts";
-import { versionTriage } from "../../../utils/testLog";
+import { versionTriage, CommandType } from "../../../utils/testLog";
 import { withSession } from "../../../pages/api/session";
 import {
   defaultGQLErrorHandler,
@@ -40,7 +42,7 @@ import {
 } from "../../../utils/error";
 import { confirmOrCreateUser } from "../../../utils/user";
 import { GET_TEST_QUERY } from "../../../gql/pages/[teamName]/[projectName]/[testId]";
-import { eightBaseClient } from "../../../utils/graphql";
+import { eightBaseClient, gqlOperatorName } from "../../../utils/graphql";
 import Error from "../../../components/molecules/error";
 import { SegmentedControl } from "../../../components/molecules/switch";
 
@@ -187,6 +189,20 @@ export const getServerSideProps = ({
     withSession(req, "configuration.tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
 
+const smartItemTestCase = (ct: CommandType, i: number): string =>
+  pipe(
+    NEA.fromArray(ct.exchange),
+    O.fold(
+      () => "Test case " + i,
+      (a) =>
+        NEA.head(a).meta.apiType === "graphql"
+          ? gqlOperatorName(NEA.head(a).request.body)
+          : NEA.head(a).request.method.toUpperCase() +
+            " " +
+            NEA.head(a).meta.path
+    )
+  );
+
 const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
   "Could not find this test resource.",
   ({
@@ -233,7 +249,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                     key={i}
                     i={i}
                     success={item.success}
-                    path={item.testCase || "Test case " + i}
+                    path={item.test_case || smartItemTestCase(item, i)}
                     setIndex={setIndex}
                   />
                 ))
