@@ -74,8 +74,22 @@ const ExchangeMessage = ({ command }: ExchangeProps) => {
           </Flex>
         </Heading>
 
-        {command.exchange.length >= 1 &&
-          "Number of steps in this stateful test: " + command.exchange.length}
+        {command.test_case && (
+          <Flex mb={2}>
+            <Text color={`mode.${colorMode}.title`} mr={2}>
+              Test case:
+            </Text>
+            <Text color={`mode.${colorMode}.text`} fontStyle="italic">
+              {command.test_case}
+            </Text>
+          </Flex>
+        )}
+
+        {command.exchange.length > 1 && (
+          <Text color={`mode.${colorMode}.text`} mb={2}>
+            {`Number of steps in this stateful test: ${command.exchange.length}`}
+          </Text>
+        )}
 
         {command.error_message && (
           <Text mb={2} mr={2}>
