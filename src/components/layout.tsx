@@ -1,10 +1,7 @@
 import React from "react";
-import { Stack, useColorMode, InitializeColorMode } from "@chakra-ui/core";
-import customTheme from "../theme";
+import { Stack, InitializeColorMode } from "@chakra-ui/core";
 
 export default function Layout({ children }) {
-  const { colorMode } = useColorMode();
-  const brandColorTheme = customTheme.colors.mode[colorMode];
   return (
     <>
       <InitializeColorMode />

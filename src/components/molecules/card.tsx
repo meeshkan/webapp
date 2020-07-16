@@ -80,6 +80,7 @@ const Card = ({
           minH={minH && minH}
           borderRadius="sm"
           gridArea={gridArea}
+          position="relative"
           overflow="auto"
         >
           {headingLink ? (
