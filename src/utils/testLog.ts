@@ -37,6 +37,7 @@ const commandType = t.intersection([
     comment: t.string,
     priority: t.Integer,
     error_message: t.union([t.string, t.null]),
+    testCase: t.string,
   }),
 ]);
 
