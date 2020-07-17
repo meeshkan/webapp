@@ -610,6 +610,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                     </Link>
                   ) : null}
                 </FormControl>
+                <Box h={65} />
                 <Flex
                   justify="flex-end"
                   pos="absolute"
