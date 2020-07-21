@@ -66,6 +66,7 @@ const ExchangeMessage = ({ command, commands }: ExchangeProps) => {
               <Popover>
                 <PopoverTrigger>
                   <Text
+                    cursor="pointer"
                     color={
                       command.priority >= 4
                         ? cyan[colorMode]
