@@ -549,11 +549,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
         onSubmit,
       }) => (
         <>
-          <Grid
-            templateColumns="repeat(3, 1fr)"
-            templateRows="repeat(2, 1fr)"
-            gap={8}
-          >
+          <Grid templateColumns="repeat(3, 1fr)" templateRows="auto" gap={8}>
             <Card gridArea="1 / 1 / 2 / 2" heading="Team settings">
               <Box as="form" onSubmit={handleSubmit(onSubmit)}>
                 <Flex align="center" mt={4}>
