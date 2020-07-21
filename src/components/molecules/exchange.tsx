@@ -11,6 +11,14 @@ import {
   AccordionButton,
   AccordionPanel,
   AccordionIcon,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverArrow,
+  PopoverCloseButton,
+  PopoverHeader,
+  PopoverBody,
+  Link,
 } from "@chakra-ui/core";
 import { CheckmarkIcon, XmarkIcon } from "../../theme/icons";
 
@@ -55,21 +63,42 @@ const ExchangeMessage = ({ command, commands }: ExchangeProps) => {
             )}
             {command.success ? "Test case passed" : "Test case failed"}
             {command.priority && (
-              <Text
-                color={
-                  command.priority >= 4
-                    ? cyan[colorMode]
-                    : command.priority >= 3
-                    ? yellow[colorMode]
-                    : command.priority >= 0
-                    ? red[colorMode]
-                    : "gray.500"
-                }
-                fontWeight={900}
-                ml={4}
-              >
-                Priority level {command.priority}
-              </Text>
+              <Popover>
+                <PopoverTrigger>
+                  <Text
+                    color={
+                      command.priority >= 4
+                        ? cyan[colorMode]
+                        : command.priority >= 3
+                        ? yellow[colorMode]
+                        : command.priority >= 0
+                        ? red[colorMode]
+                        : "gray.500"
+                    }
+                    fontWeight={900}
+                    ml={4}
+                  >
+                    Priority level {command.priority}
+                  </Text>
+                </PopoverTrigger>
+                <PopoverContent borderRadius="sm">
+                  <PopoverArrow />
+                  <PopoverCloseButton />
+                  <PopoverHeader fontSize="md">Prioritization</PopoverHeader>
+                  <PopoverBody fontWeight={400} fontSize="md" lineHeight="tall">
+                    Higher priority / more urgent bugs are lower value (1-3)
+                    and, and lower priority / less urgent bugs (4-5). More
+                    information about our classification{" "}
+                    <Link
+                      href="https://meeshkan.com/docs/prioritizing-bugs/"
+                      // color={`mode.${colorMode}.link`}
+                      isExternal
+                    >
+                      can be found in the docs.
+                    </Link>
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
             )}
           </Flex>
         </Heading>
