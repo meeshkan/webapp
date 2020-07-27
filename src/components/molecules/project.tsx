@@ -47,7 +47,7 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
           <Avatar
             src={session.user.picture}
             showBorder={true}
-            borderColor={`mode.${colorMode}.background`}
+            borderColor="transparent"
             backgroundColor="transparent"
             icon={<FallbackIcon color={`mode.${colorMode}.icon`} />}
             name={session.user.name}
