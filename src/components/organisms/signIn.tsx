@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Box,
   Heading,
   Stack,
   LightMode,
@@ -9,9 +8,11 @@ import {
   useColorMode,
   Link,
   SimpleGrid,
+  Image,
 } from "@chakra-ui/core";
 import { useRouter } from "next/router";
 import Card from "../molecules/card";
+import { GithubIcon } from "../../theme/icons";
 
 const SignIn = () => {
   const { colorMode } = useColorMode();
@@ -19,7 +20,28 @@ const SignIn = () => {
 
   return (
     <SimpleGrid columns={2} gap={8} h="80vh">
-      <Card></Card>
+      <Card>
+        <Stack
+          direction="column"
+          alignItems="center"
+          justifyContent="center"
+          h="100%"
+        >
+          <Text
+            textAlign="center"
+            mb={0}
+            lineHeight="tall"
+            fontSize="xl"
+            fontWeight={500}
+          >
+            We save teams valuable development time
+          </Text>
+          <Image
+            maxW="380px"
+            src="https://media.graphcms.com/xTqnFOUZRDqeKsSuDiuN"
+          />
+        </Stack>
+      </Card>
 
       <Card>
         <Heading
@@ -66,6 +88,7 @@ const SignIn = () => {
               colorScheme="gray"
               onClick={() => router.push("/api/login")}
             >
+              <GithubIcon mr={2} />
               Log in
             </Button>
           </Stack>
@@ -85,6 +108,7 @@ const SignIn = () => {
                 colorScheme="red"
                 onClick={() => router.push("/api/login")}
               >
+                <GithubIcon mr={2} />
                 Sign up
               </Button>
             </LightMode>
