@@ -8,7 +8,7 @@ import {
   useColorMode,
   Link,
   SimpleGrid,
-  Image,
+  Image
 } from "@chakra-ui/core";
 import { useRouter } from "next/router";
 import Card from "../molecules/card";
@@ -37,6 +37,7 @@ const SignIn = () => {
             We save teams valuable development time
           </Text>
           <Image
+            alt=""
             maxW="380px"
             src="https://media.graphcms.com/xTqnFOUZRDqeKsSuDiuN"
           />
