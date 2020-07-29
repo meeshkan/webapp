@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Menu,
   MenuButton,
@@ -11,9 +11,14 @@ import {
   Image,
   Text,
   Portal,
-  Avatar,
+  Avatar
 } from "@chakra-ui/core";
-import { ChevronDownIcon, MoonIcon, SunIcon } from "@chakra-ui/icons";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  MoonIcon,
+  SunIcon
+} from "@chakra-ui/icons";
 import { FallbackIcon } from "../../theme/icons";
 import Link from "next/link";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
@@ -26,6 +31,7 @@ interface IProjectSettingsProps {
 
 const ProjectSettings = ({ session }: IProjectSettingsProps) => {
   const { colorMode, toggleColorMode } = useColorMode();
+  const [isMenuOpen, toggleMenu] = useState(false);
   const fetchedTeamsAndThunk = useTeams(session);
   const teams = isLeft(fetchedTeamsAndThunk[0])
     ? // we are loading
@@ -38,11 +44,17 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
     <>
       <Menu closeOnSelect={false} placement="bottom-end">
         <MenuButton
+          aria-label={
+            isMenuOpen
+              ? "Close the navigation menu"
+              : "Open the navigation menu"
+          }
           display="flex"
           alignItems="center"
           backgroundColor={`mode.${colorMode}.background`}
           borderRadius="sm"
           p={0}
+          onClick={() => toggleMenu(!isMenuOpen)}
         >
           <Avatar
             src={session.user.picture}
@@ -50,7 +62,7 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
             borderColor="transparent"
             backgroundColor="transparent"
             icon={<FallbackIcon color={`mode.${colorMode}.icon`} />}
-            name={session.user.name}
+            name=""
             h={10}
             w={10}
             borderRadius="sm"
@@ -63,7 +75,11 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
           >
             {session.user.nickname}
           </Text>
-          <ChevronDownIcon mr={2} color={`mode.${colorMode}.tertiary`} />
+          {isMenuOpen ? (
+            <ChevronUpIcon mr={2} color={`mode.${colorMode}.tertiary`} />
+          ) : (
+            <ChevronDownIcon mr={2} color={`mode.${colorMode}.tertiary`} />
+          )}
         </MenuButton>
         <Portal>
           <MenuList border="none" backgroundColor={`mode.${colorMode}.card`}>
@@ -84,7 +100,10 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
                 {colorMode === "light" ? "Dark mode" : "Light mode"}
               </MenuItem>
             </MenuGroup>
-            <MenuDivider borderColor={`mode.${colorMode}.icon`} />
+            <MenuDivider
+              borderColor={`mode.${colorMode}.icon`}
+              title="New menu section"
+            />
             <MenuGroup title="Teams" color={`mode.${colorMode}.title`}>
               {teams.map((team, index) => (
                 <Link href={`/${team.name}`} key={index}>
@@ -98,7 +117,7 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
                     <Image
                       src={team.image && team.image.downloadUrl}
                       fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
-                      alt={`${team.name}'s organization image`}
+                      alt=""
                       borderRadius="sm"
                       border="1px solid"
                       borderColor={`mode.${colorMode}.icon`}
@@ -112,7 +131,10 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
               ))}
             </MenuGroup>
 
-            <MenuDivider borderColor={`mode.${colorMode}.icon`} />
+            <MenuDivider
+              borderColor={`mode.${colorMode}.icon`}
+              title="New menu section"
+            />
 
             <MenuGroup title="Other" color={`mode.${colorMode}.title`}>
               <MenuItem color={`mode.${colorMode}.text`}>
