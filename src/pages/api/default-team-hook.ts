@@ -11,6 +11,7 @@ import {
   ASSOCIATE_PHOTO_WITH_TEAM,
   CREATE_TEAM_FROM_USER_NAME,
   GET_TEAM_COUNT,
+  CREATE_DEMO_BANK,
 } from "../../gql/pages/api/default-team-hook";
 import {
   defaultGQLErrorHandler,
@@ -58,6 +59,28 @@ const createTeamFromUserName = (userId: string) => (
       defaultGQLErrorHandler("mutation to insert default team")
     ),
     // todo - add type safety for the query
+    TE.chain(({ userUpdate: { team: { items: [{ id }] } } }) => TE.right(id))
+  );
+
+const addDemoToTeam = (userId: string, teamId: string) => (
+  session: ISession
+): TE.TaskEither<NegativeDefaultTeamHookOutcome, string> =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        eightBaseClient(session).request(CREATE_DEMO_BANK, {
+          teamName: session.user.nickname,
+          userId: getUserIdFromIdOrEnv(userId),
+          namePlusTeamName: `demo bank% [/!` + session.user.nickname,
+          nodeIdPlusTeamId: `MDEwOlJlcG9zaXRvcnkyNzk4NTM5NTc=% [/!` + teamId,
+          premium1: `premium-1-` + session.user.nickname,
+          standard1: `standard-1-` + session.user.nickname,
+          standard2: `standard-2-` + session.user.nickname,
+          standard3: `standard-3-` + session.user.nickname,
+          standard4: `standard-4-` + session.user.nickname,
+        }),
+      defaultGQLErrorHandler("mutation to add demo bank to default team")
+    ),
     TE.chain(({ userUpdate: { team: { items: [{ id }] } } }) => TE.right(id))
   );
 
@@ -148,6 +171,7 @@ export default (req: NextApiRequest, res: NextApiResponse) =>
     RTE.chain(({ id }) =>
       pipe(
         createTeamFromUserName(id),
+        RTE.chain((teamId) => addDemoToTeam(id, teamId)),
         RTE.chain((teamId) => uploadPhotoForTeam(id, teamId))
       )
     ),
