@@ -51,9 +51,9 @@ export const ASSOCIATE_PHOTO_WITH_TEAM = `mutation(
   }
 }`;
 
-export const CREATE_DEMO_BANK = `mutation ADD_BANK_TO_TEAM(
+export const CREATE_DEMO_BANK = `mutation(
   $userId: ID!
-  $teamName: String!
+  $teamId: ID!
   $namePlusTeamName: String!
   $nodeIdPlusTeamId: String!
   $premium1: String!
@@ -67,11 +67,11 @@ export const CREATE_DEMO_BANK = `mutation ADD_BANK_TO_TEAM(
     data: {
       team: {
         update: {
-          filter: { name: $teamName }
+          filter: { id: $teamId }
           data: {
             project: {
               create: {
-                name: "demo bank"
+                name: "demoBank"
                 namePlusTeamName: $namePlusTeamName
                 configuration: {
                   create: {
@@ -83,7 +83,7 @@ export const CREATE_DEMO_BANK = `mutation ADD_BANK_TO_TEAM(
                 }
                 repository: {
                   create: {
-                    name: "demo bank"
+                    name: "bank"
                     owner: "Meeshkan"
                     nodeIdPlusTeamId: $nodeIdPlusTeamId
                     nodeId: "MDEwOlJlcG9zaXRvcnkyNzk4NTM5NTc="
@@ -135,7 +135,7 @@ export const CREATE_DEMO_BANK = `mutation ADD_BANK_TO_TEAM(
       }
     }
   ) {
-    team(filter: { name: { equals: $teamName } }) {
+    team(filter: { id: { equals: $teamId } }) {
       items {
         id
       }

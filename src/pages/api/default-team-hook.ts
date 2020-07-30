@@ -69,7 +69,7 @@ const addDemoToTeam = (userId: string, teamId: string) => (
     TE.tryCatch(
       () =>
         eightBaseClient(session).request(CREATE_DEMO_BANK, {
-          teamName: session.user.nickname,
+          teamId: teamId,
           userId: getUserIdFromIdOrEnv(userId),
           namePlusTeamName: `demo bank% [/!` + session.user.nickname,
           nodeIdPlusTeamId: `MDEwOlJlcG9zaXRvcnkyNzk4NTM5NTc=% [/!` + teamId,
