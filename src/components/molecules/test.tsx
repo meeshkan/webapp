@@ -49,6 +49,8 @@ export const Test = ({
                 ? "cyan"
                 : status === "Failed"
                 ? "red"
+                : status === "Build failed"
+                ? "gray"
                 : null
             }
             fontWeight={600}
