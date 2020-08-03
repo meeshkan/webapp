@@ -200,12 +200,6 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
   }) =>
     status === "In progress" ? (
       <div>Your tests are currently in progress.</div>
-    ) : JSON.parse(log)["build-error"] ? (
-      <Error
-        errorMessage={`It looks like we couldn't build your repository for testing. Please consult the bulid log ${
-          JSON.parse(log)["build-error"]
-        }`}
-      />
     ) : (
       pipe(
         {
@@ -241,8 +235,10 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                     setIndex={setIndex}
                   />
                 ))
+              ) : JSON.parse(log)["build-error"] ? (
+                <Text mt={2}>No Tests were run.</Text>
               ) : (
-                <div>No endpoints were picked up during this test.</div>
+                <Text>No endpoints were picked up during this test.</Text>
               )}
             </Card>
 
@@ -259,7 +255,9 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                       ? "cyan"
                       : status === "Failed"
                       ? "red"
-                      : "gray"
+                      : status === "Build failed"
+                      ? "gray"
+                      : null
                   }
                 >
                   {location}
@@ -279,6 +277,20 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                   command={logs.commands[index]}
                   commands={logs.commands.length > 0}
                 />
+              ) : JSON.parse(log)["build-error"] ? (
+                <>
+                  <Text lineHeight="tall">
+                    It looks like we couldn't build your repository for testing.
+                    Please consult the bulid log:
+                  </Text>
+                  <Link
+                    href={JSON.parse(log)["build-error"]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {JSON.parse(log)["build-error"]}
+                  </Link>
+                </>
               ) : (
                 <Text color={`mode.${colorMode}.text`}>
                   No bugs found here!
