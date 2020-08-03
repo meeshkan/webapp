@@ -255,7 +255,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                       ? "cyan"
                       : status === "Failed"
                       ? "red"
-                      : status === "Build failed"
+                      : status === "Build error"
                       ? "gray"
                       : null
                   }

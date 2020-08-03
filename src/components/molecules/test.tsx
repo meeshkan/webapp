@@ -49,7 +49,7 @@ export const Test = ({
                 ? "cyan"
                 : status === "Failed"
                 ? "red"
-                : status === "Build failed"
+                : status === "Build error"
                 ? "gray"
                 : null
             }
