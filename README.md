@@ -1,6 +1,6 @@
 # Meeshkan Webapp
 
-⚠️ _Meeshkan is currently in alpha and by invitation only. [Request alpha access](https://meeshkan.com/) if you're interested._
+You can sign up for Meeshkan at [https://app.meeshkan.com/](https://app.meeshkan.com/).
 
 Repositories in, bug fixes out. [Meeshkan](https://meeshkan.com/) is an automated testing tool designed to find bugs in your projects. In its current state, it's built to handle APIs and third-party services. Once installed, Meeshkan runs weekly and submits issues to your repository when it finds bugs.
 
