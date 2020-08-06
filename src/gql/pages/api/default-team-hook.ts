@@ -73,22 +73,6 @@ export const CREATE_DEMO_BANK = `mutation(
               create: {
                 name: "demoBank"
                 namePlusTeamName: $namePlusTeamName
-                configuration: {
-                  create: {
-                    buildCommand: "npm install && npm start"
-                    openAPISpec: "http://localhost:4000/bank/openapi"
-                    graphQLSchema: "http://localhost:4000/bank/graphql"
-                    directory: "./"
-                  }
-                }
-                repository: {
-                  create: {
-                    name: "bank"
-                    owner: "Meeshkan"
-                    nodeIdPlusTeamId: $nodeIdPlusTeamId
-                    nodeId: "MDEwOlJlcG9zaXRvcnkyNzk4NTM5NTc="
-                  }
-                }
                 tests: {
                   create: [
                     {
@@ -127,6 +111,22 @@ export const CREATE_DEMO_BANK = `mutation(
                       testType: "Standard"
                     }
                   ]
+                }
+                configuration: {
+                  create: {
+                    buildCommand: "npm install && npm start"
+                    openAPISpec: "http://localhost:4000/bank/openapi"
+                    graphQLSchema: "http://localhost:4000/bank/graphql"
+                    directory: "./"
+                  }
+                }
+                repository: {
+                  create: {
+                    name: "bank"
+                    owner: "Meeshkan"
+                    nodeIdPlusTeamId: $nodeIdPlusTeamId
+                    nodeId: "MDEwOlJlcG9zaXRvcnkyNzk4NTM5NTc="
+                  }
                 }
               }
             }
