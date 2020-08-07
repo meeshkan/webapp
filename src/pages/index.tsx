@@ -224,6 +224,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                     bg={`mode.${colorMode}.background`}
                     showBorder={true}
                     borderRadius="sm"
+                    name=""
                   />
                   <Stack spacing={2}>
                     <Heading
