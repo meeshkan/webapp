@@ -11,14 +11,9 @@ import {
   Image,
   Text,
   Portal,
-  Avatar
+  Avatar,
 } from "@chakra-ui/core";
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  MoonIcon,
-  SunIcon
-} from "@chakra-ui/icons";
+import { ChevronDownIcon, MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { FallbackIcon } from "../../theme/icons";
 import Link from "next/link";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
@@ -62,7 +57,7 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
             borderColor="transparent"
             backgroundColor="transparent"
             icon={<FallbackIcon color={`mode.${colorMode}.icon`} />}
-            name=""
+            name={`${session.user.name}'s avatar image`}
             h={10}
             w={10}
             borderRadius="sm"
@@ -75,11 +70,7 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
           >
             {session.user.nickname}
           </Text>
-          {isMenuOpen ? (
-            <ChevronUpIcon mr={2} color={`mode.${colorMode}.tertiary`} />
-          ) : (
-            <ChevronDownIcon mr={2} color={`mode.${colorMode}.tertiary`} />
-          )}
+          <ChevronDownIcon mr={2} color={`mode.${colorMode}.tertiary`} />
         </MenuButton>
         <Portal>
           <MenuList border="none" backgroundColor={`mode.${colorMode}.card`}>
@@ -112,12 +103,11 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
                     d="flex"
                     alignContent="center"
                     aria-label={`Links to ${team.name}'s dashboard`}
-                    // command={`⌘${index}`}
                   >
                     <Image
                       src={team.image && team.image.downloadUrl}
                       fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
-                      alt=""
+                      alt={`${team.name}'s organization image`}
                       borderRadius="sm"
                       border="1px solid"
                       borderColor={`mode.${colorMode}.icon`}
