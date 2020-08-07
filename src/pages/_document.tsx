@@ -5,6 +5,7 @@ import Document, {
   Main,
   NextScript,
 } from "next/document";
+import ReactGA from "react-ga";
 
 class MyDocument extends Document {
   static async getInitialProps(ctx: DocumentContext) {
@@ -12,7 +13,12 @@ class MyDocument extends Document {
 
     return initialProps;
   }
+
   render() {
+    if (global["window"]) {
+      ReactGA.initialize("UA-107981669-10");
+      ReactGA.pageview(window.location.pathname + window.location.search);
+    }
     return (
       <Html lang="en">
         <Head>
