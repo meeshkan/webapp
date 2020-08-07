@@ -20,7 +20,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <>
-      <Head>
+      {/* <Head>
         <script
           dangerouslySetInnerHTML={{
             __html:
@@ -29,7 +29,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                 : `window.intercomSettings = { app_id: "${process.env.INTERCOM_ID}"};`,
           }}
         ></script>
-      </Head>
+      </Head> */}
       <ChakraProvider theme={customTheme}>
         <CSSReset />
         <Layout>
