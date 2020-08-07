@@ -560,6 +560,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                     w={8}
                     borderRadius="sm"
                     mr={4}
+                    alt={`Uploaded logo from ${team.name}`}
                   />
                   <Box>
                     <FormLabel
@@ -681,7 +682,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                       }
                       backgroundColor="transparent"
                       icon={<FallbackIcon color={`mode.${colorMode}.icon`} />}
-                      name={session.user.name}
+                      name={session.user.name`'s uploaded avatar`}
                       h={8}
                       w={8}
                       borderRadius="sm"
