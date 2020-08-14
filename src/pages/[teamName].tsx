@@ -704,7 +704,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                       }
                       backgroundColor="transparent"
                       icon={<FallbackIcon color={`mode.${colorMode}.icon`} />}
-                      name={session.user.name`'s uploaded avatar`}
+                      name={`${session.user.name}'s uploaded avatar`}
                       h={8}
                       w={8}
                       borderRadius="sm"
