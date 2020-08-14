@@ -7,7 +7,7 @@ import { mixpanelize } from "../../utils/mixpanel-client";
 
 type CardProps = {
   children: object;
-  session: ISession;
+  session?: ISession;
   gridArea?: string;
   heading?: string;
   headingLink?: string;
