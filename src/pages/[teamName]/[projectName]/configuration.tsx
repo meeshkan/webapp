@@ -493,7 +493,11 @@ const ConfigurationPage = withError<
                 right="8px"
               />
             </Alert>
-            <Card heading="Build settings" id={`build-settings`}>
+            <Card
+              session={session}
+              heading="Build settings"
+              id={`build-settings`}
+            >
               <FormItem
                 label="Root directory"
                 name="directory"
@@ -536,7 +540,11 @@ const ConfigurationPage = withError<
 
             <Box h={4} />
 
-            <Card heading="Slack integration" id={`slack-integration`}>
+            <Card
+              session={session}
+              heading="Slack integration"
+              id={`slack-integration`}
+            >
               <Flex justifyContent="space-between" my={4}>
                 <FormLabel color={`mode.${colorMode}.text`}>
                   Global notifications {notifications == true ? "on" : "off"}

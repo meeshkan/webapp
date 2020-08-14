@@ -1,14 +1,17 @@
 import React from "react";
 import { Text, Stack, useColorMode } from "@chakra-ui/core";
 import Card from "../molecules/card";
+import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 
 type SettingsProps = {
+  session: ISession;
   repositoryName: String;
   organizationName: String;
   configured: Boolean;
 };
 
 const Settings = ({
+  session,
   repositoryName,
   organizationName,
   configured,
@@ -16,6 +19,7 @@ const Settings = ({
   const { colorMode } = useColorMode();
   return (
     <Card
+      session={session}
       gridArea="1 / 1 / 2 / 2"
       heading="Project details"
       headingLink={`/${organizationName}/${repositoryName}/configuration`}

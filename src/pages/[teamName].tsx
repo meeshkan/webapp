@@ -550,7 +550,11 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
       }) => (
         <>
           <Grid templateColumns="repeat(3, 1fr)" templateRows="auto" gap={8}>
-            <Card gridArea="1 / 1 / 2 / 2" heading="Team settings">
+            <Card
+              session={session}
+              gridArea="1 / 1 / 2 / 2"
+              heading="Team settings"
+            >
               <Box as="form" onSubmit={handleSubmit(onSubmit)}>
                 <Flex align="center" mt={4}>
                   <Image
@@ -633,6 +637,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
             </Card>
 
             <Card
+              session={session}
               gridArea="2 / 1 / 3 / 2"
               heading={`Team members - ${team.users.items.length}`}
             >
@@ -699,6 +704,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
               <Grid templateColumns="repeat(2, 1fr)" gap={8}>
                 {team.project.items.map((project, index) => (
                   <Card
+                    session={session}
                     key={index}
                     link={`/${team.name}/${project.name}`}
                     linkLabel={`Links to ${team.name}'s project ${project.name}`}

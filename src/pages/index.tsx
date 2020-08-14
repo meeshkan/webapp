@@ -26,6 +26,7 @@ import {
   Avatar,
 } from "@chakra-ui/core";
 import { AddIcon, FallbackIcon } from "../theme/icons";
+import { mixpanelize } from "../utils/mixpanel-client";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
@@ -211,6 +212,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
           >
             {allTeams.map((team, index) => (
               <Card
+                session={session}
                 key={index}
                 link={`/${team.name}`}
                 linkLabel={`Links to ${team.name}'s dashboard`}
@@ -247,7 +249,16 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
 
             {/* Create a team | BUTTON */}
             <Button
-              onClick={onOpen}
+              onClick={mixpanelize(
+                session,
+                "Clicked button",
+                {
+                  to: "https://app.meeshkan.com/{newTeam}",
+                  from: "https://app.meeshkan.com",
+                  c2a: "Create a team",
+                },
+                onOpen
+              )}
               pos="unset"
               p={4}
               minH="72px"
@@ -295,7 +306,18 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                 />
                 <Box
                   as="form"
-                  onSubmit={handleSubmit(onSubmit)}
+                  onSubmit={handleSubmit(
+                    mixpanelize(
+                      session,
+                      "Clicked button",
+                      {
+                        to: "https://app.meeshkan.com/{newTeam}",
+                        from: "https://app.meeshkan.com",
+                        c2a: "Create team",
+                      },
+                      onSubmit
+                    )
+                  )}
                   w="100%"
                   overflow="auto"
                 >
