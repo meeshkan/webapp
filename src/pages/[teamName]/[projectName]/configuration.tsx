@@ -61,6 +61,7 @@ import { confirmOrCreateUser, getUserIdFromIdOrEnv } from "../../../utils/user";
 import { withSession } from "../../api/session";
 import { getSlackOAuthState } from "../../../utils/oauth";
 import FormItem from "../../../components/molecules/formItem";
+import { mixpanelize } from "../../../utils/mixpanel-client";
 
 type NegativeConfigurationFetchOutcome =
   | NOT_LOGGED_IN
@@ -463,7 +464,16 @@ const ConfigurationPage = withError<
           </Box>
           <Stack
             as="form"
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={handleSubmit(
+              mixpanelize(
+                session,
+                "Clicked button",
+                {
+                  c2a: "Save configuratoni",
+                },
+                onSubmit
+              )
+            )}
             w="100%"
             spacing={8}
             gridArea="1 / 2 / 4 / 4"
