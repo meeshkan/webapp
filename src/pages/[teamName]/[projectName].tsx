@@ -62,7 +62,9 @@ const ProjectWithTeamName = t.intersection([
   t.type({ teamName: t.string }),
 ]);
 
-type IProjectWithTeamName = t.TypeOf<typeof ProjectWithTeamName>;
+type IProjectWithTeamName = t.TypeOf<typeof ProjectWithTeamName> & {
+  session: ISession;
+};
 
 const Team = t.type({
   image: t.union([
@@ -128,7 +130,7 @@ const getProject = (teamName: string, projectName: string) => (
           })
         )
       ).get,
-    TE.chain((project) => TE.right({ ...project, teamName: teamName }))
+    TE.chain((project) => TE.right({ ...project, session, teamName: teamName }))
   );
 
 const userType = t.type({ id: t.string });
@@ -160,11 +162,13 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, IProjectWithTeamName>(
         gap={8}
       >
         <Settings
+          session={projectProps.session}
           organizationName={projectProps.teamName}
           repositoryName={projectProps.name}
           configured={projectProps.configuration ? true : false}
         />
         <Premium
+          session={projectProps.session}
           teamName={projectProps.teamName}
           projectName={projectProps.name}
           tests={projectProps.tests.items.filter(
@@ -172,13 +176,14 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, IProjectWithTeamName>(
           )}
         />
         <Branch
+          session={projectProps.session}
           teamName={projectProps.teamName}
           projectName={projectProps.name}
           tests={projectProps.tests.items.filter(
             (test) => test.testType == "Standard"
           )}
         />
-        <Chart />
+        <Chart session={projectProps.session} />
       </Grid>
     </>
   )

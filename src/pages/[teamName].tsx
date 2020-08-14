@@ -90,6 +90,7 @@ import Card from "../components/molecules/card";
 import { withError } from "../components/molecules/error";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
+import { mixpanelize } from "../utils/mixpanel-client";
 
 type NegativeTeamFetchOutcome =
   | NOT_LOGGED_IN
@@ -112,6 +113,8 @@ type NegativeUpdateTeamOutcome = UNDEFINED_ERROR | INCORRECT_TYPE_SAFETY;
 type ITeam = t.TypeOf<typeof Team>;
 type IRepositoriesGroupedByOwner = NonEmptyArray<IRepository>[];
 type ImportProps = {
+  teamName: string;
+  session: ISession;
   repoName: String;
   onClick: TE.TaskEither<NegativeImportProjectOutcome, void>;
 };
@@ -234,13 +237,27 @@ type UpdateTeamVariables = t.TypeOf<typeof updateTeamVariables> & {
   router: NextRouter;
 };
 
-const ImportProject = ({ repoName, onClick }: ImportProps) => {
+const ImportProject = ({
+  repoName,
+  onClick,
+  teamName,
+  session,
+}: ImportProps) => {
   const { colorMode } = useColorMode();
   return (
     <Button
       w="full"
       variant="ghost"
-      onClick={() => onClick()}
+      onClick={mixpanelize(
+        session,
+        "Clicked a button",
+        {
+          to: `https://app.meeshkan.com/${teamName}/{newProject}`,
+          from: `https://app.meeshkan.com/${teamName}`,
+          c2a: "Import a project",
+        },
+        onClick
+      )}
       justifyContent="space-between"
       color={`mode.${colorMode}.text`}
     >
@@ -550,7 +567,11 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
       }) => (
         <>
           <Grid templateColumns="repeat(3, 1fr)" templateRows="auto" gap={8}>
-            <Card gridArea="1 / 1 / 2 / 2" heading="Team settings">
+            <Card
+              session={session}
+              gridArea="1 / 1 / 2 / 2"
+              heading="Team settings"
+            >
               <Box as="form" onSubmit={handleSubmit(onSubmit)}>
                 <Flex align="center" mt={4}>
                   <Image
@@ -633,6 +654,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
             </Card>
 
             <Card
+              session={session}
               gridArea="2 / 1 / 3 / 2"
               heading={`Team members - ${team.users.items.length}`}
             >
@@ -699,6 +721,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
               <Grid templateColumns="repeat(2, 1fr)" gap={8}>
                 {team.project.items.map((project, index) => (
                   <Card
+                    session={session}
                     key={index}
                     link={`/${team.name}/${project.name}`}
                     linkLabel={`Links to ${team.name}'s project ${project.name}`}
@@ -735,7 +758,16 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
 
                 {/* Import a project | BUTTON */}
                 <Button
-                  onClick={onOpen}
+                  onClick={mixpanelize(
+                    session,
+                    "Clicked a button",
+                    {
+                      to: `https://app.meeshkan.com/${team.name}/{newProject}`,
+                      from: `https://app.meeshkan.com/${team.name}`,
+                      c2a: "Import a project",
+                    },
+                    onOpen
+                  )}
                   pos="unset"
                   p={4}
                   minH="72px"
@@ -805,13 +837,21 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                             <Button
                               as="a"
                               colorScheme="red"
-                              onClick={() =>
-                                ReactGA.event({
-                                  category: "Github",
-                                  action: "Import repo start",
-                                  label: "index.tsx",
-                                })
-                              }
+                              onClick={mixpanelize(
+                                session,
+                                "Clicked a button",
+                                {
+                                  to: `https://github.com/apps/meeshkan/installations/new`,
+                                  from: `https://app.meeshkan.com/${team.name}`,
+                                  c2a: "Import a project",
+                                },
+                                () =>
+                                  ReactGA.event({
+                                    category: "Github",
+                                    action: "Import repo start",
+                                    label: "index.tsx",
+                                  })
+                              )}
                               href={`https://github.com/apps/meeshkan/installations/new?state=${ghOauthState}`}
                               aria-label="Link to GitHub to install meeshkan on a repository"
                             >
@@ -915,6 +955,8 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                                     (repo, index) => (
                                       <ImportProject
                                         key={index}
+                                        teamName={team.name}
+                                        session={session}
                                         repoName={repo.name}
                                         onClick={createProject({
                                           importProjectIsExecuting:

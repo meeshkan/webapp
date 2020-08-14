@@ -19,6 +19,7 @@ module.exports = nextSourceMaps({
     MEESHKAN_ALTERNATIVE_ID: process.env.MEESHKAN_ALTERNATIVE_ID,
     INTERCOM_ID: process.env.INTERCOM_ID,
     INTERCOM_EMAIL: process.env.INTERCOM_EMAIL,
+    MIXPANEL_TOKEN: process.env.MIXPANEL_TOKEN,
   },
   webpack: (config, { isServer, buildId }) => {
     config.plugins.push(

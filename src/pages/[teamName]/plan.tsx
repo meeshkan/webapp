@@ -12,14 +12,17 @@ import {
   useColorMode,
   Box,
 } from "@chakra-ui/core";
+import auth0 from "../../utils/auth0";
 import getStripe from "../../utils/getStripe";
 import Card from "../../components/molecules/card";
 import { CheckmarkIcon, XmarkIcon } from "../../theme/icons";
+import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 
 type PricingProps = {
   title: string;
   subtitle: string;
   price: string;
+  session: ISession;
   yesFeatures?: Array<string>;
   noFeatures?: Array<string>;
   hasCTA: boolean;
@@ -35,11 +38,12 @@ const PricingCard = ({
   noFeatures,
   hasCTA,
   handleSubmit,
+  session,
   loading,
 }: PricingProps) => {
   const { colorMode } = useColorMode();
   return (
-    <Card>
+    <Card session={session}>
       <Heading
         as="h3"
         fontSize="2xl"
@@ -107,7 +111,7 @@ const PricingCard = ({
 
 const Checkout = (props) => {
   const [loading, setLoading] = useState(false);
-
+  const session = props.session;
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -124,6 +128,7 @@ const Checkout = (props) => {
   return (
     <SimpleGrid columns={3} spacing={8} maxW="1000px" mx="auto">
       <PricingCard
+        session={session}
         title="Free"
         subtitle="for Individuals"
         price="$0"
@@ -146,6 +151,7 @@ const Checkout = (props) => {
       />
 
       <PricingCard
+        session={session}
         title="Pro"
         subtitle="for Teams"
         price="$99"
@@ -169,6 +175,7 @@ const Checkout = (props) => {
         loading={loading}
       />
       <PricingCard
+        session={session}
         title="Business"
         subtitle="starting at"
         price="$2000"
@@ -198,9 +205,10 @@ Checkout.getInitialProps = async function ({ req }) {
     `${process.env.LOGOUT_REDIRECT_URL}api/build-checkout`
   );
   const data = await res.json();
-
+  const session = await auth0().getSession(req);
   return {
     sessionId: data.id,
+    session,
   };
 };
 
