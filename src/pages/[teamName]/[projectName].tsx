@@ -41,6 +41,10 @@ type NegativeProjectFetchOutcome =
 const Project = t.type({
   name: t.string,
   configuration: t.union([t.null, t.any]),
+  repository: t.type({
+    id: t.number,
+    owner: t.string,
+  }),
   tests: t.type({
     items: t.array(
       t.type({
@@ -163,8 +167,9 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, IProjectWithTeamName>(
       >
         <Settings
           session={projectProps.session}
-          organizationName={projectProps.teamName}
+          organizationName={projectProps.repository.owner}
           repositoryName={projectProps.name}
+          repositoryId={projectProps.repository.id}
           configured={projectProps.configuration ? true : false}
         />
         <Premium

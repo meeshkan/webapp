@@ -1,13 +1,14 @@
-import React from "react";
-import { Text, Stack, useColorMode } from "@chakra-ui/core";
+import React, { useState } from "react";
+import { Text, Stack, useColorMode, Button } from "@chakra-ui/core";
 import Card from "../molecules/card";
-import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
+import { IClaims, ISession } from "@auth0/nextjs-auth0/dist/session/session";
 
 type SettingsProps = {
   session: ISession;
   repositoryName: String;
   organizationName: String;
   configured: Boolean;
+  repositoryId: Number;
 };
 
 const Settings = ({
@@ -15,8 +16,48 @@ const Settings = ({
   repositoryName,
   organizationName,
   configured,
+  repositoryId,
 }: SettingsProps) => {
+  const [triggerTest, setTriggerTest] = useState(false);
+  const [testId, setTestId] = useState(JSON);
   const { colorMode } = useColorMode();
+
+  const today = new Date();
+
+  const handleClick = (repository: Number, requestedBy: IClaims) => {
+    let triggerTestData = JSON.stringify({
+      repository: repository,
+      requested_by: requestedBy,
+      time: today.toISOString(),
+      premium: true,
+      // branch: ""
+    });
+
+    fetch("https://meeshkan.io/webhook-prod/trigger-build", {
+      method: "POST",
+      body: triggerTestData,
+      headers: {
+        "Api-Key": process.env.MEESHKAN_WEBHOOK_TOKEN,
+      },
+    }).then((res) => {
+      setTriggerTest(true);
+      if (res.status !== 200) {
+        console.log(
+          "Looks like there was a problem. Status Code: " + res.status
+        );
+      }
+
+      res
+        .json()
+        .then((data) => {
+          console.log(data);
+          setTestId(data);
+        })
+        .catch((error) => {
+          error.message;
+        });
+    });
+  };
   return (
     <Card
       session={session}
@@ -46,6 +87,10 @@ const Settings = ({
           {configured.toString()}
         </Text>
       </Stack>
+
+      <Button onClick={() => handleClick(repositoryId, session.user)}>
+        Trigger premium test
+      </Button>
     </Card>
   );
 };
