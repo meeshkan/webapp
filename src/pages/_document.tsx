@@ -22,9 +22,6 @@ class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
-          <title>Meeshkan Webapp</title>
-          <link rel="icon" href="/icon.png" />
-
           {/* Google Analytics */}
           <script
             async
