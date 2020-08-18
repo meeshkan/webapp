@@ -33,11 +33,12 @@ const Settings = ({
       // branch: ""
     });
 
-    fetch("https://meeshkan.io/webhook-prod/trigger-build", {
+    fetch("/api/trigger-build", {
       method: "POST",
       body: triggerTestData,
       headers: {
         "Api-Key": process.env.MEESHKAN_WEBHOOK_TOKEN,
+        "Content-Type": "application/json",
       },
     }).then((res) => {
       setTriggerTest(true);
