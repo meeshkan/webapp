@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, Stack, useColorMode, Button } from "@chakra-ui/core";
+import { Text, Stack, useColorMode, Button, LightMode } from "@chakra-ui/core";
 import Card from "../molecules/card";
 import { IClaims, ISession } from "@auth0/nextjs-auth0/dist/session/session";
 
@@ -88,9 +88,16 @@ const Settings = ({
         </Text>
       </Stack>
 
-      <Button onClick={() => handleClick(repositoryId, session.user)}>
-        Trigger premium test
-      </Button>
+      <LightMode>
+        <Button
+          onClick={() => handleClick(repositoryId, session.user)}
+          colorScheme="red"
+          size="sm"
+          mt={4}
+        >
+          Trigger premium test
+        </Button>
+      </LightMode>
     </Card>
   );
 };
