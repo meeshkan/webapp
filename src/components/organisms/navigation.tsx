@@ -6,7 +6,7 @@ import {
   IconButton,
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink
+  BreadcrumbLink,
 } from "@chakra-ui/core";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { LogoIcon } from "../../theme/icons";
@@ -45,8 +45,9 @@ const Navigation = ({ session }: INavigationProps) => {
           borderRadius="sm"
           height="40px"
         >
-          <Link href="/" aria-label="Go to homepage">
+          <Link href="/">
             <LogoIcon
+              aria-label="Go to homepage"
               color={`mode.${colorMode}.title`}
               h={8}
               w="auto"
