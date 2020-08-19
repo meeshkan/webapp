@@ -28,7 +28,6 @@ const Settings = ({
 
   const handleClick = (repository: Number, requestedBy: IClaims) => {
     setTriggerTest(true);
-
     let triggerTestData = JSON.stringify({
       repository: repository,
       requested_by: requestedBy,
