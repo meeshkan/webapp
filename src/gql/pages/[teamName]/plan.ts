@@ -20,7 +20,6 @@ export const UPDATE_STRIPE_ID_MUTATION = `mutation UPDATE_TEAM_PLAN(
           downloadUrl
         }
         inviteLink
-        plan
         users {
           items {
             email

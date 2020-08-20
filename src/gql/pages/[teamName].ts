@@ -13,7 +13,6 @@ export const GET_TEAM_QUERY = `query($teamName: String!) {
           downloadUrl
         }
         inviteLink
-        plan
         users {
           items {
             email

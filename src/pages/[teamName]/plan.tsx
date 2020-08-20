@@ -36,7 +36,12 @@ import { NonEmptyArray, groupSort } from "fp-ts/lib/NonEmptyArray";
 import { LensTaskEither, lensTaskEitherHead } from "../../monocle-ts";
 import { ITeamsProps } from "..";
 import { GET_SERVER_SIDE_PROPS_ERROR } from "../../utils/error";
-import { stripe } from "../../utils/stripe";
+import {
+  stripe,
+  createCustomerId,
+  getPlan,
+  titleToPlan,
+} from "../../utils/stripe";
 import { confirmOrCreateUser } from "../../utils/user";
 import { withSession } from "../api/session";
 import { UPDATE_STRIPE_ID_MUTATION } from "../../gql/pages/[teamName]/plan";
@@ -48,9 +53,11 @@ import { withError } from "../../components/molecules/error";
 
 type IPlanProps = {
   team: ITeamWithStripe;
+  plan: string;
   id: string;
   session: ISession;
 };
+
 const userType = t.type({ id: t.string });
 
 export const getServerSideProps = ({
@@ -65,32 +72,9 @@ export const getServerSideProps = ({
       team.stripeCustomerId !== null
         ? TE.right({ session, id, team })
         : pipe(
-            TE.tryCatch(
-              () => stripe().customers.create(),
-              () => ({
-                type: "STRIPE_ERROR",
-                msg: "Could not create a stripe customer",
-              })
-            ),
-            TE.chain((res) =>
-              TE.tryCatch(
-                () =>
-                  eightBaseClient(session)
-                    .request(UPDATE_STRIPE_ID_MUTATION, {
-                      userId: id,
-                      teamName: team.name,
-                      stripeCustomerId: res.id,
-                    })
-                    .then((_) => Promise.resolve(res.id)),
-                () => ({
-                  type: "UPDATE_PLAN_ERROR",
-                  msg: "Could not update plan on 8base",
-                })
-              )
-            ),
+            createCustomerId(id, team.name)(session),
             TE.chain((customerId) =>
               TE.right({
-                session,
                 id,
                 team: {
                   ...team,
@@ -100,6 +84,23 @@ export const getServerSideProps = ({
             )
           )
     ),
+    RTE.chain(({ id, team }) => (session) =>
+      TE.tryCatch(
+        () =>
+          stripe()
+            .customers.retrieve(team.stripeCustomerId)
+            .then((res) => ({
+              session,
+              plan: getPlan(res),
+              id,
+              team,
+            })),
+        () => ({
+          type: "STRIPE_ERROR",
+          msg: "Could not create a stripe customer",
+        })
+      )
+    ),
     withSession(req, "plan.tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
 //////////////////////////////////////
@@ -107,6 +108,7 @@ export const getServerSideProps = ({
 type PricingProps = {
   title: string;
   subtitle: string;
+  currentPlan: string;
   price: string;
   session: ISession;
   yesFeatures?: Array<string>;
@@ -121,6 +123,7 @@ const PricingCard = ({
   subtitle,
   price,
   yesFeatures,
+  currentPlan,
   noFeatures,
   hasCTA,
   handleSubmit,
@@ -180,7 +183,7 @@ const PricingCard = ({
         >
           <FormControl as="form" onSubmit={handleSubmit}>
             <Button
-              isDisabled={loading || title === "Free"}
+              isDisabled={loading || titleToPlan[title] === currentPlan}
               type="submit"
               colorScheme="red"
               w="full"
@@ -226,6 +229,7 @@ const Checkout = withError<GET_SERVER_SIDE_PROPS_ERROR, IPlanProps>(
           title="Free"
           subtitle="for Individuals"
           price="$0"
+          currentPlan={props.plan}
           yesFeatures={[
             "1 team member",
             "2 projects",
@@ -248,6 +252,7 @@ const Checkout = withError<GET_SERVER_SIDE_PROPS_ERROR, IPlanProps>(
           session={session}
           title="Pro"
           subtitle="for Teams"
+          currentPlan={props.plan}
           price="$99"
           yesFeatures={[
             "8 team members",
@@ -286,6 +291,7 @@ const Checkout = withError<GET_SERVER_SIDE_PROPS_ERROR, IPlanProps>(
             "Role based permissions",
             "Jira/Linear integration",
           ]}
+          currentPlan={props.plan}
           hasCTA={true}
           handleSubmit={toTypeform}
           loading={loading}
