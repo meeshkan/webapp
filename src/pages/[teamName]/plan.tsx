@@ -205,6 +205,7 @@ const Checkout = withError<GET_SERVER_SIDE_PROPS_ERROR, IPlanProps>(
     const session = props.session;
     const toTypeform: React.FormEventHandler<HTMLFormElement> = (e) => {
       e.preventDefault();
+      window.location.href = "https://meeshkan.typeform.com/to/oYCF6vWQ";
     };
     const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
       e.preventDefault();
