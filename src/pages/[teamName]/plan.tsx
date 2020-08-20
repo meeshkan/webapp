@@ -17,6 +17,7 @@ import getStripe from "../../utils/getStripe";
 import Card from "../../components/molecules/card";
 import { CheckmarkIcon, XmarkIcon } from "../../theme/icons";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
+import { useRouter } from "next/router";
 
 type PricingProps = {
   title: string;
@@ -94,7 +95,7 @@ const PricingCard = ({
         >
           <FormControl as="form" onSubmit={handleSubmit}>
             <Button
-              isDisabled={loading || title === "Free" || title === "Business"}
+              isDisabled={loading || title === "Free"}
               type="submit"
               colorScheme="red"
               w="full"
@@ -112,6 +113,10 @@ const PricingCard = ({
 const Checkout = (props) => {
   const [loading, setLoading] = useState(false);
   const session = props.session;
+  const toTypeform: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    window.location.href = "https://meeshkan.typeform.com/to/oYCF6vWQ";
+  };
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -193,7 +198,7 @@ const Checkout = (props) => {
           "Jira/Linear integration",
         ]}
         hasCTA={true}
-        handleSubmit={handleSubmit}
+        handleSubmit={toTypeform}
         loading={loading}
       />
     </SimpleGrid>
