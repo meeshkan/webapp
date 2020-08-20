@@ -77,7 +77,6 @@ export const CREATE_PROJECT_MUTATION = `mutation CREATE_PROJECT($userId:ID!, $te
           downloadUrl
         }
         inviteLink
-        plan
         users {
           items {
             email
@@ -113,7 +112,6 @@ export const UPDATE_TEAM_MUTATION = `mutation UPDATE_TEAM($userId: ID!, $teamNam
           downloadUrl
         }
         inviteLink
-        plan
         users {
           items {
             email
