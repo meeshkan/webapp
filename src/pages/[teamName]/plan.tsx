@@ -18,6 +18,91 @@ import Card from "../../components/molecules/card";
 import { CheckmarkIcon, XmarkIcon } from "../../theme/icons";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import { useRouter } from "next/router";
+import { getTeam } from "../[teamName]";
+/////////////
+import * as t from "io-ts";
+import * as E from "fp-ts/lib/Either";
+import * as A from "fp-ts/lib/Array";
+import { flow, constant, constNull, constVoid } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/pipeable";
+import * as RTE from "fp-ts/lib/ReaderTaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
+import * as O from "fp-ts/lib/Option";
+import * as Ord from "fp-ts/lib/Ord";
+import * as NEA from "fp-ts/lib/ReadonlyNonEmptyArray";
+import * as _E from "../../fp-ts/Either";
+import * as _RTE from "../../fp-ts/ReaderTaskEither";
+import { NonEmptyArray, groupSort } from "fp-ts/lib/NonEmptyArray";
+import { LensTaskEither, lensTaskEitherHead } from "../../monocle-ts";
+import { ITeamsProps } from "..";
+import { GET_SERVER_SIDE_PROPS_ERROR } from "../../utils/error";
+import { stripe } from "../../utils/stripe";
+import { confirmOrCreateUser } from "../../utils/user";
+import { withSession } from "../api/session";
+import { UPDATE_STRIPE_ID_MUTATION } from "../../gql/pages/[teamName]/plan";
+import { ITeamWithStripe } from "../[teamName]";
+import { eightBaseClient } from "../../utils/graphql";
+import { withError } from "../../components/molecules/error";
+
+/////////////
+
+type IPlanProps = {
+  team: ITeamWithStripe;
+  id: string;
+  session: ISession;
+};
+const userType = t.type({ id: t.string });
+
+export const getServerSideProps = ({
+  params: { teamName },
+  req,
+}): Promise<{
+  props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, IPlanProps>;
+}> =>
+  pipe(
+    _RTE.seq2([confirmOrCreateUser("id", userType), getTeam(teamName)]),
+    RTE.chain(([{ id }, team]) => (session) =>
+      team.stripeCustomerId !== null
+        ? TE.right({ session, id, team })
+        : pipe(
+            TE.tryCatch(
+              () => stripe().customers.create(),
+              () => ({
+                type: "STRIPE_ERROR",
+                msg: "Could not create a stripe customer",
+              })
+            ),
+            TE.chain((res) =>
+              TE.tryCatch(
+                () =>
+                  eightBaseClient(session)
+                    .request(UPDATE_STRIPE_ID_MUTATION, {
+                      userId: id,
+                      teamName: team.name,
+                      stripeCustomerId: res.id,
+                    })
+                    .then((_) => Promise.resolve(res.id)),
+                () => ({
+                  type: "UPDATE_PLAN_ERROR",
+                  msg: "Could not update plan on 8base",
+                })
+              )
+            ),
+            TE.chain((customerId) =>
+              TE.right({
+                session,
+                id,
+                team: {
+                  ...team,
+                  stripeCustomerId: customerId,
+                },
+              })
+            )
+          )
+    ),
+    withSession(req, "plan.tsx getServerSideProps")
+  )().then(_E.eitherSanitizedWithGenericError);
+//////////////////////////////////////
 
 type PricingProps = {
   title: string;
@@ -110,111 +195,104 @@ const PricingCard = ({
   );
 };
 
-const Checkout = (props) => {
-  const [loading, setLoading] = useState(false);
-  const session = props.session;
-  const toTypeform: React.FormEventHandler<HTMLFormElement> = (e) => {
-    e.preventDefault();
-    window.location.href = "https://meeshkan.typeform.com/to/oYCF6vWQ";
-  };
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+const Checkout = withError<GET_SERVER_SIDE_PROPS_ERROR, IPlanProps>(
+  "Uh oh. It looks like this resource does not exist!",
+  (props: IPlanProps) => {
+    const [loading, setLoading] = useState(false);
+    const session = props.session;
+    const toTypeform: React.FormEventHandler<HTMLFormElement> = (e) => {
+      e.preventDefault();
+    };
+    const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
+      e.preventDefault();
+      setLoading(true);
+      fetch(
+        `/api/stripe-portal?customer=${props.team.stripeCustomerId}&return_url=${process.env.LOGOUT_REDIRECT_URL}${props.team.name}`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          window.location.href = data.url;
+          return Promise.resolve(true);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    };
 
-    // Redirect to Checkout.
-    const stripe = await getStripe();
-    const { error } = await stripe!.redirectToCheckout({
-      sessionId: props.sessionId,
-    });
-    console.warn(error.message);
-    setLoading(false);
-  };
+    return (
+      <SimpleGrid columns={3} spacing={8} maxW="1000px" mx="auto">
+        <PricingCard
+          session={session}
+          title="Free"
+          subtitle="for Individuals"
+          price="$0"
+          yesFeatures={[
+            "1 team member",
+            "2 projects",
+            "Manual project setup",
+            "100 testing hours",
+            "GitHub import",
+          ]}
+          noFeatures={[
+            "Concurrent tests",
+            "GitLab & Bitbucket",
+            "Test history",
+            "Audit reports",
+          ]}
+          hasCTA={true}
+          handleSubmit={handleSubmit}
+          loading={loading}
+        />
 
-  return (
-    <SimpleGrid columns={3} spacing={8} maxW="1000px" mx="auto">
-      <PricingCard
-        session={session}
-        title="Free"
-        subtitle="for Individuals"
-        price="$0"
-        yesFeatures={[
-          "1 team member",
-          "2 projects",
-          "Manual project setup",
-          "100 testing hours",
-          "GitHub import",
-        ]}
-        noFeatures={[
-          "Concurrent tests",
-          "GitLab & Bitbucket",
-          "Test history",
-          "Audit reports",
-        ]}
-        hasCTA={true}
-        handleSubmit={handleSubmit}
-        loading={loading}
-      />
-
-      <PricingCard
-        session={session}
-        title="Pro"
-        subtitle="for Teams"
-        price="$99"
-        yesFeatures={[
-          "8 team members",
-          "Unlimited projects",
-          "1 project set up",
-          "1000 testing hours",
-          "3 concurrent tests",
-          "Weekly audit reporting",
-          "30 day history",
-        ]}
-        noFeatures={[
-          "GitLab & Bitbucket",
-          "Jira/Linear integration",
-          "Auth flow testing UI",
-          "Custom build pipelines",
-        ]}
-        hasCTA={true}
-        handleSubmit={handleSubmit}
-        loading={loading}
-      />
-      <PricingCard
-        session={session}
-        title="Business"
-        subtitle="starting at"
-        price="$2000"
-        yesFeatures={[
-          "25 team members",
-          "Unlimited projects",
-          "5 projects set up",
-          "Unlimited testing hours",
-          "10 concurrent tests",
-          "Unlimited history",
-          "GitLab & Bitbucket import",
-          "Auth flow testing UI",
-          "Custom build pipelines",
-          "Role based permissions",
-          "Jira/Linear integration",
-        ]}
-        hasCTA={true}
-        handleSubmit={toTypeform}
-        loading={loading}
-      />
-    </SimpleGrid>
-  );
-};
-
-Checkout.getInitialProps = async function ({ req }) {
-  const res = await fetch(
-    `${process.env.LOGOUT_REDIRECT_URL}api/build-checkout`
-  );
-  const data = await res.json();
-  const session = await auth0().getSession(req);
-  return {
-    sessionId: data.id,
-    session,
-  };
-};
+        <PricingCard
+          session={session}
+          title="Pro"
+          subtitle="for Teams"
+          price="$99"
+          yesFeatures={[
+            "8 team members",
+            "Unlimited projects",
+            "1 project set up",
+            "1000 testing hours",
+            "3 concurrent tests",
+            "Weekly audit reporting",
+            "30 day history",
+          ]}
+          noFeatures={[
+            "GitLab & Bitbucket",
+            "Jira/Linear integration",
+            "Auth flow testing UI",
+            "Custom build pipelines",
+          ]}
+          hasCTA={true}
+          handleSubmit={handleSubmit}
+          loading={loading}
+        />
+        <PricingCard
+          session={session}
+          title="Business"
+          subtitle="starting at"
+          price="$2000"
+          yesFeatures={[
+            "25 team members",
+            "Unlimited projects",
+            "5 projects set up",
+            "Unlimited testing hours",
+            "10 concurrent tests",
+            "Unlimited history",
+            "GitLab & Bitbucket import",
+            "Auth flow testing UI",
+            "Custom build pipelines",
+            "Role based permissions",
+            "Jira/Linear integration",
+          ]}
+          hasCTA={true}
+          handleSubmit={toTypeform}
+          loading={loading}
+        />
+      </SimpleGrid>
+    );
+  }
+);
 
 export default Checkout;

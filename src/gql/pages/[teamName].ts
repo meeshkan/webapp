@@ -8,6 +8,7 @@ export const GET_TEAM_QUERY = `query($teamName: String!) {
       items{
         id
         name
+        stripeCustomerId
         image {
           downloadUrl
         }

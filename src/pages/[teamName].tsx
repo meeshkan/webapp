@@ -111,6 +111,7 @@ type ITeamProps = {
 type NegativeImportProjectOutcome = UNDEFINED_ERROR | INCORRECT_TYPE_SAFETY;
 type NegativeUpdateTeamOutcome = UNDEFINED_ERROR | INCORRECT_TYPE_SAFETY;
 type ITeam = t.TypeOf<typeof Team>;
+export type ITeamWithStripe = t.TypeOf<typeof TeamWithStripe>;
 type IRepositoriesGroupedByOwner = NonEmptyArray<IRepository>[];
 type ImportProps = {
   teamName: string;
@@ -126,9 +127,10 @@ const TeamUpdate = t.type({
   userId: t.union([t.null, t.string]),
 });
 
-const Team = t.type({
+const _Team = t.type({
   id: t.string,
   name: t.string,
+
   image: t.union([
     t.null,
     t.type({
@@ -170,6 +172,20 @@ const Team = t.type({
   }),
 });
 
+const Team = t.intersection([
+  _Team,
+  t.type({
+    stripeCustomerId: t.union([t.string, t.null]),
+  }),
+]);
+
+const TeamWithStripe = t.intersection([
+  _Team,
+  t.type({
+    stripeCustomerId: t.string,
+  }),
+]);
+
 const queryTp = t.type({
   user: t.type({
     team: t.type({
@@ -192,7 +208,7 @@ interface ImportProjectVariables {
   toast: (props: UseToastOptions) => void;
 }
 
-const getTeam = (teamName: string) => (
+export const getTeam = (teamName: string) => (
   session: ISession
 ): TE.TaskEither<NegativeTeamFetchOutcome, ITeam> =>
   pipe(

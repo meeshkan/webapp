@@ -28,6 +28,14 @@ export interface REST_ENDPOINT_ERROR {
   type: "REST_ENDPOINT_ERROR";
   msg: string;
 }
+export interface STRIPE_ERROR {
+  type: "STRIPE_ERROR";
+  msg: string;
+}
+export interface UPDATE_PLAN_ERROR {
+  type: "UPDATE_PLAN_ERROR";
+  msg: string;
+}
 export interface OAUTH_FLOW_ERROR {
   type: "OAUTH_FLOW_ERROR";
   msg: string;
