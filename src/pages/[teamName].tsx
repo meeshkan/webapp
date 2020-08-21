@@ -720,13 +720,11 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                   <Text color={`mode.${colorMode}.title`} fontWeight={600}>
                     {planToTitle[plan]}
                   </Text>
-                  {plan === FREE_PLAN ? (
-                    <Link passHref href={`/${team.name}/plan`}>
-                      <ChakraLink fontWeight={600} ml={2}>
-                        {`-> Upgrade`}
-                      </ChakraLink>
-                    </Link>
-                  ) : null}
+                  <Link passHref href={`/${team.name}/plan`}>
+                    <ChakraLink fontWeight={600} ml={2}>
+                      {plan === FREE_PLAN ? `-> Upgrade` : `-> Manage`}
+                    </ChakraLink>
+                  </Link>
                 </FormControl>
                 <Box h={65} />
                 <Flex

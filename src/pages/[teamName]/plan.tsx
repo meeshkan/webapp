@@ -43,6 +43,7 @@ import {
   titleToPlan,
   FREE_PLAN,
   createPlanIfNoPlan,
+  NO_PLAN,
 } from "../../utils/stripe";
 import { confirmOrCreateUser } from "../../utils/user";
 import { withSession } from "../api/session";
@@ -204,7 +205,9 @@ const PricingCard = ({
               w="full"
               mt={8}
             >
-              Purchase {title} plan
+              {titleToPlan[title] === FREE_PLAN
+                ? `Get ${title} plan`
+                : `Purchase ${title} plan`}
             </Button>
           </FormControl>
         </Flex>
