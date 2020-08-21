@@ -43,6 +43,8 @@ const Owner = t.type({
   avatar_url: t.string,
 });
 
+export const TEAM_IMPORT_PROJECT = "TEAM_IMPORT_PROJECT";
+
 export type IOwner = t.TypeOf<typeof Owner>;
 
 export const Permissions = t.type({
