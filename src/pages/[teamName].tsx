@@ -960,128 +960,141 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                               Import from GitHub
                             </Button>
                           </Flex>
-                        ) : (
-                          E.isRight(repoListAndThunk[0]) &&
+                        ) : E.isRight(repoListAndThunk[0]) &&
                           E.isRight(repoListAndThunk[0].right) &&
                           E.isRight(owner) &&
                           E.isRight(owner.right) &&
-                          O.isSome(owner.right.right) && (
-                            <>
-                              <Menu
-                                closeOnSelect={true}
-                                placement="bottom-start"
+                          O.isSome(owner.right.right) ? (
+                          <>
+                            <Menu closeOnSelect={true} placement="bottom-start">
+                              <MenuButton
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="space-between"
+                                minWidth="204px"
+                                ml={2}
+                                mb={4}
+                                border="1px solid"
+                                backgroundColor={`mode.${colorMode}.background`}
+                                borderColor={`mode.${colorMode}.icon`}
+                                p={0}
+                                size="sm"
+                                overflow="hidden"
                               >
-                                <MenuButton
-                                  display="flex"
-                                  alignItems="center"
-                                  justifyContent="space-between"
-                                  minWidth="204px"
-                                  ml={2}
-                                  mb={4}
-                                  border="1px solid"
-                                  backgroundColor={`mode.${colorMode}.background`}
-                                  borderColor={`mode.${colorMode}.icon`}
-                                  p={0}
-                                  size="sm"
-                                  overflow="hidden"
+                                <Avatar
+                                  src={owner.right.right.value.avatar_url}
+                                  backgroundColor="transparent"
+                                  icon={
+                                    <FallbackIcon
+                                      color={`mode.${colorMode}.icon`}
+                                    />
+                                  }
+                                  name={session.user.name}
+                                  h={8}
+                                  w={8}
+                                  borderRadius="sm"
+                                />
+                                <Text mr={8} color={`mode.${colorMode}.text`}>
+                                  {owner.right.right.value.login}
+                                </Text>
+                                <ArrowUpDownIcon
+                                  boxSize="12px"
+                                  color="gray.500"
+                                  mr={2}
+                                />
+                              </MenuButton>
+                              <MenuList
+                                border="none"
+                                backgroundColor={`mode.${colorMode}.card`}
+                                color={`mode.${colorMode}.text`}
+                              >
+                                <MenuOptionGroup
+                                  defaultValue={owner.right.right.value.login}
+                                  type="radio"
                                 >
-                                  <Avatar
-                                    src={owner.right.right.value.avatar_url}
-                                    backgroundColor="transparent"
-                                    icon={
-                                      <FallbackIcon
-                                        color={`mode.${colorMode}.icon`}
-                                      />
-                                    }
-                                    name={session.user.name}
-                                    h={8}
-                                    w={8}
-                                    borderRadius="sm"
-                                  />
-                                  <Text mr={8} color={`mode.${colorMode}.text`}>
-                                    {owner.right.right.value.login}
-                                  </Text>
-                                  <ArrowUpDownIcon
-                                    boxSize="12px"
-                                    color="gray.500"
-                                    mr={2}
-                                  />
-                                </MenuButton>
-                                <MenuList
-                                  border="none"
-                                  backgroundColor={`mode.${colorMode}.card`}
-                                  color={`mode.${colorMode}.text`}
-                                >
-                                  <MenuOptionGroup
-                                    defaultValue={owner.right.right.value.login}
-                                    type="radio"
-                                  >
-                                    {repoListAndThunk[0].right.right.map(
-                                      (reposForOwner, index) => (
-                                        <MenuItemOption
-                                          key={index}
-                                          value={
-                                            NEA.head(reposForOwner).owner.login
-                                          }
-                                          onClick={() => {
-                                            setOwner(
+                                  {repoListAndThunk[0].right.right.map(
+                                    (reposForOwner, index) => (
+                                      <MenuItemOption
+                                        key={index}
+                                        value={
+                                          NEA.head(reposForOwner).owner.login
+                                        }
+                                        onClick={() => {
+                                          setOwner(
+                                            E.right(
                                               E.right(
-                                                E.right(
-                                                  O.some(
-                                                    NEA.head(reposForOwner)
-                                                      .owner
-                                                  )
+                                                O.some(
+                                                  NEA.head(reposForOwner).owner
                                                 )
                                               )
-                                            );
-                                            setOwnerRepos(
-                                              E.right(
-                                                E.right(O.some(reposForOwner))
-                                              )
-                                            );
-                                          }}
-                                        >
-                                          {NEA.head(reposForOwner).owner.login}
-                                        </MenuItemOption>
-                                      )
-                                    )}
-                                  </MenuOptionGroup>
-                                </MenuList>
-                              </Menu>
-                              <Stack>
-                                {E.isRight(ownerRepos) &&
-                                  E.isRight(ownerRepos.right) &&
-                                  O.isSome(ownerRepos.right.right) &&
-                                  ownerRepos.right.right.value.map(
-                                    (repo, index) => (
-                                      <ImportProject
-                                        key={index}
-                                        teamName={team.name}
-                                        session={session}
-                                        repoName={repo.name}
-                                        onClick={createProject({
-                                          importProjectIsExecuting:
-                                            importProjectIsExecuting[1],
-                                          closeModal: onClose,
-                                          toast,
-                                          userId: getUserIdFromIdOrEnv(id),
-                                          namePlusTeam: `${repo.name}${SEPARATOR}${team.name}`,
-                                          nodeID: repo.node_id,
-                                          nodePlusTeam:
-                                            repo.node_id + SEPARATOR + team.id,
-                                          repositoryName: repo.name,
-                                          owner: repo.owner.login,
-                                          // this assumes that at least one team exist
-                                          // doesn't cover error case
-                                          // where team addition fails
-                                          teamName: team.name,
-                                          router,
-                                        })(session)}
-                                      />
+                                            )
+                                          );
+                                          setOwnerRepos(
+                                            E.right(
+                                              E.right(O.some(reposForOwner))
+                                            )
+                                          );
+                                        }}
+                                      >
+                                        {NEA.head(reposForOwner).owner.login}
+                                      </MenuItemOption>
                                     )
                                   )}
-                              </Stack>
-                            </>
+                                </MenuOptionGroup>
+                              </MenuList>
+                            </Menu>
+                            <Stack>
+                              {E.isRight(ownerRepos) &&
+                                E.isRight(ownerRepos.right) &&
+                                O.isSome(ownerRepos.right.right) &&
+                                ownerRepos.right.right.value.map(
+                                  (repo, index) => (
+                                    <ImportProject
+                                      key={index}
+                                      teamName={team.name}
+                                      session={session}
+                                      repoName={repo.name}
+                                      onClick={createProject({
+                                        importProjectIsExecuting:
+                                          importProjectIsExecuting[1],
+                                        closeModal: onClose,
+                                        toast,
+                                        userId: getUserIdFromIdOrEnv(id),
+                                        namePlusTeam: `${repo.name}${SEPARATOR}${team.name}`,
+                                        nodeID: repo.node_id,
+                                        nodePlusTeam:
+                                          repo.node_id + SEPARATOR + team.id,
+                                        repositoryName: repo.name,
+                                        owner: repo.owner.login,
+                                        // this assumes that at least one team exist
+                                        // doesn't cover error case
+                                        // where team addition fails
+                                        teamName: team.name,
+                                        router,
+                                      })(session)}
+                                    />
+                                  )
+                                )}
+                            </Stack>
+                          </>
+                        ) : (
+                          E.isLeft(repoListAndThunk[0]) && (
+                            <Box
+                              h="100%"
+                              w="100%"
+                              d="flex"
+                              justifyContent="center"
+                              alignItems="center"
+                            >
+                              <Spinner
+                                color={
+                                  colorMode === "light" ? "red.500" : "red.300"
+                                }
+                                size="xl"
+                                thickness="4px"
+                                emptyColor={`mode.${colorMode}.icon`}
+                              />
+                            </Box>
                           )
                         )}
                       </ModalBody>
