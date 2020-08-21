@@ -1,4 +1,4 @@
-import { ComponentTheme, mode } from "@chakra-ui/theme-tools"
+import { ComponentTheme, mode } from "@chakra-ui/theme-tools";
 
 const Popover: ComponentTheme = {
   baseStyle: (props) => ({
@@ -31,6 +31,6 @@ const Popover: ComponentTheme = {
       borderTopWidth: "1px",
     },
   }),
-}
+};
 
-export default Popover
+export default Popover;

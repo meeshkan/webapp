@@ -32,7 +32,6 @@ import {
 import { confirmOrCreateUser } from "../../../utils/user";
 import { GET_TEST_QUERY } from "../../../gql/pages/[teamName]/[projectName]/[testId]";
 import { eightBaseClient, gqlOperatorName } from "../../../utils/graphql";
-import Error from "../../../components/molecules/error";
 
 type NegativeTestFetchOutcome =
   | NOT_LOGGED_IN
@@ -65,6 +64,9 @@ type ITestProps = {
 
 const Project = t.type({
   name: t.string,
+  // repository: t.type({
+  //   owner: t.string,
+  // }),
   tests: t.type({
     items: t.array(TestT),
   }),

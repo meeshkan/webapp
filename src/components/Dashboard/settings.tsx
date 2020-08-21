@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 type SettingsProps = {
   session: ISession;
   repositoryName: String;
-  organizationName: String;
+  teamName: String;
   configured: Boolean;
   repositoryId: Number;
 };
@@ -15,7 +15,7 @@ type SettingsProps = {
 const Settings = ({
   session,
   repositoryName,
-  organizationName,
+  teamName,
   configured,
   repositoryId,
 }: SettingsProps) => {
@@ -53,7 +53,7 @@ const Settings = ({
       res
         .json()
         .then((data) => {
-          router.push(`/${organizationName}/${repositoryName}/${data.test}`);
+          router.push(`/${teamName}/${repositoryName}/${data.test}`);
         })
         .catch((error) => {
           error.message;
@@ -65,14 +65,14 @@ const Settings = ({
       session={session}
       gridArea="1 / 1 / 2 / 2"
       heading="Project details"
-      headingLink={`/${organizationName}/${repositoryName}/configuration`}
+      headingLink={`/${teamName}/${repositoryName}/configuration`}
       linkLabel="This project's configuration page"
       minH="35vh"
     >
       <Stack direction="row" my={2}>
         <Text>Repository:</Text>
         <Text color={`mode.${colorMode}.title`} fontWeight={600}>
-          {`${organizationName}/${repositoryName}`}
+          {`${teamName}/${repositoryName}`}
         </Text>
       </Stack>
 

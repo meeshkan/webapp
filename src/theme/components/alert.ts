@@ -4,27 +4,27 @@ import {
   mode,
   getColor,
   ink,
-} from "@chakra-ui/theme-tools"
+} from "@chakra-ui/theme-tools";
 
 function getSubtleStyle(props: Props) {
-  const { theme: t, colorScheme: c } = props
+  const { theme: t, colorScheme: c } = props;
 
-  const light = getColor(t, `${c}.100`, c)
-  const dark = ink(`${c}.200`, "lowest")(t)
+  const light = getColor(t, `${c}.100`, c);
+  const dark = ink(`${c}.200`, "lowest")(t);
 
-  const bg = mode(light, dark)(props)
+  const bg = mode(light, dark)(props);
 
   return {
     Root: { bg },
     Icon: {
       color: mode(`${c}.500`, `${c}.200`)(props),
     },
-  }
+  };
 }
 
 function getLeftAccentStyle(props: Props) {
-  const { colorScheme: c } = props
-  const subtleStyle = getSubtleStyle(props)
+  const { colorScheme: c } = props;
+  const subtleStyle = getSubtleStyle(props);
   return {
     Root: {
       paddingLeft: 3,
@@ -35,12 +35,12 @@ function getLeftAccentStyle(props: Props) {
     Icon: {
       color: mode(`${c}.500`, `${c}.200`)(props),
     },
-  }
+  };
 }
 
 function getTopAccentStyle(props: Props) {
-  const { colorScheme: c } = props
-  const subtleStyle = getSubtleStyle(props)
+  const { colorScheme: c } = props;
+  const subtleStyle = getSubtleStyle(props);
   return {
     Root: {
       paddingTop: 2,
@@ -51,17 +51,17 @@ function getTopAccentStyle(props: Props) {
     Icon: {
       color: mode(`${c}.500`, `${c}.200`)(props),
     },
-  }
+  };
 }
 
 function getSolidStyle(props: Props) {
-  const { colorScheme: c } = props
+  const { colorScheme: c } = props;
   return {
     Root: {
       bg: mode(`${c}.500`, `${c}.200`)(props),
       color: mode(`white`, `gray.900`)(props),
     },
-  }
+  };
 }
 
 const Alert: ComponentTheme = {
@@ -84,13 +84,13 @@ const Alert: ComponentTheme = {
     "left-accent": getLeftAccentStyle,
     "top-accent": getTopAccentStyle,
   },
-}
+};
 
 export const AlertVariants = {
   solid: "solid",
   subtle: "subtle",
   "left-accent": "left-accent",
   "top-accent": "top-accent",
-}
+};
 
-export default Alert
+export default Alert;

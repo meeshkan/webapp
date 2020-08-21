@@ -1,4 +1,4 @@
-import { ComponentTheme, mode } from "@chakra-ui/theme-tools"
+import { ComponentTheme, mode } from "@chakra-ui/theme-tools";
 
 const Kbd: ComponentTheme = {
   baseStyle: (props) => ({
@@ -12,6 +12,6 @@ const Kbd: ComponentTheme = {
     px: "0.4em",
     whiteSpace: "nowrap",
   }),
-}
+};
 
-export default Kbd
+export default Kbd;

@@ -4,10 +4,10 @@ import {
   ComponentTheme,
   StyleObject,
   getColor,
-} from "@chakra-ui/theme-tools"
+} from "@chakra-ui/theme-tools";
 
 function getLineStyle(props: Props) {
-  const { colorScheme: c } = props
+  const { colorScheme: c } = props;
   return {
     TabList: {
       borderBottom: "2px solid",
@@ -29,11 +29,11 @@ function getLineStyle(props: Props) {
         cursor: "not-allowed",
       },
     },
-  }
+  };
 }
 
 function getEnclosedStyle(props: Props) {
-  const { colorScheme: c } = props
+  const { colorScheme: c } = props;
   return {
     Tab: {
       borderTopRadius: "md",
@@ -51,11 +51,11 @@ function getEnclosedStyle(props: Props) {
       borderBottom: "1px solid",
       borderColor: "inherit",
     },
-  }
+  };
 }
 
 function getEnclosedColoredStyle(props: Props) {
-  const { colorScheme: c } = props
+  const { colorScheme: c } = props;
   return {
     Tab: {
       border: "1px solid",
@@ -78,11 +78,11 @@ function getEnclosedColoredStyle(props: Props) {
       borderBottom: "1px solid",
       borderColor: "inherit",
     },
-  }
+  };
 }
 
 function getSoftRoundedStyle(props: any): StyleObject {
-  const { colorScheme: c, theme: t } = props
+  const { colorScheme: c, theme: t } = props;
   return {
     Tab: {
       borderRadius: "full",
@@ -94,11 +94,11 @@ function getSoftRoundedStyle(props: any): StyleObject {
       },
     },
     TabList: {},
-  }
+  };
 }
 
 function getSolidRoundedStyle(props: Props): StyleObject {
-  const { colorScheme: c } = props
+  const { colorScheme: c } = props;
   return {
     Tab: {
       borderRadius: "full",
@@ -110,7 +110,7 @@ function getSolidRoundedStyle(props: Props): StyleObject {
       },
     },
     TabList: {},
-  }
+  };
 }
 
 const Tabs: ComponentTheme = {
@@ -165,13 +165,13 @@ const Tabs: ComponentTheme = {
     "solid-rounded": getSolidRoundedStyle,
     unstyled: {},
   },
-}
+};
 
 export const TabSizes = {
   sm: "sm",
   md: "md",
   lg: "lg",
-}
+};
 
 export const TabVariants = {
   line: "line",
@@ -180,6 +180,6 @@ export const TabVariants = {
   "enclosed-colored": "enclosed-colored",
   "solid-rounded": "solid-rounded",
   unstyled: "unstyled",
-}
+};
 
-export default Tabs
+export default Tabs;

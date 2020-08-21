@@ -1,4 +1,4 @@
-import { ComponentTheme, mode, orient } from "@chakra-ui/theme-tools"
+import { ComponentTheme, mode, orient } from "@chakra-ui/theme-tools";
 
 const Slider: ComponentTheme = {
   defaultProps: {
@@ -104,12 +104,12 @@ const Slider: ComponentTheme = {
       bg: mode(`${props.colorScheme}.500`, `${props.colorScheme}.200`)(props),
     },
   }),
-}
+};
 
 export const SliderSizes = {
   lg: "lg",
   sm: "sm",
   md: "md",
-}
+};
 
-export default Slider
+export default Slider;

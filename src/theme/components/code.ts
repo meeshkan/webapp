@@ -1,5 +1,5 @@
-import Badge, { BadgeVariants } from "./badge"
-import { ComponentTheme } from "@chakra-ui/theme-tools"
+import Badge, { BadgeVariants } from "./badge";
+import { ComponentTheme } from "@chakra-ui/theme-tools";
 
 const Code: ComponentTheme = {
   defaultProps: Badge.defaultProps,
@@ -10,8 +10,8 @@ const Code: ComponentTheme = {
     borderRadius: "sm",
   },
   variants: Badge.variants,
-}
+};
 
-export const CodeVariants = BadgeVariants
+export const CodeVariants = BadgeVariants;
 
-export default Code
+export default Code;

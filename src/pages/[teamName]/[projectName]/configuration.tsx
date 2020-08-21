@@ -404,7 +404,7 @@ const ConfigurationPage = withError<
       },
       (p) => ({
         ...p,
-        onSubmit: (values: IConfiguration) =>
+        onSubmit: (values: IConfiguration) => {
           updateConfiguration({
             toast: p.toast,
             setConfiguration: p.useGetConfiguration[2],
@@ -418,7 +418,15 @@ const ConfigurationPage = withError<
             },
             userId: getUserIdFromIdOrEnv(id),
             namePlusTeamName: `${projectName}${SEPARATOR}${teamName}`,
-          })(session)().then(constNull),
+          })(session)().then(constNull);
+          p.toast({
+            title: "Configuration saved.",
+            description: "Your configuration is saved. A new test has started.",
+            status: "success",
+            duration: 9000,
+            isClosable: true,
+          });
+        },
         configuration:
           E.isRight(p.useGetConfiguration[0]) &&
           E.isRight(p.useGetConfiguration[0].right)

@@ -167,7 +167,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, IProjectWithTeamName>(
       >
         <Settings
           session={projectProps.session}
-          organizationName={projectProps.repository.owner}
+          teamName={projectProps.teamName}
           repositoryName={projectProps.name}
           repositoryId={projectProps.repository.id}
           configured={projectProps.configuration ? true : false}

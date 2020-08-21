@@ -1,4 +1,4 @@
-import { ComponentTheme } from "@chakra-ui/theme-tools"
+import { ComponentTheme } from "@chakra-ui/theme-tools";
 
 const Divider: ComponentTheme = {
   defaultProps: {
@@ -14,6 +14,6 @@ const Divider: ComponentTheme = {
       width: "100%",
     },
   },
-}
+};
 
-export default Divider
+export default Divider;
