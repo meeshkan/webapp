@@ -38,7 +38,7 @@ const Premium = ({ tests, teamName, projectName, session }: PremiumProps) => {
       minH="35vh"
     >
       {!tests.length ? (
-        <Text mt={2}>You don't have any premium tests completed yet.</Text>
+        <Text mt={2}>You don't have any premium tests yet.</Text>
       ) : (
         A.sort(newestTestFirst)(tests).map((test, index) => (
           <Test

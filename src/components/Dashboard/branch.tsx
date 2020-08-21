@@ -35,8 +35,8 @@ const Branch = ({ tests, teamName, projectName, session }: BranchProps) => {
     <Card session={session} gridArea="1 / 3 / 3 / 4" heading="Continuous tests">
       {!tests.length ? (
         <Text mt={2}>
-          You made a commit to the project since importing, meaning there are no
-          continuous tests yet.
+          You haven't made a commit to the project since importing, meaning
+          there are no continuous tests yet.
         </Text>
       ) : (
         A.sort(newestTestFirst)(tests).map((test, index) => (
