@@ -886,7 +886,9 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                   onClose={onClose}
                   isOpen={isOpen}
                   isCentered
-                  scrollBehavior="inside"
+                  scrollBehavior={
+                    E.isLeft(repoListAndThunk[0]) ? "outside" : "inside"
+                  }
                   closeOnOverlayClick={true}
                   size="lg"
                 >
