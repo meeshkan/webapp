@@ -721,7 +721,24 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                     {planToTitle[plan]}
                   </Text>
                   <Link passHref href={`/${team.name}/plan`}>
-                    <ChakraLink fontWeight={600} ml={2}>
+                    <ChakraLink
+                      onClick={(e) => {
+                        if (plan === FREE_PLAN) {
+                          return;
+                        }
+                        e.preventDefault();
+                        fetch(
+                          `/api/stripe-portal?customer=${team.stripeCustomerId}&return_url=${process.env.LOGOUT_REDIRECT_URL}${team.name}`
+                        )
+                          .then((res) => res.json())
+                          .then((data) => {
+                            window.location.href = data.url;
+                            return Promise.resolve(true);
+                          });
+                      }}
+                      fontWeight={600}
+                      ml={2}
+                    >
                       {plan === FREE_PLAN ? `-> Upgrade` : `-> Manage`}
                     </ChakraLink>
                   </Link>
