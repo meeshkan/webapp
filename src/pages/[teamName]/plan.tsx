@@ -109,7 +109,7 @@ export const getServerSideProps = ({
         TE.chain((_) =>
           TE.right({
             session,
-            plan: FREE_PLAN,
+            plan: plan === NO_PLAN ? FREE_PLAN : plan,
             id,
             team,
           })
