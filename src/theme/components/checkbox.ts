@@ -1,7 +1,7 @@
-import { ComponentTheme, mode, Props } from "@chakra-ui/theme-tools"
+import { ComponentTheme, mode, Props } from "@chakra-ui/theme-tools";
 
 function getCheckedStyle(props: Props) {
-  const { colorScheme: c } = props
+  const { colorScheme: c } = props;
   return {
     bg: mode(`${c}.500`, `${c}.200`)(props),
     borderColor: mode(`${c}.500`, `${c}.200`)(props),
@@ -15,11 +15,11 @@ function getCheckedStyle(props: Props) {
       bg: mode("gray.200", "whiteAlpha.300")(props),
       color: mode("gray.500", "whiteAlpha.500")(props),
     },
-  }
+  };
 }
 
 const baseStyle = (props: Props) => {
-  const { colorScheme: c } = props
+  const { colorScheme: c } = props;
 
   return {
     Control: {
@@ -48,8 +48,8 @@ const baseStyle = (props: Props) => {
     Label: {
       _disabled: { opacity: 0.4 },
     },
-  }
-}
+  };
+};
 
 const sizes = {
   sm: {
@@ -64,7 +64,7 @@ const sizes = {
     Control: { width: 5, height: 5 },
     Label: { fontSize: "lg" },
   },
-}
+};
 
 const Checkbox: ComponentTheme = {
   defaultProps: {
@@ -73,12 +73,12 @@ const Checkbox: ComponentTheme = {
   },
   baseStyle,
   sizes,
-}
+};
 
 export const CheckboxSizes = {
   lg: "lg",
   sm: "sm",
   md: "md",
-}
+};
 
-export default Checkbox
+export default Checkbox;

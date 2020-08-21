@@ -1,4 +1,4 @@
-import { ComponentTheme, mode } from "@chakra-ui/theme-tools"
+import { ComponentTheme, mode } from "@chakra-ui/theme-tools";
 
 const sizes: ComponentTheme["sizes"] = {
   sm: {
@@ -40,7 +40,7 @@ const sizes: ComponentTheme["sizes"] = {
       },
     },
   },
-}
+};
 
 const Switch: ComponentTheme = {
   defaultProps: {
@@ -72,12 +72,12 @@ const Switch: ComponentTheme = {
     },
   }),
   sizes,
-}
+};
 
 export const SwitchSizes = {
   sm: "sm",
   md: "md",
   lg: "lg",
-}
+};
 
-export default Switch
+export default Switch;

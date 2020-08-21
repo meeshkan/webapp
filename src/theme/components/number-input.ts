@@ -1,4 +1,4 @@
-import { ComponentTheme, mode } from "@chakra-ui/theme-tools"
+import { ComponentTheme, mode } from "@chakra-ui/theme-tools";
 
 function getSizeStyle(size: "sm" | "md" | "lg") {
   return {
@@ -13,7 +13,7 @@ function getSizeStyle(size: "sm" | "md" | "lg") {
         borderTopWidth: 1,
       },
     },
-  }
+  };
 }
 
 const NumberInput: ComponentTheme = {
@@ -46,12 +46,12 @@ const NumberInput: ComponentTheme = {
     md: getSizeStyle("md"),
     lg: getSizeStyle("lg"),
   },
-}
+};
 
 export const NumberInputSizes = {
   sm: "sm",
   md: "md",
   lg: "lg",
-}
+};
 
-export default NumberInput
+export default NumberInput;

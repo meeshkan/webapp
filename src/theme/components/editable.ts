@@ -1,5 +1,5 @@
-import { ComponentTheme } from "@chakra-ui/theme-tools"
-import { SystemProps } from "@chakra-ui/system"
+import { ComponentTheme } from "@chakra-ui/theme-tools";
+import { SystemProps } from "@chakra-ui/system";
 
 const base: SystemProps = {
   fontSize: "inherit",
@@ -10,7 +10,7 @@ const base: SystemProps = {
   borderRadius: "md",
   paddingX: "3px",
   marginX: "-3px",
-}
+};
 
 const Editable: ComponentTheme = {
   baseStyle: {
@@ -31,6 +31,6 @@ const Editable: ComponentTheme = {
       },
     },
   },
-}
+};
 
-export default Editable
+export default Editable;

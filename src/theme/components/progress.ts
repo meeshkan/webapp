@@ -1,23 +1,23 @@
-import { ComponentTheme, mode, getColor } from "@chakra-ui/theme-tools"
+import { ComponentTheme, mode, getColor } from "@chakra-ui/theme-tools";
 
-type ProgressTheme = ComponentTheme<{ isIndeterminate?: boolean }>
+type ProgressTheme = ComponentTheme<{ isIndeterminate?: boolean }>;
 
 const getProgressBg: ProgressTheme["baseStyle"] = (props) => {
-  const { colorScheme: c, theme: t, isIndeterminate } = props
+  const { colorScheme: c, theme: t, isIndeterminate } = props;
 
-  const bg = mode(`${c}.500`, `${c}.200`)(props)
+  const bg = mode(`${c}.500`, `${c}.200`)(props);
 
   const gradient = `linear-gradient(
     to right,
     transparent 0%,
     ${getColor(t, bg)} 50%,
     transparent 100%
-  )`
+  )`;
 
   return {
     bg: isIndeterminate ? gradient : bg,
-  }
-}
+  };
+};
 
 const sizes: ProgressTheme["sizes"] = {
   xs: {
@@ -40,7 +40,7 @@ const sizes: ProgressTheme["sizes"] = {
       height: "1rem",
     },
   },
-}
+};
 
 const Progress: ProgressTheme = {
   defaultProps: {
@@ -62,13 +62,13 @@ const Progress: ProgressTheme = {
     },
   }),
   sizes,
-}
+};
 
 export const ProgressSizes = {
   lg: "lg",
   sm: "sm",
   md: "md",
   xs: "xs",
-}
+};
 
-export default Progress
+export default Progress;

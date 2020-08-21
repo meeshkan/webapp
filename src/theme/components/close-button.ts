@@ -1,4 +1,4 @@
-import { ComponentTheme, mode } from "@chakra-ui/theme-tools"
+import { ComponentTheme, mode } from "@chakra-ui/theme-tools";
 
 const CloseButton: ComponentTheme = {
   defaultProps: {
@@ -39,12 +39,12 @@ const CloseButton: ComponentTheme = {
       fontSize: "10px",
     },
   },
-}
+};
 
 export const CloseButtonSizes = {
   lg: "lg",
   sm: "sm",
   md: "md",
-}
+};
 
-export default CloseButton
+export default CloseButton;

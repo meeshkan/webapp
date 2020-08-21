@@ -1,4 +1,4 @@
-import { mode, ComponentTheme } from "@chakra-ui/theme-tools"
+import { mode, ComponentTheme } from "@chakra-ui/theme-tools";
 
 const Tooltip: ComponentTheme = {
   baseStyle: (props) => ({
@@ -13,6 +13,6 @@ const Tooltip: ComponentTheme = {
     boxShadow: "md",
     maxWidth: "320px",
   }),
-}
+};
 
-export default Tooltip
+export default Tooltip;

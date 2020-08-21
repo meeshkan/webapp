@@ -1,4 +1,4 @@
-import Input, { InputSizes, InputTheme, InputVariants } from "./input"
+import Input, { InputSizes, InputTheme, InputVariants } from "./input";
 
 const Textarea: InputTheme = {
   ...Input,
@@ -8,9 +8,9 @@ const Textarea: InputTheme = {
     minHeight: "80px",
     lineHeight: "short",
   },
-}
+};
 
-export const TextareaVariants = InputVariants
-export const TextareaSizes = InputSizes
+export const TextareaVariants = InputVariants;
+export const TextareaSizes = InputSizes;
 
-export default Textarea
+export default Textarea;

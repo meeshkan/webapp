@@ -1,4 +1,4 @@
-import { ComponentTheme } from "@chakra-ui/theme-tools"
+import { ComponentTheme } from "@chakra-ui/theme-tools";
 
 const Icon: ComponentTheme = {
   defaultProps: {
@@ -11,7 +11,7 @@ const Icon: ComponentTheme = {
     sm: { boxSize: "24px" },
     xs: { boxSize: "16px" },
   },
-}
+};
 
 export const IconSize = {
   xl: "xl",
@@ -19,6 +19,6 @@ export const IconSize = {
   md: "md",
   sm: "sm",
   xs: "xs",
-}
+};
 
-export default Icon
+export default Icon;

@@ -1,4 +1,4 @@
-import { ComponentTheme } from "@chakra-ui/theme-tools"
+import { ComponentTheme } from "@chakra-ui/theme-tools";
 
 const Stat: ComponentTheme = {
   defaultProps: {
@@ -34,10 +34,10 @@ const Stat: ComponentTheme = {
       },
     },
   },
-}
+};
 
 export const StatSizes = {
   md: "md",
-}
+};
 
-export default Stat
+export default Stat;

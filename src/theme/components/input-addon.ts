@@ -1,12 +1,12 @@
-import { SystemProps } from "@chakra-ui/system"
-import { ComponentTheme, mode, Props } from "@chakra-ui/theme-tools"
+import { SystemProps } from "@chakra-ui/system";
+import { ComponentTheme, mode, Props } from "@chakra-ui/theme-tools";
 
 function getOutlineStyle(props: Props): SystemProps {
   return {
     border: "1px solid",
     borderColor: mode("inherit", "whiteAlpha.50")(props),
     bg: mode("gray.100", "whiteAlpha.300")(props),
-  }
+  };
 }
 
 function getFilledStyle(props: Props): SystemProps {
@@ -14,7 +14,7 @@ function getFilledStyle(props: Props): SystemProps {
     border: "2px solid",
     borderColor: "transparent",
     bg: mode("gray.100", "whiteAlpha.50")(props),
-  }
+  };
 }
 
 function getFlushedStyle(props: Props): SystemProps {
@@ -24,14 +24,14 @@ function getFlushedStyle(props: Props): SystemProps {
     borderRadius: 0,
     paddingX: 0,
     bg: "transparent",
-  }
+  };
 }
 
 const unstyled = {
   bg: "transparent",
   paddingX: 0,
   height: "auto",
-}
+};
 
 const sizes: ComponentTheme["sizes"] = {
   lg: {
@@ -52,7 +52,7 @@ const sizes: ComponentTheme["sizes"] = {
     paddingY: 1,
     borderRadius: "sm",
   },
-}
+};
 
 const InputAddon: ComponentTheme = {
   sizes,
@@ -62,13 +62,13 @@ const InputAddon: ComponentTheme = {
     flushed: getFlushedStyle,
     unstyled,
   },
-}
+};
 
 export const InputAddonVariants = {
   outline: "outline",
   filled: "filled",
   flushed: "flushed",
   unstyled: "unstyled",
-}
+};
 
-export default InputAddon
+export default InputAddon;

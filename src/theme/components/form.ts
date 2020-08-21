@@ -1,4 +1,4 @@
-import { ComponentTheme, mode } from "@chakra-ui/theme-tools"
+import { ComponentTheme, mode } from "@chakra-ui/theme-tools";
 
 const Form: ComponentTheme = {
   baseStyle: (props) => ({
@@ -33,6 +33,6 @@ const Form: ComponentTheme = {
       color: mode("red.500", "red.300")(props),
     },
   }),
-}
+};
 
-export default Form
+export default Form;
