@@ -14,6 +14,9 @@ export const GET_TEST_QUERY = `query(
           downloadUrl
         }
         name
+        repository {
+          owner
+        }
         project(filter:{
           name: {
             equals: $projectName
