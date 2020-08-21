@@ -97,6 +97,7 @@ import {
   getPlan,
   FREE_PLAN,
   planToTitle,
+  createPlanIfNoPlan,
 } from "../utils/stripe";
 
 type NegativeTeamFetchOutcome =
@@ -553,6 +554,37 @@ export const getServerSideProps = ({
           type: "STRIPE_ERROR",
           msg: "Could not create a stripe customer",
         })
+      )
+    ),
+    RTE.chain(({ id, team, ghOauthState }) => (_) =>
+      TE.tryCatch(
+        () =>
+          stripe()
+            .customers.retrieve(team.stripeCustomerId)
+            .then((res) => ({
+              ghOauthState,
+              plan: getPlan(res),
+              id,
+              team,
+            })),
+        () => ({
+          type: "STRIPE_ERROR",
+          msg: "Could not create a stripe customer",
+        })
+      )
+    ),
+    RTE.chain(({ id, team, ghOauthState, plan }) => (session) =>
+      pipe(
+        createPlanIfNoPlan(team.stripeCustomerId)(plan),
+        TE.chain((_) =>
+          TE.right({
+            session,
+            ghOauthState,
+            plan: FREE_PLAN,
+            id,
+            team,
+          })
+        )
       )
     ),
     withSession(req, "[teamName].tsx getServerSideProps")

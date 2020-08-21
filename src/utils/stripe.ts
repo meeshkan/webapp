@@ -52,6 +52,7 @@ export const createCustomerId = (id: string, teamName: string) => (
     )
   );
 
+export const NO_PLAN = "NO_PLAN";
 export const FREE_PLAN = "FREE_PLAN";
 export const PREMIUM_PLAN = "PREMIUM_PLAN";
 export const BUSINESS_PLAN = "BUSINESS_PLAN";
@@ -88,6 +89,23 @@ const _getPlan = (response: string): string =>
     ? PREMIUM_PLAN
     : checkPlan(response)(FREE_PRODUCTS)
     ? FREE_PLAN
-    : FREE_PLAN;
+    : NO_PLAN;
 
 export const getPlan = flow(JSON.stringify, _getPlan);
+
+export const createPlanIfNoPlan = (customer: string) => (plan: string) =>
+  plan !== NO_PLAN
+    ? TE.right(plan)
+    : TE.tryCatch(
+        () =>
+          stripe()
+            .subscriptions.create({
+              customer,
+              items: [{ price: process.env.STRIPE_FREE_PLAN_PRICE }],
+            })
+            .then((_) => FREE_PLAN),
+        (err) => ({
+          type: "STRIPE_ERROR",
+          msg: JSON.stringify(err),
+        })
+      );

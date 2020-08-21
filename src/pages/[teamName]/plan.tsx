@@ -41,6 +41,8 @@ import {
   createCustomerId,
   getPlan,
   titleToPlan,
+  FREE_PLAN,
+  createPlanIfNoPlan,
 } from "../../utils/stripe";
 import { confirmOrCreateUser } from "../../utils/user";
 import { withSession } from "../api/session";
@@ -99,6 +101,19 @@ export const getServerSideProps = ({
           type: "STRIPE_ERROR",
           msg: "Could not create a stripe customer",
         })
+      )
+    ),
+    RTE.chain(({ id, team, plan }) => (session) =>
+      pipe(
+        createPlanIfNoPlan(team.stripeCustomerId)(plan),
+        TE.chain((_) =>
+          TE.right({
+            session,
+            plan: FREE_PLAN,
+            id,
+            team,
+          })
+        )
       )
     ),
     withSession(req, "plan.tsx getServerSideProps")
