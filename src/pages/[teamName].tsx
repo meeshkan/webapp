@@ -1047,8 +1047,14 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                               {E.isRight(ownerRepos) &&
                                 E.isRight(ownerRepos.right) &&
                                 O.isSome(ownerRepos.right.right) &&
-                                ownerRepos.right.right.value.map(
-                                  (repo, index) => (
+                                ownerRepos.right.right.value
+                                  .filter(
+                                    (i) =>
+                                      team.project.items
+                                        .map((proj) => proj.name)
+                                        .indexOf(i.name) === -1
+                                  )
+                                  .map((repo, index) => (
                                     <ImportProject
                                       key={index}
                                       teamName={team.name}
@@ -1073,8 +1079,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                                         router,
                                       })(session)}
                                     />
-                                  )
-                                )}
+                                  ))}
                             </Stack>
                           </>
                         ) : (
