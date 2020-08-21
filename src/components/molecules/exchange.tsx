@@ -117,7 +117,9 @@ const ExchangeMessage = ({ command, commands }: ExchangeProps) => {
 
         {command.exchange.length > 1 && (
           <Text color={`mode.${colorMode}.text`} mb={2}>
-            {`Number of steps in this stateful test: ${command.exchange.length}`}
+            {command.exchange.length > 1
+              ? `Number of steps in this stateful test: ${command.exchange.length}`
+              : `Test results:`}
           </Text>
         )}
 
