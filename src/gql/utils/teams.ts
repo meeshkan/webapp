@@ -20,7 +20,11 @@ export const GET_TEAMS_QUERY = `query {
             }
           }
         }
-        project {
+        project(filter: {
+          archived:{
+            equals: false
+          }
+        }) {
           items {
             name
             repository {
