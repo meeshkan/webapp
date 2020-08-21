@@ -199,6 +199,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
     test: { log, location, commitHash, status, testType },
     teamName,
     projectName,
+    session,
   }) =>
     status === "In progress" ? (
       <div>Your tests are currently in progress.</div>
@@ -222,6 +223,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
             gap={8}
           >
             <Card
+              session={session}
               gridArea="1 / 2 / 4 / 1"
               heading={`${testType} test cases — ${failures.length} failure${
                 failures.length === 1 ? "" : "s"

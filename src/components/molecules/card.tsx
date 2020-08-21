@@ -1,10 +1,13 @@
 import React from "react";
+import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import { Box, useColorMode, Heading, Stack, Link } from "@chakra-ui/core";
 import { ArrowForwardIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/router";
+import { mixpanelize } from "../../utils/mixpanel-client";
 
 type CardProps = {
   children: object;
+  session?: ISession;
   gridArea?: string;
   heading?: string;
   headingLink?: string;
@@ -16,6 +19,7 @@ type CardProps = {
 
 const Card = ({
   children,
+  session,
   gridArea,
   heading,
   headingLink,
@@ -29,6 +33,15 @@ const Card = ({
 
   const handleClick = (e) => {
     e.preventDefault();
+    mixpanelize(
+      session,
+      "Clicked button",
+      {
+        to: link,
+        c2a: linkLabel,
+      },
+      () => {}
+    );
     router.push(headingLink || link);
   };
   return (

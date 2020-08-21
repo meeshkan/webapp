@@ -11,6 +11,7 @@ module.exports = nextSourceMaps({
     COOKIE_SECRET: process.env.COOKIE_SECRET,
     GITHUB_AUTH_ENV: process.env.GITHUB_AUTH_ENV,
     EIGHT_BASE_ENDPOINT: process.env.EIGHT_BASE_ENDPOINT,
+    LOGOUT_REDIRECT_URL: process.env.LOGOUT_REDIRECT_URL,
     GH_OAUTH_APP_CLIENT_ID: process.env.GH_OAUTH_APP_CLIENT_ID,
     PRINT_CLIENT_SIDE_ERROR_MESSAGES:
       process.env.PRINT_CLIENT_SIDE_ERROR_MESSAGES,
@@ -19,6 +20,7 @@ module.exports = nextSourceMaps({
     MEESHKAN_ALTERNATIVE_ID: process.env.MEESHKAN_ALTERNATIVE_ID,
     INTERCOM_ID: process.env.INTERCOM_ID,
     INTERCOM_EMAIL: process.env.INTERCOM_EMAIL,
+    MIXPANEL_TOKEN: process.env.MIXPANEL_TOKEN,
   },
   webpack: (config, { isServer, buildId }) => {
     config.plugins.push(

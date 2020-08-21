@@ -21,6 +21,10 @@ export const GET_PROJECT_QUERY = `query(
           items {
             name
             configuration { id }
+            repository {
+              owner
+              id
+            }
             tests {
               items {
                 id

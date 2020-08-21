@@ -30,7 +30,7 @@ type NegativeGHOAuthOutcome =
 
 const userType = t.type({ id: t.string });
 type UserType = t.TypeOf<typeof userType>;
-const ghStateType = t.type({ id: t.string });
+const ghStateType = t.type({ id: t.string, goto: t.string });
 type GHStateType = t.TypeOf<typeof ghStateType>;
 
 export const fromQueryParam = (p: string | string[]) =>
@@ -40,22 +40,33 @@ export default safeApi<NegativeGHOAuthOutcome, void>(
   (req, res) =>
     pipe(
       Oauth.Oauth(req, process.env.GH_OAUTH_FLOW_SIGNING_KEY, ghStateType),
-      RTE.chain<ISession, NegativeGHOAuthOutcome, GHStateType, UserType>(() =>
-        confirmOrCreateUser("id", userType)
-      ),
-      RTE.chain(({ id }) =>
-        authenticateAppWithGithub(
-          id,
-          new URLSearchParams({
-            code: fromQueryParam(req.query.code),
-            client_id: process.env.GH_OAUTH_APP_CLIENT_ID,
-            client_secret: process.env.GH_OAUTH_APP_CLIENT_SECRET,
-            redirect_uri: process.env.GH_OAUTH_REDIRECT_URI,
-            state: fromQueryParam(req.query.state),
-          })
+      RTE.chain<
+        ISession,
+        NegativeGHOAuthOutcome,
+        GHStateType,
+        UserType & { goto: string }
+      >(({ goto }) =>
+        pipe(
+          confirmOrCreateUser("id", userType),
+          RTE.chain(({ id }) => RTE.right({ id, goto }))
         )
       ),
-      RTE.chain((_) => Oauth.Redirect(res)),
+      RTE.chain(({ id, goto }) =>
+        pipe(
+          authenticateAppWithGithub(
+            id,
+            new URLSearchParams({
+              code: fromQueryParam(req.query.code),
+              client_id: process.env.GH_OAUTH_APP_CLIENT_ID,
+              client_secret: process.env.GH_OAUTH_APP_CLIENT_SECRET,
+              redirect_uri: process.env.GH_OAUTH_REDIRECT_URI,
+              state: fromQueryParam(req.query.state),
+            })
+          ),
+          RTE.chain((_) => RTE.right(goto))
+        )
+      ),
+      RTE.chain((goto) => Oauth.Redirect(res, goto)),
       withSession(req, "oauth.ts default export")
     ),
   _400ErrorHandler

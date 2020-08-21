@@ -83,6 +83,7 @@ import {
   IOwner,
   IRepository,
   Repository,
+  TEAM_IMPORT_PROJECT,
 } from "../utils/gh";
 import { withSession } from "./api/session";
 import ReactGA from "react-ga";
@@ -90,6 +91,15 @@ import Card from "../components/molecules/card";
 import { withError } from "../components/molecules/error";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
+import { mixpanelize } from "../utils/mixpanel-client";
+import {
+  stripe,
+  createCustomerId,
+  getPlan,
+  FREE_PLAN,
+  planToTitle,
+  createPlanIfNoPlan,
+} from "../utils/stripe";
 
 type NegativeTeamFetchOutcome =
   | NOT_LOGGED_IN
@@ -102,16 +112,20 @@ type NegativeTeamFetchOutcome =
 
 type QueryTp = t.TypeOf<typeof queryTp>;
 type ITeamProps = {
-  team: ITeam;
+  team: ITeamWithStripe;
   id: string;
+  plan: string;
   session: ISession;
   ghOauthState: string;
 };
 type NegativeImportProjectOutcome = UNDEFINED_ERROR | INCORRECT_TYPE_SAFETY;
 type NegativeUpdateTeamOutcome = UNDEFINED_ERROR | INCORRECT_TYPE_SAFETY;
 type ITeam = t.TypeOf<typeof Team>;
+export type ITeamWithStripe = t.TypeOf<typeof TeamWithStripe>;
 type IRepositoriesGroupedByOwner = NonEmptyArray<IRepository>[];
 type ImportProps = {
+  teamName: string;
+  session: ISession;
   repoName: String;
   onClick: TE.TaskEither<NegativeImportProjectOutcome, void>;
 };
@@ -123,9 +137,10 @@ const TeamUpdate = t.type({
   userId: t.union([t.null, t.string]),
 });
 
-const Team = t.type({
+const _Team = t.type({
   id: t.string,
   name: t.string,
+
   image: t.union([
     t.null,
     t.type({
@@ -133,7 +148,6 @@ const Team = t.type({
     }),
   ]),
   inviteLink: t.string,
-  plan: t.string,
   users: t.type({
     items: t.array(
       t.type({
@@ -167,6 +181,20 @@ const Team = t.type({
   }),
 });
 
+const Team = t.intersection([
+  _Team,
+  t.type({
+    stripeCustomerId: t.union([t.string, t.null]),
+  }),
+]);
+
+const TeamWithStripe = t.intersection([
+  _Team,
+  t.type({
+    stripeCustomerId: t.string,
+  }),
+]);
+
 const queryTp = t.type({
   user: t.type({
     team: t.type({
@@ -189,7 +217,7 @@ interface ImportProjectVariables {
   toast: (props: UseToastOptions) => void;
 }
 
-const getTeam = (teamName: string) => (
+export const getTeam = (teamName: string) => (
   session: ISession
 ): TE.TaskEither<NegativeTeamFetchOutcome, ITeam> =>
   pipe(
@@ -234,13 +262,27 @@ type UpdateTeamVariables = t.TypeOf<typeof updateTeamVariables> & {
   router: NextRouter;
 };
 
-const ImportProject = ({ repoName, onClick }: ImportProps) => {
+const ImportProject = ({
+  repoName,
+  onClick,
+  teamName,
+  session,
+}: ImportProps) => {
   const { colorMode } = useColorMode();
   return (
     <Button
       w="full"
       variant="ghost"
-      onClick={() => onClick()}
+      onClick={mixpanelize(
+        session,
+        "Clicked a button",
+        {
+          to: `https://app.meeshkan.com/${teamName}/{newProject}`,
+          from: `https://app.meeshkan.com/${teamName}`,
+          c2a: "Import a project",
+        },
+        onClick
+      )}
       justifyContent="space-between"
       color={`mode.${colorMode}.text`}
     >
@@ -478,20 +520,84 @@ export const getServerSideProps = ({
     _RTE.seq3([
       confirmOrCreateUser("id", userType),
       getTeam(teamName),
-      RTE.fromReaderEither(getGHOAuthState),
+      RTE.fromReaderEither(getGHOAuthState(`/${teamName}/?displayPicker=true`)),
     ]),
     RTE.chain(([{ id }, team, ghOauthState]) => (session) =>
-      TE.right({ session, id, team, ghOauthState })
+      team.stripeCustomerId !== null
+        ? TE.right({ ghOauthState, id, team })
+        : pipe(
+            createCustomerId(id, team.name)(session),
+            TE.chain((customerId) =>
+              TE.right({
+                id,
+                ghOauthState,
+                team: {
+                  ...team,
+                  stripeCustomerId: customerId,
+                },
+              })
+            )
+          )
+    ),
+    RTE.chain(({ id, team, ghOauthState }) => (session) =>
+      TE.tryCatch(
+        () =>
+          stripe()
+            .customers.retrieve(team.stripeCustomerId)
+            .then((res) => ({
+              session,
+              ghOauthState,
+              plan: getPlan(res),
+              id,
+              team,
+            })),
+        () => ({
+          type: "STRIPE_ERROR",
+          msg: "Could not create a stripe customer",
+        })
+      )
+    ),
+    RTE.chain(({ id, team, ghOauthState }) => (_) =>
+      TE.tryCatch(
+        () =>
+          stripe()
+            .customers.retrieve(team.stripeCustomerId)
+            .then((res) => ({
+              ghOauthState,
+              plan: getPlan(res),
+              id,
+              team,
+            })),
+        () => ({
+          type: "STRIPE_ERROR",
+          msg: "Could not create a stripe customer",
+        })
+      )
+    ),
+    RTE.chain(({ id, team, ghOauthState, plan }) => (session) =>
+      pipe(
+        createPlanIfNoPlan(team.stripeCustomerId)(plan),
+        TE.chain((_) =>
+          TE.right({
+            session,
+            ghOauthState,
+            plan: FREE_PLAN,
+            id,
+            team,
+          })
+        )
+      )
     ),
     withSession(req, "[teamName].tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
 
 export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
   "Uh oh. Looks like this resource does not exist.",
-  ({ team, id, session, ghOauthState }) =>
+  ({ team, id, session, ghOauthState, plan }) =>
     pipe(
       {
         useColorMode: useColorMode(),
+        test: console.log("hello"),
         router: useRouter(),
         useDisclosure: useDisclosure(),
         teamsFromClientSideFetch: useTeams(session),
@@ -519,6 +625,18 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
       },
       (p) => ({
         ...p,
+        displayPicker: pipe(
+          useState(p.router.query.displayPicker ? true : false),
+          (dp) => {
+            console.log("DP", dp[0], p.router.query.displayPicker);
+            if (dp[0]) {
+              // forces open if query asks to display picker
+              p.useDisclosure.onOpen();
+              dp[1](false);
+            }
+            return dp;
+          }
+        ),
         onSubmit: (values: ITeamUpdate) =>
           updateTeam({
             toast: p.toast,
@@ -550,7 +668,11 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
       }) => (
         <>
           <Grid templateColumns="repeat(3, 1fr)" templateRows="auto" gap={8}>
-            <Card gridArea="1 / 1 / 2 / 2" heading="Team settings">
+            <Card
+              session={session}
+              gridArea="1 / 1 / 2 / 2"
+              heading="Team settings"
+            >
               <Box as="form" onSubmit={handleSubmit(onSubmit)}>
                 <Flex align="center" mt={4}>
                   <Image
@@ -560,6 +682,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                     w={8}
                     borderRadius="sm"
                     mr={4}
+                    alt={`Uploaded logo from ${team.name}`}
                   />
                   <Box>
                     <FormLabel
@@ -596,9 +719,9 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                 <FormControl d="flex" mt={4}>
                   <FormLabel color={`mode.${colorMode}.text`}>Plan:</FormLabel>
                   <Text color={`mode.${colorMode}.title`} fontWeight={600}>
-                    {team.plan}
+                    {planToTitle[plan]}
                   </Text>
-                  {team.plan === "Free" ? (
+                  {plan === FREE_PLAN ? (
                     <Link passHref href={`/${team.name}/plan`}>
                       <ChakraLink fontWeight={600} ml={2}>
                         {`-> Upgrade`}
@@ -632,6 +755,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
             </Card>
 
             <Card
+              session={session}
               gridArea="2 / 1 / 3 / 2"
               heading={`Team members - ${team.users.items.length}`}
             >
@@ -681,7 +805,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                       }
                       backgroundColor="transparent"
                       icon={<FallbackIcon color={`mode.${colorMode}.icon`} />}
-                      name={session.user.name}
+                      name={`${session.user.name}'s uploaded avatar`}
                       h={8}
                       w={8}
                       borderRadius="sm"
@@ -698,6 +822,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
               <Grid templateColumns="repeat(2, 1fr)" gap={8}>
                 {team.project.items.map((project, index) => (
                   <Card
+                    session={session}
                     key={index}
                     link={`/${team.name}/${project.name}`}
                     linkLabel={`Links to ${team.name}'s project ${project.name}`}
@@ -734,7 +859,16 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
 
                 {/* Import a project | BUTTON */}
                 <Button
-                  onClick={onOpen}
+                  onClick={mixpanelize(
+                    session,
+                    "Clicked a button",
+                    {
+                      to: `https://app.meeshkan.com/${team.name}/{newProject}`,
+                      from: `https://app.meeshkan.com/${team.name}`,
+                      c2a: "Import a project",
+                    },
+                    onOpen
+                  )}
                   pos="unset"
                   p={4}
                   minH="72px"
@@ -804,13 +938,21 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                             <Button
                               as="a"
                               colorScheme="red"
-                              onClick={() =>
-                                ReactGA.event({
-                                  category: "Github",
-                                  action: "Import repo start",
-                                  label: "index.tsx",
-                                })
-                              }
+                              onClick={mixpanelize(
+                                session,
+                                "Clicked a button",
+                                {
+                                  to: `https://github.com/apps/meeshkan/installations/new`,
+                                  from: `https://app.meeshkan.com/${team.name}`,
+                                  c2a: "Import a project",
+                                },
+                                () =>
+                                  ReactGA.event({
+                                    category: "Github",
+                                    action: "Import repo start",
+                                    label: "index.tsx",
+                                  })
+                              )}
                               href={`https://github.com/apps/meeshkan/installations/new?state=${ghOauthState}`}
                               aria-label="Link to GitHub to install meeshkan on a repository"
                             >
@@ -818,126 +960,141 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                               Import from GitHub
                             </Button>
                           </Flex>
-                        ) : (
-                          E.isRight(repoListAndThunk[0]) &&
+                        ) : E.isRight(repoListAndThunk[0]) &&
                           E.isRight(repoListAndThunk[0].right) &&
                           E.isRight(owner) &&
                           E.isRight(owner.right) &&
-                          O.isSome(owner.right.right) && (
-                            <>
-                              <Menu
-                                closeOnSelect={true}
-                                placement="bottom-start"
+                          O.isSome(owner.right.right) ? (
+                          <>
+                            <Menu closeOnSelect={true} placement="bottom-start">
+                              <MenuButton
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="space-between"
+                                minWidth="204px"
+                                ml={2}
+                                mb={4}
+                                border="1px solid"
+                                backgroundColor={`mode.${colorMode}.background`}
+                                borderColor={`mode.${colorMode}.icon`}
+                                p={0}
+                                size="sm"
+                                overflow="hidden"
                               >
-                                <MenuButton
-                                  display="flex"
-                                  alignItems="center"
-                                  justifyContent="space-between"
-                                  minWidth="204px"
-                                  ml={2}
-                                  mb={4}
-                                  border="1px solid"
-                                  backgroundColor={`mode.${colorMode}.background`}
-                                  borderColor={`mode.${colorMode}.icon`}
-                                  p={0}
-                                  size="sm"
-                                  overflow="hidden"
+                                <Avatar
+                                  src={owner.right.right.value.avatar_url}
+                                  backgroundColor="transparent"
+                                  icon={
+                                    <FallbackIcon
+                                      color={`mode.${colorMode}.icon`}
+                                    />
+                                  }
+                                  name={session.user.name}
+                                  h={8}
+                                  w={8}
+                                  borderRadius="sm"
+                                />
+                                <Text mr={8} color={`mode.${colorMode}.text`}>
+                                  {owner.right.right.value.login}
+                                </Text>
+                                <ArrowUpDownIcon
+                                  boxSize="12px"
+                                  color="gray.500"
+                                  mr={2}
+                                />
+                              </MenuButton>
+                              <MenuList
+                                border="none"
+                                backgroundColor={`mode.${colorMode}.card`}
+                                color={`mode.${colorMode}.text`}
+                              >
+                                <MenuOptionGroup
+                                  defaultValue={owner.right.right.value.login}
+                                  type="radio"
                                 >
-                                  <Avatar
-                                    src={owner.right.right.value.avatar_url}
-                                    backgroundColor="transparent"
-                                    icon={
-                                      <FallbackIcon
-                                        color={`mode.${colorMode}.icon`}
-                                      />
-                                    }
-                                    name={session.user.name}
-                                    h={8}
-                                    w={8}
-                                    borderRadius="sm"
-                                  />
-                                  <Text mr={8} color={`mode.${colorMode}.text`}>
-                                    {owner.right.right.value.login}
-                                  </Text>
-                                  <ArrowUpDownIcon
-                                    boxSize="12px"
-                                    color="gray.500"
-                                    mr={2}
-                                  />
-                                </MenuButton>
-                                <MenuList
-                                  border="none"
-                                  backgroundColor={`mode.${colorMode}.card`}
-                                  color={`mode.${colorMode}.text`}
-                                >
-                                  <MenuOptionGroup
-                                    defaultValue={owner.right.right.value.login}
-                                    type="radio"
-                                  >
-                                    {repoListAndThunk[0].right.right.map(
-                                      (reposForOwner, index) => (
-                                        <MenuItemOption
-                                          key={index}
-                                          value={
-                                            NEA.head(reposForOwner).owner.login
-                                          }
-                                          onClick={() => {
-                                            setOwner(
+                                  {repoListAndThunk[0].right.right.map(
+                                    (reposForOwner, index) => (
+                                      <MenuItemOption
+                                        key={index}
+                                        value={
+                                          NEA.head(reposForOwner).owner.login
+                                        }
+                                        onClick={() => {
+                                          setOwner(
+                                            E.right(
                                               E.right(
-                                                E.right(
-                                                  O.some(
-                                                    NEA.head(reposForOwner)
-                                                      .owner
-                                                  )
+                                                O.some(
+                                                  NEA.head(reposForOwner).owner
                                                 )
                                               )
-                                            );
-                                            setOwnerRepos(
-                                              E.right(
-                                                E.right(O.some(reposForOwner))
-                                              )
-                                            );
-                                          }}
-                                        >
-                                          {NEA.head(reposForOwner).owner.login}
-                                        </MenuItemOption>
-                                      )
-                                    )}
-                                  </MenuOptionGroup>
-                                </MenuList>
-                              </Menu>
-                              <Stack>
-                                {E.isRight(ownerRepos) &&
-                                  E.isRight(ownerRepos.right) &&
-                                  O.isSome(ownerRepos.right.right) &&
-                                  ownerRepos.right.right.value.map(
-                                    (repo, index) => (
-                                      <ImportProject
-                                        key={index}
-                                        repoName={repo.name}
-                                        onClick={createProject({
-                                          importProjectIsExecuting:
-                                            importProjectIsExecuting[1],
-                                          closeModal: onClose,
-                                          toast,
-                                          userId: getUserIdFromIdOrEnv(id),
-                                          namePlusTeam: `${repo.name}${SEPARATOR}${team.name}`,
-                                          nodeID: repo.node_id,
-                                          nodePlusTeam:
-                                            repo.node_id + SEPARATOR + team.id,
-                                          repositoryName: repo.name,
-                                          owner: repo.owner.login,
-                                          // this assumes that at least one team exist
-                                          // doesn't cover error case
-                                          // where team addition fails
-                                          teamName: team.name,
-                                          router,
-                                        })(session)}
-                                      />
+                                            )
+                                          );
+                                          setOwnerRepos(
+                                            E.right(
+                                              E.right(O.some(reposForOwner))
+                                            )
+                                          );
+                                        }}
+                                      >
+                                        {NEA.head(reposForOwner).owner.login}
+                                      </MenuItemOption>
                                     )
                                   )}
-                              </Stack>
-                            </>
+                                </MenuOptionGroup>
+                              </MenuList>
+                            </Menu>
+                            <Stack>
+                              {E.isRight(ownerRepos) &&
+                                E.isRight(ownerRepos.right) &&
+                                O.isSome(ownerRepos.right.right) &&
+                                ownerRepos.right.right.value.map(
+                                  (repo, index) => (
+                                    <ImportProject
+                                      key={index}
+                                      teamName={team.name}
+                                      session={session}
+                                      repoName={repo.name}
+                                      onClick={createProject({
+                                        importProjectIsExecuting:
+                                          importProjectIsExecuting[1],
+                                        closeModal: onClose,
+                                        toast,
+                                        userId: getUserIdFromIdOrEnv(id),
+                                        namePlusTeam: `${repo.name}${SEPARATOR}${team.name}`,
+                                        nodeID: repo.node_id,
+                                        nodePlusTeam:
+                                          repo.node_id + SEPARATOR + team.id,
+                                        repositoryName: repo.name,
+                                        owner: repo.owner.login,
+                                        // this assumes that at least one team exist
+                                        // doesn't cover error case
+                                        // where team addition fails
+                                        teamName: team.name,
+                                        router,
+                                      })(session)}
+                                    />
+                                  )
+                                )}
+                            </Stack>
+                          </>
+                        ) : (
+                          E.isLeft(repoListAndThunk[0]) && (
+                            <Box
+                              h="100%"
+                              w="100%"
+                              d="flex"
+                              justifyContent="center"
+                              alignItems="center"
+                            >
+                              <Spinner
+                                color={
+                                  colorMode === "light" ? "red.500" : "red.300"
+                                }
+                                size="xl"
+                                thickness="4px"
+                                emptyColor={`mode.${colorMode}.icon`}
+                              />
+                            </Box>
                           )
                         )}
                       </ModalBody>

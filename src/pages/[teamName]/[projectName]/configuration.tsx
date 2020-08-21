@@ -61,6 +61,7 @@ import { confirmOrCreateUser, getUserIdFromIdOrEnv } from "../../../utils/user";
 import { withSession } from "../../api/session";
 import { getSlackOAuthState } from "../../../utils/oauth";
 import FormItem from "../../../components/molecules/formItem";
+import { mixpanelize } from "../../../utils/mixpanel-client";
 
 type NegativeConfigurationFetchOutcome =
   | NOT_LOGGED_IN
@@ -463,7 +464,16 @@ const ConfigurationPage = withError<
           </Box>
           <Stack
             as="form"
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={handleSubmit(
+              mixpanelize(
+                session,
+                "Clicked button",
+                {
+                  c2a: "Save configuratoni",
+                },
+                onSubmit
+              )
+            )}
             w="100%"
             spacing={8}
             gridArea="1 / 2 / 4 / 4"
@@ -493,7 +503,11 @@ const ConfigurationPage = withError<
                 right="8px"
               />
             </Alert>
-            <Card heading="Build settings" id={`build-settings`}>
+            <Card
+              session={session}
+              heading="Build settings"
+              id={`build-settings`}
+            >
               <FormItem
                 label="Root directory"
                 name="directory"
@@ -536,7 +550,11 @@ const ConfigurationPage = withError<
 
             <Box h={4} />
 
-            <Card heading="Slack integration" id={`slack-integration`}>
+            <Card
+              session={session}
+              heading="Slack integration"
+              id={`slack-integration`}
+            >
               <Flex justifyContent="space-between" my={4}>
                 <FormLabel color={`mode.${colorMode}.text`}>
                   Global notifications {notifications == true ? "on" : "off"}

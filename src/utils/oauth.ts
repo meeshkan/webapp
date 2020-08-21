@@ -24,11 +24,14 @@ export const decryptOAuthState = (key: string) => (s: string) =>
     key
   );
 
-export const getGHOAuthState = <E>(session: ISession): E.Either<E, string> =>
+export const getGHOAuthState = (goto: string) => <E>(
+  session: ISession
+): E.Either<E, string> =>
   pipe(
     encrypt(
       JSON.stringify({
         id: session.user.sub,
+        goto,
         env: process.env.GITHUB_AUTH_ENV,
       }),
       crypto.randomBytes(16),
@@ -82,11 +85,11 @@ export const Oauth = <A extends { id: string }>(
     )
   );
 
-export const Redirect = <E, B>(res: NextApiResponse) =>
+export const Redirect = <E, B>(res: NextApiResponse, goto: string) =>
   pipe(
     RTE.right<E, B, NextApiResponse<any>>(
       res.writeHead(301, {
-        Location: "/",
+        Location: goto,
       })
     ),
     RTE.chain((_) => RTE.right(constVoid()))

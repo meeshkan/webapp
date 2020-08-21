@@ -6,6 +6,7 @@ import { Text } from "@chakra-ui/core";
 import * as t from "io-ts";
 import { newestDateFirst } from "../../utils/date";
 import * as Ord from "fp-ts/lib/Ord";
+import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 
 const TTest = t.type({
   status: t.string,
@@ -18,6 +19,7 @@ const TTest = t.type({
 type ITTest = t.TypeOf<typeof TTest>;
 
 type PremiumProps = {
+  session: ISession;
   tests: ITTest[];
   teamName: string;
   projectName: string;
@@ -27,9 +29,14 @@ export const newestTestFirst: Ord.Ord<ITTest> = {
   equals: (d0, d1) => newestDateFirst.equals(d0.createdAt, d1.createdAt),
 };
 
-const Premium = ({ tests, teamName, projectName }: PremiumProps) => {
+const Premium = ({ tests, teamName, projectName, session }: PremiumProps) => {
   return (
-    <Card gridArea="1 / 2 / 2 / 3" heading="Premium tests" minH="35vh">
+    <Card
+      session={session}
+      gridArea="1 / 2 / 2 / 3"
+      heading="Premium tests"
+      minH="35vh"
+    >
       {!tests.length ? (
         <Text mt={2}>You don't have any premium tests completed yet.</Text>
       ) : (

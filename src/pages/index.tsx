@@ -26,6 +26,7 @@ import {
   Avatar,
 } from "@chakra-ui/core";
 import { AddIcon, FallbackIcon } from "../theme/icons";
+import { mixpanelize } from "../utils/mixpanel-client";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/pipeable";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
@@ -45,7 +46,6 @@ import {
 import { getTeams, ITeam, useTeams, Team } from "../utils/teams";
 import { confirmOrCreateUser, getUserIdFromIdOrEnv } from "../utils/user";
 import { withSession } from "./api/session";
-import { getGHOAuthState } from "../utils/oauth";
 import { useForm } from "react-hook-form";
 import { constNull, flow, constant } from "fp-ts/lib/function";
 import { CREATE_TEAM_MUTATION } from "../gql/pages";
@@ -70,7 +70,6 @@ export type ITeamsProps = {
   session: ISession;
   teams: ITeam[];
   id: string;
-  ghOauthState: string;
 };
 
 interface createTeamVariables {
@@ -149,13 +148,9 @@ export const getServerSideProps = ({
   props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>;
 }> =>
   pipe(
-    _RTE.seq3([
-      confirmOrCreateUser("id", userType),
-      getTeams,
-      RTE.fromReaderEither(getGHOAuthState),
-    ]),
-    RTE.chain(([{ id }, teams, ghOauthState]) => (session) =>
-      TE.right({ session, id, teams, ghOauthState })
+    _RTE.seq2([confirmOrCreateUser("id", userType), getTeams]),
+    RTE.chain(([{ id }, teams]) => (session) =>
+      TE.right({ session, id, teams })
     ),
     withSession(req, "index.tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
@@ -211,6 +206,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
           >
             {allTeams.map((team, index) => (
               <Card
+                session={session}
                 key={index}
                 link={`/${team.name}`}
                 linkLabel={`Links to ${team.name}'s dashboard`}
@@ -224,6 +220,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                     bg={`mode.${colorMode}.background`}
                     showBorder={true}
                     borderRadius="sm"
+                    name=""
                   />
                   <Stack spacing={2}>
                     <Heading
@@ -246,7 +243,16 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
 
             {/* Create a team | BUTTON */}
             <Button
-              onClick={onOpen}
+              onClick={mixpanelize(
+                session,
+                "Clicked button",
+                {
+                  to: "https://app.meeshkan.com/{newTeam}",
+                  from: "https://app.meeshkan.com",
+                  c2a: "Create a team",
+                },
+                onOpen
+              )}
               pos="unset"
               p={4}
               minH="72px"
@@ -294,7 +300,18 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                 />
                 <Box
                   as="form"
-                  onSubmit={handleSubmit(onSubmit)}
+                  onSubmit={handleSubmit(
+                    mixpanelize(
+                      session,
+                      "Clicked button",
+                      {
+                        to: "https://app.meeshkan.com/{newTeam}",
+                        from: "https://app.meeshkan.com",
+                        c2a: "Create team",
+                      },
+                      onSubmit
+                    )
+                  )}
                   w="100%"
                   overflow="auto"
                 >

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Menu,
   MenuButton,
@@ -26,6 +26,7 @@ interface IProjectSettingsProps {
 
 const ProjectSettings = ({ session }: IProjectSettingsProps) => {
   const { colorMode, toggleColorMode } = useColorMode();
+  const [isMenuOpen, toggleMenu] = useState(false);
   const fetchedTeamsAndThunk = useTeams(session);
   const teams = isLeft(fetchedTeamsAndThunk[0])
     ? // we are loading
@@ -38,11 +39,17 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
     <>
       <Menu closeOnSelect={false} placement="bottom-end">
         <MenuButton
+          aria-label={
+            isMenuOpen
+              ? "Close the navigation menu"
+              : "Open the navigation menu"
+          }
           display="flex"
           alignItems="center"
           backgroundColor={`mode.${colorMode}.background`}
           borderRadius="sm"
           p={0}
+          onClick={() => toggleMenu(!isMenuOpen)}
         >
           <Avatar
             src={session.user.picture}
@@ -50,7 +57,7 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
             borderColor="transparent"
             backgroundColor="transparent"
             icon={<FallbackIcon color={`mode.${colorMode}.icon`} />}
-            name={session.user.name}
+            name={`${session.user.name}'s avatar image`}
             h={10}
             w={10}
             borderRadius="sm"
@@ -84,7 +91,10 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
                 {colorMode === "light" ? "Dark mode" : "Light mode"}
               </MenuItem>
             </MenuGroup>
-            <MenuDivider borderColor={`mode.${colorMode}.icon`} />
+            <MenuDivider
+              borderColor={`mode.${colorMode}.icon`}
+              title="New menu section"
+            />
             <MenuGroup title="Teams" color={`mode.${colorMode}.title`}>
               {teams.map((team, index) => (
                 <Link href={`/${team.name}`} key={index}>
@@ -93,7 +103,6 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
                     d="flex"
                     alignContent="center"
                     aria-label={`Links to ${team.name}'s dashboard`}
-                    // command={`⌘${index}`}
                   >
                     <Image
                       src={team.image && team.image.downloadUrl}
@@ -112,7 +121,10 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
               ))}
             </MenuGroup>
 
-            <MenuDivider borderColor={`mode.${colorMode}.icon`} />
+            <MenuDivider
+              borderColor={`mode.${colorMode}.icon`}
+              title="New menu section"
+            />
 
             <MenuGroup title="Other" color={`mode.${colorMode}.title`}>
               <MenuItem color={`mode.${colorMode}.text`}>

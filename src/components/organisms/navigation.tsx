@@ -25,7 +25,7 @@ interface INavigationProps {
 const Navigation = ({ session }: INavigationProps) => {
   const { colorMode, toggleColorMode } = useColorMode();
   const router = useRouter();
-  const pathForBreadcrumbs = router.asPath.split("/").slice(1);
+  const pathForBreadcrumbs = router.asPath.split("?")[0].split("/").slice(1);
 
   return (
     <>
@@ -47,6 +47,7 @@ const Navigation = ({ session }: INavigationProps) => {
         >
           <Link href="/">
             <LogoIcon
+              aria-label="Go to homepage"
               color={`mode.${colorMode}.title`}
               h={8}
               w="auto"

@@ -8,7 +8,7 @@ import {
   useColorMode,
   Link,
   SimpleGrid,
-  Image
+  Image,
 } from "@chakra-ui/core";
 import { useRouter } from "next/router";
 import Card from "../molecules/card";
@@ -20,7 +20,11 @@ const SignIn = () => {
 
   return (
     <SimpleGrid columns={2} gap={8} h="80vh">
-      <Card>
+      {/** ewwwwwwwwwwwwwwwwwwwww null session, figure out a better way to do this... anti-pattern
+       * this is the only place we have null because it is the only place a user can't be signed in
+       * from the webapp
+       */}
+      <Card session={null}>
         <Stack
           direction="column"
           alignItems="center"
@@ -44,7 +48,7 @@ const SignIn = () => {
         </Stack>
       </Card>
 
-      <Card>
+      <Card session={null}>
         <Heading
           as="h2"
           color={`mode.${colorMode}.title`}
