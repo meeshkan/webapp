@@ -22,7 +22,11 @@ export const GET_TEAM_QUERY = `query($teamName: String!) {
             }
           }
         }
-        project {
+        project(filter: {
+          archived:{
+            equals: false
+          }
+        }) {
           items {
             name
             repository {

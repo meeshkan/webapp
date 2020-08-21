@@ -1,7 +1,11 @@
 export const GET_TEAMS_QUERY = `query {
   user {
-    team {
-      items{
+    team(filter: {
+      archived: {
+        equals: false
+      }
+    }) {
+      items {
         name
         id
         image {
@@ -16,7 +20,11 @@ export const GET_TEAMS_QUERY = `query {
             }
           }
         }
-        project {
+        project(filter: {
+          archived:{
+            equals: false
+          }
+        }) {
           items {
             name
             repository {
