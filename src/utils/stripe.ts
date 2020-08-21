@@ -28,7 +28,10 @@ export const createCustomerId = (id: string, teamName: string) => (
 ) =>
   pipe(
     TE.tryCatch(
-      () => stripe().customers.create(),
+      () =>
+        stripe().customers.create({
+          email: session.user.email,
+        }),
       () => ({
         type: "STRIPE_ERROR",
         msg: "Could not create a stripe customer",
