@@ -74,7 +74,11 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
         </MenuButton>
         <Portal>
           <MenuList border="none" backgroundColor={`mode.${colorMode}.card`}>
-            <MenuGroup title="Settings" color={`mode.${colorMode}.title`}>
+            <MenuGroup
+              title="Settings"
+              color={`mode.${colorMode}.title`}
+              fontWeight={700}
+            >
               <MenuItem
                 aria-label={`Switch to ${
                   colorMode === "light" ? "dark" : "light"
@@ -95,7 +99,11 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
               borderColor={`mode.${colorMode}.icon`}
               title="New menu section"
             />
-            <MenuGroup title="Teams" color={`mode.${colorMode}.title`}>
+            <MenuGroup
+              title="Teams"
+              color={`mode.${colorMode}.title`}
+              fontWeight={700}
+            >
               {teams.map((team, index) => (
                 <Link href={`/${team.name}`} key={index}>
                   <MenuItem
@@ -126,7 +134,11 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
               title="New menu section"
             />
 
-            <MenuGroup title="Other" color={`mode.${colorMode}.title`}>
+            <MenuGroup
+              title="Other"
+              color={`mode.${colorMode}.title`}
+              fontWeight={700}
+            >
               <MenuItem color={`mode.${colorMode}.text`}>
                 <ChakraLink
                   href="https://meeshkan.com/docs/"
