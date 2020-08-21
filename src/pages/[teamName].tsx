@@ -99,6 +99,7 @@ import {
   FREE_PLAN,
   planToTitle,
   createPlanIfNoPlan,
+  NO_PLAN,
 } from "../utils/stripe";
 
 type NegativeTeamFetchOutcome =
@@ -581,7 +582,7 @@ export const getServerSideProps = ({
           TE.right({
             session,
             ghOauthState,
-            plan: FREE_PLAN,
+            plan: plan === NO_PLAN ? FREE_PLAN : plan,
             id,
             team,
           })
@@ -597,7 +598,6 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
     pipe(
       {
         useColorMode: useColorMode(),
-        test: console.log("hello"),
         router: useRouter(),
         useDisclosure: useDisclosure(),
         teamsFromClientSideFetch: useTeams(session),
@@ -628,7 +628,6 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
         displayPicker: pipe(
           useState(p.router.query.displayPicker ? true : false),
           (dp) => {
-            console.log("DP", dp[0], p.router.query.displayPicker);
             if (dp[0]) {
               // forces open if query asks to display picker
               p.useDisclosure.onOpen();
@@ -721,13 +720,11 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                   <Text color={`mode.${colorMode}.title`} fontWeight={600}>
                     {planToTitle[plan]}
                   </Text>
-                  {plan === FREE_PLAN ? (
-                    <Link passHref href={`/${team.name}/plan`}>
-                      <ChakraLink fontWeight={600} ml={2}>
-                        {`-> Upgrade`}
-                      </ChakraLink>
-                    </Link>
-                  ) : null}
+                  <Link passHref href={`/${team.name}/plan`}>
+                    <ChakraLink fontWeight={600} ml={2}>
+                      {plan === FREE_PLAN ? `-> Upgrade` : `-> Manage`}
+                    </ChakraLink>
+                  </Link>
                 </FormControl>
                 <Box h={65} />
                 <Flex
