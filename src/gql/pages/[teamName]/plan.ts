@@ -1,13 +1,13 @@
-export const UPDATE_PLAN_MUTATION = `mutation UPDATE_TEAM_PLAN(
+export const UPDATE_STRIPE_ID_MUTATION = `mutation UPDATE_TEAM_PLAN(
   $userId: ID!
   $teamName: String!
-  $newPlan: String!
+  $stripeCustomerId: String!
 ) {
   userUpdate(
     filter: { id: $userId }
     data: {
       team: {
-        update: { filter: { name: $teamName }, data: { plan: $newPlan } }
+        update: { filter: { name: $teamName }, data: { stripeCustomerId: $stripeCustomerId } }
       }
     }
   ) {
@@ -15,11 +15,11 @@ export const UPDATE_PLAN_MUTATION = `mutation UPDATE_TEAM_PLAN(
       items {
         id
         name
+        stripeCustomerId
         image {
           downloadUrl
         }
         inviteLink
-        plan
         users {
           items {
             email

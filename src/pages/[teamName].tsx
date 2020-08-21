@@ -91,6 +91,14 @@ import { withError } from "../components/molecules/error";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { mixpanelize } from "../utils/mixpanel-client";
+import {
+  stripe,
+  createCustomerId,
+  getPlan,
+  FREE_PLAN,
+  planToTitle,
+  createPlanIfNoPlan,
+} from "../utils/stripe";
 
 type NegativeTeamFetchOutcome =
   | NOT_LOGGED_IN
@@ -103,14 +111,16 @@ type NegativeTeamFetchOutcome =
 
 type QueryTp = t.TypeOf<typeof queryTp>;
 type ITeamProps = {
-  team: ITeam;
+  team: ITeamWithStripe;
   id: string;
+  plan: string;
   session: ISession;
   ghOauthState: string;
 };
 type NegativeImportProjectOutcome = UNDEFINED_ERROR | INCORRECT_TYPE_SAFETY;
 type NegativeUpdateTeamOutcome = UNDEFINED_ERROR | INCORRECT_TYPE_SAFETY;
 type ITeam = t.TypeOf<typeof Team>;
+export type ITeamWithStripe = t.TypeOf<typeof TeamWithStripe>;
 type IRepositoriesGroupedByOwner = NonEmptyArray<IRepository>[];
 type ImportProps = {
   teamName: string;
@@ -126,9 +136,10 @@ const TeamUpdate = t.type({
   userId: t.union([t.null, t.string]),
 });
 
-const Team = t.type({
+const _Team = t.type({
   id: t.string,
   name: t.string,
+
   image: t.union([
     t.null,
     t.type({
@@ -136,7 +147,6 @@ const Team = t.type({
     }),
   ]),
   inviteLink: t.string,
-  plan: t.string,
   users: t.type({
     items: t.array(
       t.type({
@@ -170,6 +180,20 @@ const Team = t.type({
   }),
 });
 
+const Team = t.intersection([
+  _Team,
+  t.type({
+    stripeCustomerId: t.union([t.string, t.null]),
+  }),
+]);
+
+const TeamWithStripe = t.intersection([
+  _Team,
+  t.type({
+    stripeCustomerId: t.string,
+  }),
+]);
+
 const queryTp = t.type({
   user: t.type({
     team: t.type({
@@ -192,7 +216,7 @@ interface ImportProjectVariables {
   toast: (props: UseToastOptions) => void;
 }
 
-const getTeam = (teamName: string) => (
+export const getTeam = (teamName: string) => (
   session: ISession
 ): TE.TaskEither<NegativeTeamFetchOutcome, ITeam> =>
   pipe(
@@ -498,14 +522,77 @@ export const getServerSideProps = ({
       RTE.fromReaderEither(getGHOAuthState),
     ]),
     RTE.chain(([{ id }, team, ghOauthState]) => (session) =>
-      TE.right({ session, id, team, ghOauthState })
+      team.stripeCustomerId !== null
+        ? TE.right({ ghOauthState, id, team })
+        : pipe(
+            createCustomerId(id, team.name)(session),
+            TE.chain((customerId) =>
+              TE.right({
+                id,
+                ghOauthState,
+                team: {
+                  ...team,
+                  stripeCustomerId: customerId,
+                },
+              })
+            )
+          )
+    ),
+    RTE.chain(({ id, team, ghOauthState }) => (session) =>
+      TE.tryCatch(
+        () =>
+          stripe()
+            .customers.retrieve(team.stripeCustomerId)
+            .then((res) => ({
+              session,
+              ghOauthState,
+              plan: getPlan(res),
+              id,
+              team,
+            })),
+        () => ({
+          type: "STRIPE_ERROR",
+          msg: "Could not create a stripe customer",
+        })
+      )
+    ),
+    RTE.chain(({ id, team, ghOauthState }) => (_) =>
+      TE.tryCatch(
+        () =>
+          stripe()
+            .customers.retrieve(team.stripeCustomerId)
+            .then((res) => ({
+              ghOauthState,
+              plan: getPlan(res),
+              id,
+              team,
+            })),
+        () => ({
+          type: "STRIPE_ERROR",
+          msg: "Could not create a stripe customer",
+        })
+      )
+    ),
+    RTE.chain(({ id, team, ghOauthState, plan }) => (session) =>
+      pipe(
+        createPlanIfNoPlan(team.stripeCustomerId)(plan),
+        TE.chain((_) =>
+          TE.right({
+            session,
+            ghOauthState,
+            plan: FREE_PLAN,
+            id,
+            team,
+          })
+        )
+      )
     ),
     withSession(req, "[teamName].tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);
 
 export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
   "Uh oh. Looks like this resource does not exist.",
-  ({ team, id, session, ghOauthState }) =>
+  ({ team, id, session, ghOauthState, plan }) =>
     pipe(
       {
         useColorMode: useColorMode(),
@@ -618,9 +705,9 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                 <FormControl d="flex" mt={4}>
                   <FormLabel color={`mode.${colorMode}.text`}>Plan:</FormLabel>
                   <Text color={`mode.${colorMode}.title`} fontWeight={600}>
-                    {team.plan}
+                    {planToTitle[plan]}
                   </Text>
-                  {team.plan === "Free" ? (
+                  {plan === FREE_PLAN ? (
                     <Link passHref href={`/${team.name}/plan`}>
                       <ChakraLink fontWeight={600} ml={2}>
                         {`-> Upgrade`}
