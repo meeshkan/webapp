@@ -31,6 +31,9 @@ export const createCustomerId = (id: string, teamName: string) => (
       () =>
         stripe().customers.create({
           email: session.user.email,
+          metadata: {
+            sub: session.user.sub,
+          },
         }),
       () => ({
         type: "STRIPE_ERROR",
