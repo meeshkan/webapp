@@ -159,7 +159,7 @@ export default safeApi<NegativeOAuthOutcome, void>(
           })
         )
       ),
-      RTE.chain((_) => Oauth.Redirect(res)),
+      RTE.chain((_) => Oauth.Redirect(res, "/")),
       withSession(req, "oauth.ts default export")
     ),
   _400ErrorHandler

@@ -25,7 +25,7 @@ interface INavigationProps {
 const Navigation = ({ session }: INavigationProps) => {
   const { colorMode, toggleColorMode } = useColorMode();
   const router = useRouter();
-  const pathForBreadcrumbs = router.asPath.split("/").slice(1);
+  const pathForBreadcrumbs = router.asPath.split("?")[0].split("/").slice(1);
 
   return (
     <>

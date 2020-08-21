@@ -46,7 +46,6 @@ import {
 import { getTeams, ITeam, useTeams, Team } from "../utils/teams";
 import { confirmOrCreateUser, getUserIdFromIdOrEnv } from "../utils/user";
 import { withSession } from "./api/session";
-import { getGHOAuthState } from "../utils/oauth";
 import { useForm } from "react-hook-form";
 import { constNull, flow, constant } from "fp-ts/lib/function";
 import { CREATE_TEAM_MUTATION } from "../gql/pages";
@@ -71,7 +70,6 @@ export type ITeamsProps = {
   session: ISession;
   teams: ITeam[];
   id: string;
-  ghOauthState: string;
 };
 
 interface createTeamVariables {
@@ -150,13 +148,9 @@ export const getServerSideProps = ({
   props: E.Either<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>;
 }> =>
   pipe(
-    _RTE.seq3([
-      confirmOrCreateUser("id", userType),
-      getTeams,
-      RTE.fromReaderEither(getGHOAuthState),
-    ]),
-    RTE.chain(([{ id }, teams, ghOauthState]) => (session) =>
-      TE.right({ session, id, teams, ghOauthState })
+    _RTE.seq2([confirmOrCreateUser("id", userType), getTeams]),
+    RTE.chain(([{ id }, teams]) => (session) =>
+      TE.right({ session, id, teams })
     ),
     withSession(req, "index.tsx getServerSideProps")
   )().then(_E.eitherSanitizedWithGenericError);

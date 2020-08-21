@@ -83,6 +83,7 @@ import {
   IOwner,
   IRepository,
   Repository,
+  TEAM_IMPORT_PROJECT,
 } from "../utils/gh";
 import { withSession } from "./api/session";
 import ReactGA from "react-ga";
@@ -519,7 +520,7 @@ export const getServerSideProps = ({
     _RTE.seq3([
       confirmOrCreateUser("id", userType),
       getTeam(teamName),
-      RTE.fromReaderEither(getGHOAuthState),
+      RTE.fromReaderEither(getGHOAuthState(`/${teamName}/?displayPicker=true`)),
     ]),
     RTE.chain(([{ id }, team, ghOauthState]) => (session) =>
       team.stripeCustomerId !== null
@@ -596,6 +597,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
     pipe(
       {
         useColorMode: useColorMode(),
+        test: console.log("hello"),
         router: useRouter(),
         useDisclosure: useDisclosure(),
         teamsFromClientSideFetch: useTeams(session),
@@ -623,6 +625,18 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
       },
       (p) => ({
         ...p,
+        displayPicker: pipe(
+          useState(p.router.query.displayPicker ? true : false),
+          (dp) => {
+            console.log("DP", dp[0], p.router.query.displayPicker);
+            if (dp[0]) {
+              // forces open if query asks to display picker
+              p.useDisclosure.onOpen();
+              dp[1](false);
+            }
+            return dp;
+          }
+        ),
         onSubmit: (values: ITeamUpdate) =>
           updateTeam({
             toast: p.toast,
