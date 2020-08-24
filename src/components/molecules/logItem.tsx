@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Flex, Text, useColorMode } from "@chakra-ui/core";
+import { Box, Flex, Text, useColorMode, Button } from "@chakra-ui/core";
 import { CheckmarkIcon, XmarkIcon, ArrowRightIcon } from "../../theme/icons";
 
 type LogProps = {
@@ -8,9 +8,17 @@ type LogProps = {
   success: boolean;
   priority: number;
   setIndex: React.Dispatch<React.SetStateAction<number>>;
+  isActive: boolean;
 };
 
-const LogItem = ({ i, path, success, priority, setIndex }: LogProps) => {
+const LogItem = ({
+  i,
+  path,
+  success,
+  priority,
+  setIndex,
+  isActive = false,
+}: LogProps) => {
   const { colorMode } = useColorMode();
   const stoplight = {
     light: {
@@ -25,7 +33,7 @@ const LogItem = ({ i, path, success, priority, setIndex }: LogProps) => {
     },
   };
   return (
-    <Box
+    <Button
       d="flex"
       alignItems="center"
       justifyContent="space-between"
@@ -34,13 +42,20 @@ const LogItem = ({ i, path, success, priority, setIndex }: LogProps) => {
       }}
       borderBottom="1px solid"
       borderColor={`mode.${colorMode}.icon`}
+      size="lg"
       px={2}
-      py={1}
       borderRadius="md"
       transition="all 0.3s"
+      w="full"
+      backgroundColor="transparent"
+      isActive={isActive}
       _hover={{
-        background: `mode.${colorMode}.background`,
+        backgroundColor: `mode.${colorMode}.background`,
         cursor: "pointer",
+        borderBottomColor: "transparent",
+      }}
+      _active={{
+        backgroundColor: `mode.${colorMode}.background`,
         borderBottomColor: "transparent",
       }}
     >
@@ -85,7 +100,7 @@ const LogItem = ({ i, path, success, priority, setIndex }: LogProps) => {
       </Flex>
 
       <ArrowRightIcon color={`mode.${colorMode}.icon`} />
-    </Box>
+    </Button>
   );
 };
 
