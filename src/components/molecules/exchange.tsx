@@ -36,12 +36,24 @@ type ExchangeProps = {
 
 const ExchangeMessage = ({ command, commands }: ExchangeProps) => {
   const { colorMode } = useColorMode();
-  const red = { light: "red.500", dark: "red.300" };
-  const yellow = { light: "yellow.500", dark: "yellow.300" };
-  const cyan = { light: "cyan.500", dark: "cyan.300" };
-  const cyanBorder = { light: "cyan.700", dark: "cyan.200" };
-  const redBorder = { light: "red.700", dark: "red.200" };
+  // const red = { light: "red.500", dark: "red.300" };
+  // const yellow = { light: "yellow.500", dark: "yellow.300" };
+  // const cyan = { light: "cyan.500", dark: "cyan.300" };
+  // const cyanBorder = { light: "cyan.700", dark: "cyan.200" };
+  // const redBorder = { light: "red.700", dark: "red.200" };
 
+  const stoplight = {
+    light: {
+      success: { stroke: "cyan.500", background: "cyan.50" },
+      failure: { stroke: "red.500", background: "red.50" },
+      text: { cyan: "cyan.500", yellow: "yellow.500", red: "red.500" },
+    },
+    dark: {
+      success: { stroke: "cyan.100", background: "rgba(51, 204, 174, 0.25)" },
+      failure: { stroke: "red.100", background: "rgba(220, 24, 83, 0.25)" },
+      text: { cyan: "cyan.200", yellow: "yellow.200", red: "red.200" },
+    },
+  };
   return (
     <>
       <Box mb={8}>
@@ -52,15 +64,31 @@ const ExchangeMessage = ({ command, commands }: ExchangeProps) => {
           fontSize="xl"
         >
           <Flex align="center">
-            {command.success ? (
-              <CheckmarkIcon
-                boxSize="16px"
-                mr={2}
-                color={cyanBorder[colorMode]}
-              />
-            ) : (
-              <XmarkIcon boxSize="16px" mr={2} color={redBorder[colorMode]} />
-            )}
+            <Box
+              borderRadius="full"
+              boxSize="32px"
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              mr={2}
+              backgroundColor={
+                command.success === true
+                  ? stoplight[colorMode].success.background
+                  : stoplight[colorMode].failure.background
+              }
+            >
+              {command.success ? (
+                <CheckmarkIcon
+                  boxSize="16px"
+                  color={stoplight[colorMode].success.stroke}
+                />
+              ) : (
+                <XmarkIcon
+                  boxSize="16px"
+                  color={stoplight[colorMode].failure.stroke}
+                />
+              )}
+            </Box>
             {command.success ? "Test case passed" : "Test case failed"}
             {command.priority && (
               <Popover>
@@ -69,11 +97,11 @@ const ExchangeMessage = ({ command, commands }: ExchangeProps) => {
                     cursor="pointer"
                     color={
                       command.priority >= 4
-                        ? cyan[colorMode]
+                        ? stoplight[colorMode].text.cyan
                         : command.priority >= 3
-                        ? yellow[colorMode]
+                        ? stoplight[colorMode].text.yellow
                         : command.priority >= 0
-                        ? red[colorMode]
+                        ? stoplight[colorMode].text.red
                         : "gray.500"
                     }
                     fontWeight={900}

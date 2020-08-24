@@ -1,8 +1,16 @@
 import React, { useState } from "react";
-import { Text, Stack, useColorMode, Button, useToast } from "@chakra-ui/core";
+import {
+  Text,
+  Stack,
+  useColorMode,
+  Button,
+  useToast,
+  Link as ChakraLink,
+} from "@chakra-ui/core";
 import Card from "../molecules/card";
 import { IClaims, ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 type SettingsProps = {
   session: ISession;
@@ -86,7 +94,15 @@ const Settings = ({
       <Stack direction="row" my={2}>
         <Text>Configured:</Text>
         <Text color={`mode.${colorMode}.title`} fontWeight={600}>
-          {configured.toString()}
+          {configured === false ? (
+            <Link href={`/${teamName}/${repositoryName}/configuration`}>
+              <ChakraLink fontFamily="mono" fontStyle="italic">
+                {configured.toString() + ` ->`}
+              </ChakraLink>
+            </Link>
+          ) : (
+            configured.toString()
+          )}
         </Text>
       </Stack>
 

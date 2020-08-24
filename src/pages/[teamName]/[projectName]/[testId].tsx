@@ -235,8 +235,10 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                     key={i}
                     i={i}
                     success={item.success}
+                    priority={item.priority}
                     path={item.test_case || smartItemTestCase(item, i)}
                     setIndex={setIndex}
+                    isActive={i == index}
                   />
                 ))
               ) : JSON.parse(log)["build-error"] ? (
