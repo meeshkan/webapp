@@ -235,7 +235,7 @@ const ExchangeMessage = ({ command, commands }: ExchangeProps) => {
                         : exchange.request.method.toUpperCase()
                       : exchange.request.method.toUpperCase()}
                   </Text>
-                  <Text fontWeight={600}>{exchange.meta.path}</Text>
+                  <Text fontWeight={600}>{exchange.request.pathname}</Text>
                 </Flex>
                 <AccordionIcon color={`mode.${colorMode}.icon`} />
               </AccordionButton>
