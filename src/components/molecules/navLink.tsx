@@ -1,4 +1,4 @@
-import React, { forwardRef, cloneElement } from "react";
+import React, { forwardRef } from "react";
 import { Box, useColorMode } from "@chakra-ui/core";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -15,7 +15,7 @@ const NavLink = ({ children, href, ...props }) => {
 
   return (
     <Link href={href} {...props}>
-      {typeof children === "function" ? children(isActive) : children}
+      <a>{typeof children === "function" ? children(isActive) : children}</a>
     </Link>
   );
 };
