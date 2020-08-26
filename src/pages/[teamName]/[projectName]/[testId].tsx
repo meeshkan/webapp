@@ -32,6 +32,7 @@ import {
 import { confirmOrCreateUser } from "../../../utils/user";
 import { GET_TEST_QUERY } from "../../../gql/pages/[teamName]/[projectName]/[testId]";
 import { eightBaseClient, gqlOperatorName } from "../../../utils/graphql";
+import { ArrowRightIcon } from "../../../theme/icons";
 
 type NegativeTestFetchOutcome =
   | NOT_LOGGED_IN
@@ -49,6 +50,11 @@ const TestT = t.type({
   location: t.string,
   log: t.union([t.string, t.null]),
   testType: t.string,
+  project: t.type({
+    repository: t.type({
+      owner: t.string,
+    }),
+  }),
 });
 
 type ITestT = t.TypeOf<typeof TestT>;
@@ -64,9 +70,6 @@ type ITestProps = {
 
 const Project = t.type({
   name: t.string,
-  // repository: t.type({
-  //   owner: t.string,
-  // }),
   tests: t.type({
     items: t.array(TestT),
   }),
@@ -153,7 +156,6 @@ const getTest = (teamName: string, projectName: string, testID: string) => (
   );
 
 const userType = t.type({ id: t.string });
-type UserType = t.TypeOf<typeof userType>;
 
 export const getServerSideProps = ({
   params: { teamName, projectName, testId },
@@ -196,13 +198,13 @@ const smartItemTestCase = (ct: CommandType, i: number): string =>
 const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
   "Could not find this test resource.",
   ({
-    test: { log, location, commitHash, status, testType },
+    test: { log, location, commitHash, status, testType, project },
     teamName,
     projectName,
     session,
   }) =>
     status === "In progress" ? (
-      <div>Your tests are currently in progress.</div>
+      <Text>Your tests are currently in progress.</Text>
     ) : (
       pipe(
         {
@@ -252,7 +254,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
               {testType !== "Premium" && (
                 <Code
                   mb={4}
-                  fontSize="xl"
+                  fontSize="lg"
                   fontWeight={900}
                   colorScheme={
                     status === "In progress"
@@ -267,10 +269,11 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                   }
                 >
                   {location}
-                  {` branch -> commit `}
+                  branch <ArrowRightIcon /> commit{" "}
                   <Link
-                    href={`https://github.com/${teamName}/${projectName}/commit/${commitHash}`}
+                    href={`https://github.com/${project.repository.owner}/${projectName}/commit/${commitHash}`}
                     color="inherit"
+                    isExternal
                   >
                     {commitHash.slice(0, 7)}
                   </Link>

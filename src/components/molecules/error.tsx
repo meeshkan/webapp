@@ -59,7 +59,7 @@ const ErrorComponent = ({ errorMessage }: ErrorProps) => {
             fontWeight={900}
             _hover={{ textDecor: "none" }}
           >
-            {`Go back home ->`}
+            Go to dashboard
           </Link>
         </NextLink>
       </Flex>

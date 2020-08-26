@@ -36,7 +36,7 @@ const Card = ({
     e.preventDefault();
     mixpanelize(
       session,
-      "Clicked button",
+      `Navigated to ${link || headingLink}`,
       {
         to: link,
         c2a: linkLabel,

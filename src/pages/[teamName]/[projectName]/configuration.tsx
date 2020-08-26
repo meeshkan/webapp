@@ -475,9 +475,9 @@ const ConfigurationPage = withError<
             onSubmit={handleSubmit(
               mixpanelize(
                 session,
-                "Clicked button",
+                "Save configuration",
                 {
-                  c2a: "Save configuratoni",
+                  c2a: "Save configuration",
                 },
                 onSubmit
               )
