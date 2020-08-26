@@ -243,9 +243,10 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
 
             {/* Create a team | BUTTON */}
             <Button
+              variant="ghost"
               onClick={mixpanelize(
                 session,
-                "Create a team",
+                "Intent to create a team",
                 {
                   to: "https://app.meeshkan.com/{newTeam}",
                   from: "https://app.meeshkan.com",
@@ -254,12 +255,18 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                 onOpen
               )}
               pos="unset"
+              letterSpacing="wide"
+              border="1px solid"
+              borderColor={`mode.${colorMode}.tertiary`}
               p={4}
               minH="72px"
               justifyContent="start"
-              bg={`mode.${colorMode}.card`}
-              color={`mode.${colorMode}.title`}
-              _hover={{ color: `mode.${colorMode}.titleHover` }}
+              color={`mode.${colorMode}.text`}
+              _hover={{
+                color: `mode.${colorMode}.title`,
+                backgroundColor: `mode.${colorMode}.card`,
+                borderColor: "transparent",
+              }}
             >
               <AddIcon boxSize={10} mr={2} stroke="2px" />
               Create a team
@@ -303,7 +310,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                   onSubmit={handleSubmit(
                     mixpanelize(
                       session,
-                      "Create team",
+                      "Create a team",
                       {
                         to: "https://app.meeshkan.com/{newTeam}",
                         from: "https://app.meeshkan.com",

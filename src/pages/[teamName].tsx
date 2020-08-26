@@ -856,6 +856,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
 
                 {/* Import a project | BUTTON */}
                 <Button
+                  variant="ghost"
                   onClick={mixpanelize(
                     session,
                     "Import a project",
@@ -868,11 +869,17 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                   )}
                   pos="unset"
                   p={4}
+                  letterSpacing="wide"
+                  border="1px solid"
+                  borderColor={`mode.${colorMode}.tertiary`}
                   minH="72px"
                   justifyContent="start"
-                  bg={`mode.${colorMode}.card`}
-                  color={`mode.${colorMode}.title`}
-                  _hover={{ color: `mode.${colorMode}.titleHover` }}
+                  color={`mode.${colorMode}.text`}
+                  _hover={{
+                    color: `mode.${colorMode}.title`,
+                    backgroundColor: `mode.${colorMode}.card`,
+                    borderColor: "transparent",
+                  }}
                 >
                   <AddIcon boxSize={10} mr={2} stroke="2px" />
                   Import a project
@@ -939,7 +946,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                               colorScheme="red"
                               onClick={mixpanelize(
                                 session,
-                                "Import a project",
+                                "Intent to import a project",
                                 {
                                   to: `https://github.com/apps/meeshkan/installations/new`,
                                   from: `https://app.meeshkan.com/${team.name}`,
