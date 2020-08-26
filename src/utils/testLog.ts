@@ -6,13 +6,9 @@ import { pipe } from "fp-ts/lib/pipeable";
 // uses httptypes
 
 const exchangeType = t.type({
-  meta: t.intersection([
-    t.type({
-      path: t.string,
-      path_params: t.object,
-    }),
-    t.partial({ apiType: t.string }),
-  ]),
+  meta: t.partial({
+    apiType: t.string
+  }),
   response: t.intersection([
     t.type({
       statusCode: t.Integer,
@@ -22,6 +18,7 @@ const exchangeType = t.type({
   request: t.type({
     body: t.union([t.string, t.undefined]),
     method: t.string,
+    pathname: t.string,
     // headers: t.record(t.string, t.union([t.array(t.string), t.string])),
   }),
 });

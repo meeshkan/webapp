@@ -189,7 +189,7 @@ const smartItemTestCase = (ct: CommandType, i: number): string =>
           ? gqlOperatorName(NEA.head(a).request.body)
           : NEA.head(a).request.method.toUpperCase() +
             " " +
-            NEA.head(a).meta.path
+            NEA.head(a).request.pathname
     )
   );
 
