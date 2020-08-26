@@ -54,7 +54,12 @@ const Navigation = ({ session }: INavigationProps) => {
               cursor="pointer"
             />
           </Link>
-          <Breadcrumb ml={3} mt={2} separator=">">
+          <Breadcrumb
+            ml={3}
+            mt={2}
+            separator="/"
+            color={`mode.${colorMode}.tertiary`}
+          >
             {pathForBreadcrumbs.map((crumb, i, pathForBreadcrumbs) => {
               if (pathForBreadcrumbs.length - 1 === i) {
                 return (
@@ -70,7 +75,7 @@ const Navigation = ({ session }: INavigationProps) => {
                   <BreadcrumbItem key={i}>
                     <BreadcrumbLink
                       href={`/${url}`}
-                      color={`mode.${colorMode}.tertiary`}
+                      color={`mode.${colorMode}.text`}
                     >
                       {crumb}
                     </BreadcrumbLink>
