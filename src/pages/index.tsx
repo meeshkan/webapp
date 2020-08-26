@@ -245,7 +245,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
             <Button
               onClick={mixpanelize(
                 session,
-                "Clicked button",
+                "Create a team",
                 {
                   to: "https://app.meeshkan.com/{newTeam}",
                   from: "https://app.meeshkan.com",
@@ -303,7 +303,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamsProps>(
                   onSubmit={handleSubmit(
                     mixpanelize(
                       session,
-                      "Clicked button",
+                      "Create team",
                       {
                         to: "https://app.meeshkan.com/{newTeam}",
                         from: "https://app.meeshkan.com",

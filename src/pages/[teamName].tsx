@@ -276,7 +276,7 @@ const ImportProject = ({
       variant="ghost"
       onClick={mixpanelize(
         session,
-        "Clicked a button",
+        "Import a project",
         {
           to: `https://app.meeshkan.com/${teamName}/{newProject}`,
           from: `https://app.meeshkan.com/${teamName}`,
@@ -858,7 +858,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                 <Button
                   onClick={mixpanelize(
                     session,
-                    "Clicked a button",
+                    "Import a project",
                     {
                       to: `https://app.meeshkan.com/${team.name}/{newProject}`,
                       from: `https://app.meeshkan.com/${team.name}`,
@@ -939,7 +939,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                               colorScheme="red"
                               onClick={mixpanelize(
                                 session,
-                                "Clicked a button",
+                                "Import a project",
                                 {
                                   to: `https://github.com/apps/meeshkan/installations/new`,
                                   from: `https://app.meeshkan.com/${team.name}`,
