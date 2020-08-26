@@ -32,6 +32,11 @@ export const GET_TEST_QUERY = `query(
                 location
                 log
                 testType
+                project {
+                  repository {
+                    owner
+                  }
+                }
               }
             }
           }
