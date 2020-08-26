@@ -859,7 +859,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                   variant="ghost"
                   onClick={mixpanelize(
                     session,
-                    "Import a project",
+                    "Intent to import a project",
                     {
                       to: `https://app.meeshkan.com/${team.name}/{newProject}`,
                       from: `https://app.meeshkan.com/${team.name}`,
@@ -946,7 +946,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, ITeamProps>(
                               colorScheme="red"
                               onClick={mixpanelize(
                                 session,
-                                "Intent to import a project",
+                                "Get Github credentials to import",
                                 {
                                   to: `https://github.com/apps/meeshkan/installations/new`,
                                   from: `https://app.meeshkan.com/${team.name}`,
