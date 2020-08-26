@@ -311,13 +311,19 @@ const ExchangeMessage = ({ command, commands }: ExchangeProps) => {
                     >
                       Response body:
                     </Heading>
-                    <CodeBlock className={"json"}>
-                      {JSON.stringify(
-                        JSON.parse(exchange.response.body),
-                        null,
-                        2
-                      )}
-                    </CodeBlock>
+                    {exchange.response.body.startsWith("{") !== true ? (
+                      <CodeBlock className="html">
+                        {exchange.response.body}
+                      </CodeBlock>
+                    ) : (
+                      <CodeBlock className="json">
+                        {JSON.stringify(
+                          JSON.parse(exchange.response.body),
+                          null,
+                          2
+                        )}
+                      </CodeBlock>
+                    )}
                   </>
                 )}
               </AccordionPanel>

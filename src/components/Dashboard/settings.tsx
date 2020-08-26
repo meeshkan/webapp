@@ -96,9 +96,7 @@ const Settings = ({
         <Text color={`mode.${colorMode}.title`} fontWeight={600}>
           {configured === false ? (
             <Link href={`/${teamName}/${repositoryName}/configuration`}>
-              <ChakraLink fontFamily="mono" fontStyle="italic">
-                {configured.toString() + ` ->`}
-              </ChakraLink>
+              <ChakraLink>{configured.toString() + ` ->`}</ChakraLink>
             </Link>
           ) : (
             configured.toString()

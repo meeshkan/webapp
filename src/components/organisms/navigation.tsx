@@ -46,13 +46,15 @@ const Navigation = ({ session }: INavigationProps) => {
           height="40px"
         >
           <Link href="/">
-            <LogoIcon
-              aria-label="Go to homepage"
-              color={`mode.${colorMode}.title`}
-              h={8}
-              w="auto"
-              cursor="pointer"
-            />
+            <a>
+              <LogoIcon
+                aria-label="Go to homepage"
+                color={`mode.${colorMode}.title`}
+                h={8}
+                w="auto"
+                cursor="pointer"
+              />
+            </a>
           </Link>
           <Breadcrumb ml={3} mt={2} separator=">">
             {pathForBreadcrumbs.map((crumb, i, pathForBreadcrumbs) => {
@@ -69,10 +71,11 @@ const Navigation = ({ session }: INavigationProps) => {
                 return (
                   <BreadcrumbItem key={i}>
                     <BreadcrumbLink
+                      as={Link}
                       href={`/${url}`}
                       color={`mode.${colorMode}.tertiary`}
                     >
-                      {crumb}
+                      <a>{crumb}</a>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                 );

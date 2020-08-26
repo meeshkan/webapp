@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/core";
 import { ChevronDownIcon, MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { FallbackIcon } from "../../theme/icons";
-import Link from "next/link";
+import { useRouter } from "next/router";
 import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
 import { useTeams } from "../../utils/teams";
 import { isLeft } from "fp-ts/lib/Either";
@@ -27,6 +27,7 @@ interface IProjectSettingsProps {
 const ProjectSettings = ({ session }: IProjectSettingsProps) => {
   const { colorMode, toggleColorMode } = useColorMode();
   const [isMenuOpen, toggleMenu] = useState(false);
+  const router = useRouter();
   const fetchedTeamsAndThunk = useTeams(session);
   const teams = isLeft(fetchedTeamsAndThunk[0])
     ? // we are loading
@@ -105,27 +106,27 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
               fontWeight={700}
             >
               {teams.map((team, index) => (
-                <Link href={`/${team.name}`} key={index}>
-                  <MenuItem
-                    color={`mode.${colorMode}.text`}
-                    d="flex"
-                    alignContent="center"
-                    aria-label={`Links to ${team.name}'s dashboard`}
-                  >
-                    <Image
-                      src={team.image && team.image.downloadUrl}
-                      fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
-                      alt={`${team.name}'s organization image`}
-                      borderRadius="sm"
-                      border="1px solid"
-                      borderColor={`mode.${colorMode}.icon`}
-                      h={4}
-                      w={4}
-                      mr={2}
-                    />
-                    {team.name}
-                  </MenuItem>
-                </Link>
+                <MenuItem
+                  key={index}
+                  onClick={() => router.push(`/${team.name}`)}
+                  color={`mode.${colorMode}.text`}
+                  d="flex"
+                  alignContent="center"
+                  aria-label={`Links to ${team.name}'s dashboard`}
+                >
+                  <Image
+                    src={team.image && team.image.downloadUrl}
+                    fallbackSrc="https://media.graphcms.com/yT9VU4rQPKrzu7h7cqJe"
+                    alt={`${team.name}'s organization image`}
+                    borderRadius="sm"
+                    border="1px solid"
+                    borderColor={`mode.${colorMode}.icon`}
+                    h={4}
+                    w={4}
+                    mr={2}
+                  />
+                  {team.name}
+                </MenuItem>
               ))}
             </MenuGroup>
 
@@ -150,10 +151,11 @@ const ProjectSettings = ({ session }: IProjectSettingsProps) => {
                   Docs
                 </ChakraLink>
               </MenuItem>
-              <MenuItem color={`mode.${colorMode}.text`}>
-                <Link href="/api/logout">
-                  <Text>Log out</Text>
-                </Link>
+              <MenuItem
+                color={`mode.${colorMode}.text`}
+                onClick={() => router.push(`/api/logout`)}
+              >
+                <Text>Log out</Text>
               </MenuItem>
             </MenuGroup>
           </MenuList>
