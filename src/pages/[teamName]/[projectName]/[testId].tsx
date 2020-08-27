@@ -214,6 +214,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
     teamName,
     projectName,
     session,
+    testID,
   }) =>
     status === "In progress" ? (
       <Text>Your tests are currently in progress.</Text>
@@ -239,7 +240,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
               requested_by: requestedBy,
               time: p.today.toISOString(),
               premium: false,
-              branch: location,
+              testid: testID,
             });
 
             fetch("/api/trigger-build", {
