@@ -240,7 +240,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
               requested_by: requestedBy,
               time: p.today.toISOString(),
               premium: false,
-              testid: testID,
+              test: testID,
             });
 
             fetch("/api/trigger-build", {
