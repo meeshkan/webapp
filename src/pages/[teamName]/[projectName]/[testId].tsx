@@ -1,6 +1,16 @@
 import React, { useState } from "react";
-import { ISession } from "@auth0/nextjs-auth0/dist/session/session";
-import { Box, Code, Grid, Text, useColorMode, Link } from "@chakra-ui/core";
+import { ISession, IClaims } from "@auth0/nextjs-auth0/dist/session/session";
+import {
+  Box,
+  Code,
+  Grid,
+  Text,
+  useColorMode,
+  Link,
+  Button,
+  Flex,
+  useToast,
+} from "@chakra-ui/core";
 import * as E from "fp-ts/lib/Either";
 import * as NEA from "fp-ts/lib/NonEmptyArray";
 import { pipe } from "fp-ts/lib/pipeable";
@@ -33,6 +43,7 @@ import { confirmOrCreateUser } from "../../../utils/user";
 import { GET_TEST_QUERY } from "../../../gql/pages/[teamName]/[projectName]/[testId]";
 import { eightBaseClient, gqlOperatorName } from "../../../utils/graphql";
 import { ArrowRightIcon } from "../../../theme/icons";
+import { useRouter } from "next/router";
 
 type NegativeTestFetchOutcome =
   | NOT_LOGGED_IN
@@ -53,6 +64,7 @@ const TestT = t.type({
   project: t.type({
     repository: t.type({
       owner: t.string,
+      id: t.number,
     }),
   }),
 });
@@ -202,6 +214,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
     teamName,
     projectName,
     session,
+    testID,
   }) =>
     status === "In progress" ? (
       <Text>Your tests are currently in progress.</Text>
@@ -211,14 +224,59 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
           colorMode: useColorMode().colorMode,
           logs: versionTriage(JSON.parse(log)),
           index: useState(0),
+          today: new Date(),
+          router: useRouter(),
+          toast: useToast(),
         },
         (p) => ({
           ...p,
           index: p.index[0],
           setIndex: p.index[1],
           failures: p.logs.commands.filter((c) => !c.success),
+          handleClick: (repository: Number, requestedBy: IClaims) => {
+            // setTriggerTest(true);
+            let triggerTestData = JSON.stringify({
+              repository: repository,
+              requested_by: requestedBy,
+              time: p.today.toISOString(),
+              premium: false,
+              test: testID,
+            });
+
+            fetch("/api/trigger-build", {
+              method: "POST",
+              body: triggerTestData,
+              headers: {
+                "Api-Key": process.env.MEESHKAN_WEBHOOK_TOKEN,
+                "Content-Type": "application/json",
+              },
+            }).then((res) => {
+              if (res.status !== 200) {
+                console.log(
+                  "Looks like there was a problem. Status Code: " + res.status
+                );
+              }
+
+              res
+                .json()
+                .then((data) => {
+                  p.router.push(`/${teamName}/${projectName}/${data.test}`);
+                })
+                .catch((error) => {
+                  error.message;
+                });
+            });
+          },
         }),
-        ({ colorMode, logs, failures, index, setIndex }) => (
+        ({
+          colorMode,
+          logs,
+          failures,
+          index,
+          setIndex,
+          handleClick,
+          toast,
+        }) => (
           <Grid
             templateColumns="repeat(3, 1fr)"
             templateRows="repeat(2, minmax(204px, 45%))"
@@ -251,34 +309,52 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
             </Card>
 
             <Box gridArea="1 / 4 / 4 / 2" maxH="80vh" overflow="auto">
-              {testType !== "Premium" && (
-                <Code
-                  mb={4}
-                  fontSize="lg"
-                  fontWeight={900}
-                  colorScheme={
-                    status === "In progress"
-                      ? "yellow"
-                      : status === "Passing"
-                      ? "cyan"
-                      : status === "Failed"
-                      ? "red"
-                      : status === "Build error"
-                      ? "gray"
-                      : null
-                  }
-                >
-                  {location}
-                  branch <ArrowRightIcon /> commit{" "}
-                  <Link
-                    href={`https://github.com/${project.repository.owner}/${projectName}/commit/${commitHash}`}
-                    color="inherit"
-                    isExternal
+              <Flex>
+                {testType !== "Premium" && (
+                  <Code
+                    mb={4}
+                    fontSize="md"
+                    fontWeight={900}
+                    colorScheme={
+                      status === "In progress"
+                        ? "yellow"
+                        : status === "Passing"
+                        ? "cyan"
+                        : status === "Failed"
+                        ? "red"
+                        : status === "Build error"
+                        ? "gray"
+                        : null
+                    }
+                    mr={4}
                   >
-                    {commitHash.slice(0, 7)}
-                  </Link>
-                </Code>
-              )}
+                    {location} branch <ArrowRightIcon /> commit{" "}
+                    <Link
+                      href={`https://github.com/${project.repository.owner}/${projectName}/commit/${commitHash}`}
+                      color="inherit"
+                      isExternal
+                    >
+                      {commitHash.slice(0, 7)}
+                    </Link>
+                  </Code>
+                )}
+                <Button
+                  size="xs"
+                  lineHeight="none"
+                  onClick={() => {
+                    handleClick(project.repository.id, session.user);
+                    toast({
+                      title: "Test retriggered",
+                      description: `A standard test has been triggered on the ${location} branch of this repository. Standard tests take approximately 25 minutes.`,
+                      status: "success",
+                      duration: 9000,
+                      isClosable: true,
+                    });
+                  }}
+                >
+                  Retrigger this test
+                </Button>
+              </Flex>
 
               {logs.commands[index] ? (
                 <Exchange

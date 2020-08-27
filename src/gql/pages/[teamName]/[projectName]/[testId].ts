@@ -35,6 +35,7 @@ export const GET_TEST_QUERY = `query(
                 project {
                   repository {
                     owner
+                    id
                   }
                 }
               }
