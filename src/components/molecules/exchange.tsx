@@ -221,10 +221,6 @@ const ExchangeMessage = ({ command, commands }: ExchangeProps) => {
                   <Text fontWeight={600} mr={2}>
                     {exchange.meta.apiType === "graphql"
                       ? JSON.parse(exchange.request.body)["query"].startsWith(
-                          "query"
-                        )
-                        ? "QUERY"
-                        : JSON.parse(exchange.request.body)["query"].startsWith(
                             "mutation"
                           )
                         ? "MUTATION"
@@ -232,7 +228,7 @@ const ExchangeMessage = ({ command, commands }: ExchangeProps) => {
                             "subscription"
                           )
                         ? "SUBSCRIPTION"
-                        : exchange.request.method.toUpperCase()
+                        : "QUERY"
                       : exchange.request.method.toUpperCase()}
                   </Text>
                   <Text fontWeight={600}>{exchange.request.pathname}</Text>

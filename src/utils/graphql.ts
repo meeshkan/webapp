@@ -7,13 +7,11 @@ import { pipe } from "fp-ts/lib/pipeable";
 import { getTokenFromSessionOrEnv } from "../pages/api/session";
 
 export const gqlOperatorName = (b: string) =>
-  JSON.parse(b)["query"].startsWith("query")
-    ? "QUERY"
-    : JSON.parse(b)["query"].startsWith("mutation")
+  JSON.parse(b)["query"].startsWith("mutation")
     ? "MUTATION"
     : JSON.parse(b)["query"].startsWith("subscription")
     ? "SUBSCRIPTION"
-    : "";
+    : "QUERY";
 
 export const errors = t.type({
   errors: t.array(
