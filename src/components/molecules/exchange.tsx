@@ -166,7 +166,7 @@ const ExchangeMessage = ({ command, commands }: ExchangeProps) => {
         )}
       </Box>
 
-      {commands && (
+      {command.exchange.length > 1 && (
         <Heading
           as="h2"
           fontSize="lg"
