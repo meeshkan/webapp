@@ -74,6 +74,7 @@ const addDemoToTeam = (userId: string, teamId: string) => (
           namePlusTeamName: `demo bank% [/!` + session.user.nickname,
           nodeIdPlusTeamId: `MDEwOlJlcG9zaXRvcnkyNzk4NTM5NTc=% [/!` + teamId,
           premium1: `premium-1-` + session.user.nickname,
+          premium2: `premium-2-` + session.user.nickname,
           standard1: `standard-1-` + session.user.nickname,
           standard2: `standard-2-` + session.user.nickname,
           standard3: `standard-3-` + session.user.nickname,
