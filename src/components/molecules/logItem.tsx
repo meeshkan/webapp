@@ -79,7 +79,12 @@ const LogItem = ({
             <XmarkIcon color={stoplight[colorMode].failure.stroke} />
           )}
         </Box>
-        <Text fontWeight={600} color={`mode.${colorMode}.tertiary`}>
+        <Text
+          fontWeight={600}
+          color={`mode.${colorMode}.tertiary`}
+          maxW={["280px", "400px"]}
+          overflow="auto"
+        >
           {path}
         </Text>
         <Text
