@@ -82,7 +82,7 @@ const LogItem = ({
         <Text
           fontWeight={600}
           color={`mode.${colorMode}.tertiary`}
-          maxW={["280px", "400px"]}
+          maxW={["280px", "280px", "400px"]}
           overflow="auto"
         >
           {path}
