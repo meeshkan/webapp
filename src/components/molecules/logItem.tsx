@@ -44,6 +44,7 @@ const LogItem = ({
       borderColor={`mode.${colorMode}.icon`}
       size="lg"
       px={2}
+      h="auto"
       borderRadius="md"
       transition="all 0.3s"
       w="full"
@@ -57,6 +58,10 @@ const LogItem = ({
       _active={{
         backgroundColor: `mode.${colorMode}.background`,
         borderBottomColor: "transparent",
+      }}
+      style={{
+        whiteSpace: "normal",
+        wordWrap: "break-word",
       }}
     >
       <Flex alignItems="center" py={2}>
@@ -72,6 +77,7 @@ const LogItem = ({
               ? stoplight[colorMode].success.background
               : stoplight[colorMode].failure.background
           }
+          minWidth="32px"
         >
           {success === true ? (
             <CheckmarkIcon color={stoplight[colorMode].success.stroke} />
@@ -82,8 +88,8 @@ const LogItem = ({
         <Text
           fontWeight={600}
           color={`mode.${colorMode}.tertiary`}
-          maxW={["280px", "280px", "400px"]}
-          overflow="auto"
+          textAlign="left"
+          lineHeight="1.2"
         >
           {path}
         </Text>
@@ -103,8 +109,7 @@ const LogItem = ({
           {priority ? `P` + priority : null}
         </Text>
       </Flex>
-
-      <ArrowRightIcon color={`mode.${colorMode}.icon`} />
+      <ArrowRightIcon color={`mode.${colorMode}.icon`} ml={2} />
     </Button>
   );
 };
