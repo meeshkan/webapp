@@ -170,6 +170,7 @@ export default withError<GET_SERVER_SIDE_PROPS_ERROR, IProjectWithTeamName>(
           teamName={projectProps.teamName}
           repositoryName={projectProps.name}
           repositoryId={projectProps.repository.id}
+          repositoryOwner={projectProps.repository.owner}
           configured={projectProps.configuration ? true : false}
         />
         <Premium
