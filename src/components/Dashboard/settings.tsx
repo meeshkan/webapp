@@ -15,6 +15,7 @@ import Link from "next/link";
 type SettingsProps = {
   session: ISession;
   repositoryName: String;
+  repositoryOwner: String;
   teamName: String;
   configured: Boolean;
   repositoryId: Number;
@@ -23,6 +24,7 @@ type SettingsProps = {
 const Settings = ({
   session,
   repositoryName,
+  repositoryOwner,
   teamName,
   configured,
   repositoryId,
@@ -80,7 +82,7 @@ const Settings = ({
       <Stack direction="row" my={2}>
         <Text>Repository:</Text>
         <Text color={`mode.${colorMode}.title`} fontWeight={600}>
-          {`${teamName}/${repositoryName}`}
+          {`${repositoryOwner}/${repositoryName}`}
         </Text>
       </Stack>
 
