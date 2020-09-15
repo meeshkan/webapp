@@ -366,7 +366,7 @@ const TestPage = withError<GET_SERVER_SIDE_PROPS_ERROR, ITestProps>(
                 <>
                   <Text lineHeight="tall">
                     It looks like we couldn't build your repository for testing.
-                    Please consult the bulid log:
+                    Please consult the build log:
                   </Text>
                   <Link
                     href={JSON.parse(log)["build-error"]}
