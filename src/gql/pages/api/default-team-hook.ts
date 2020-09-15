@@ -122,9 +122,9 @@ export const CREATE_DEMO_BANK = `mutation(
                 }
                 configuration: {
                   create: {
-                    buildCommand: "npm install && npm start"
-                    openAPISpec: "http://localhost:4000/bank/openapi"
-                    graphQLSchema: "http://localhost:4000/bank/graphql"
+                    buildCommand: "npm install && npm run build && npm start"
+                    openAPISpec: "http://localhost:3000/api/openapi"
+                    graphQLSchema: "http://localhost:3000/api/graphql"
                     directory: "./"
                   }
                 }
