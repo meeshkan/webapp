@@ -43,7 +43,6 @@ class MyDocument extends Document {
           ></script>
           {/* Meeshkan Recorder */}
           <script
-            async
             src="https://recorder.meeshkan.com/record.js?client_id=meeshkan_webapp"
           />
         </Head>
