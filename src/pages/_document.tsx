@@ -22,6 +22,11 @@ class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
+          {/* Meeshkan Recorder */}
+          <script
+            async
+            src="https://recorder.meeshkan.com/record.js?client_id=meeshkan_webapp"
+          />
           {/* Google Analytics */}
           <script
             async
