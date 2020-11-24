@@ -21,3 +21,4 @@ jobs:
         with:
           client_id: '204d89a3-8d0b-4223-83fe-efcbd6d41e16'
           client_secret: ${{ secrets.MEESHKAN_CLIENT_SECRET }}
+          url: ${{ steps.wait-for-vercel.outputs.url }}
