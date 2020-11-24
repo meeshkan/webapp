@@ -9,7 +9,7 @@ jobs:
       - name: Wait for Vercel deployment
         uses: mskelton/wait-for-vercel-action@v1
         with:
-          prod-url: example.now.sh
+          prod-url: legacy-webapp.vercel.app
           token: ${{ secrets.VERCEL_TOKEN }}
       - name: Run after deployment
         run: echo "Deployment at ${ENVIRONMENT_URL}"
