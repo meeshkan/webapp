@@ -11,6 +11,8 @@ jobs:
         with:
           prod-url: legacy-webapp.vercel.app
           token: ${{ secrets.VERCEL_TOKEN }}
+          await-build: true
+          team-id: team_RiQ7hemgTyoU60meqITrDp8a
       - name: Run after deployment
         run: echo "Deployment at ${ENVIRONMENT_URL}"
         env:
