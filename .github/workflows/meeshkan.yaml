@@ -14,6 +14,6 @@ jobs:
           await-build: true
           team-id: team_RiQ7hemgTyoU60meqITrDp8a
       - name: Run after deployment
-        run: echo Deployment at $ENVIRONMENT_URL (or perhhaps ${{ steps.wait-for-vercel.outputs.url }})
+        run: echo Deployment at $ENVIRONMENT_URL (or perhhaps ${{ steps.wait-for-vercel.outputs.url }} )
         env:
           ENVIRONMENT_URL: ${{ steps.wait-for-vercel.outputs.url }}
