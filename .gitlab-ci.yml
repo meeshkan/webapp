@@ -2,3 +2,7 @@ test-job1:
   stage: test
   script:
     - echo "This job tests something"
+
+test-meeshkan:
+  stage: test
+  image: meeshkan/runner
