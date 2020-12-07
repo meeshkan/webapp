@@ -1,5 +1,13 @@
+stages:
+  - deploy
+  - meeshkan-test
+
 meeshkan-tests:
-  stage: test
+  stage: deploy
+  script: echo "Deployment done!"
+
+meeshkan-tests:
+  stage: meeshkan-test
   image: meeshkan/gitlab:latest
   script: /entrypoint.py
   variables:
