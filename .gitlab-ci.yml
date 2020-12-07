@@ -6,3 +6,8 @@ test-job1:
 test-meeshkan:
   stage: test
   image: meeshkan/runner
+  variables:
+    MEESHKAN_CLIENT_ID: "204d89a3-8d0b-4223-83fe-efcbd6d41e16"
+    MEESHKAN_CLIENT_SECRET: "$SECRET_OBTAINED_FROM_MEESHKAN"
+    MEESHKAN_URL: "https://example.com"
+
