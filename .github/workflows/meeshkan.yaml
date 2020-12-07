@@ -1,0 +1,24 @@
+name: Test using Meeshkan
+
+on: push
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Wait for Vercel deployment
+        id: wait-for-vercel
+        uses: mskelton/wait-for-vercel-action@v1
+        with:
+          prod-url: legacy-webapp.vercel.app
+          token: ${{ secrets.VERCEL_TOKEN }}
+          await-build: true
+          team-id: team_RiQ7hemgTyoU60meqITrDp8a
+
+      - name: Run Meeshkan tests
+        uses: meeshkan/action@master
+        with:
+          client_id: '204d89a3-8d0b-4223-83fe-efcbd6d41e16'
+          client_secret: ${{ secrets.MEESHKAN_CLIENT_SECRET }}
+          url: ${{ steps.wait-for-vercel.outputs.url }}

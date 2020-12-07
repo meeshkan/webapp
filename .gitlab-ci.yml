@@ -1,0 +1,23 @@
+stages:
+  - deploy
+  - meeshkan-tests
+
+deploy:
+  stage: deploy
+  script:
+    - echo "DEPLOYMENT_URL=https://example.com" >> build.env
+    - echo "Deployment done!"
+  artifacts:
+    reports:
+      dotenv: build.env
+
+meeshkan-tests:
+  stage: meeshkan-tests
+  image: meeshkan/gitlab:latest
+  script: /entrypoint.py
+  dependencies:
+    - deploy
+  variables:
+    MEESHKAN_CLIENT_ID: "204d89a3-8d0b-4223-83fe-efcbd6d41e16"
+    MEESHKAN_CLIENT_SECRET: "$SECRET_OBTAINED_FROM_MEESHKAN"
+    MEESHKAN_URL: "$DEPLOYMENT_URL"
