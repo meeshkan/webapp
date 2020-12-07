@@ -1,9 +1,4 @@
-test-job1:
-  stage: test
-  script:
-    - echo "This job tests something"
-
-test-meeshkan:
+meeshkan-tests:
   stage: test
   image: meeshkan/gitlab
   script: /entrypoint.py
@@ -11,4 +6,3 @@ test-meeshkan:
     MEESHKAN_CLIENT_ID: "204d89a3-8d0b-4223-83fe-efcbd6d41e16"
     MEESHKAN_CLIENT_SECRET: "$SECRET_OBTAINED_FROM_MEESHKAN"
     MEESHKAN_URL: "https://example.com"
-
