@@ -1,6 +1,6 @@
 meeshkan-tests:
   stage: test
-  image: meeshkan/gitlab
+  image: meeshkan/gitlab:latest
   script: /entrypoint.py
   variables:
     MEESHKAN_CLIENT_ID: "204d89a3-8d0b-4223-83fe-efcbd6d41e16"
