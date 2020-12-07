@@ -5,7 +5,7 @@ test-job1:
 
 test-meeshkan:
   stage: test
-  image: meeshkan/runner
+  image: meeshkan/gitlab
   script: /entrypoint.py
   variables:
     MEESHKAN_CLIENT_ID: "204d89a3-8d0b-4223-83fe-efcbd6d41e16"
