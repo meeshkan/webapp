@@ -39,7 +39,7 @@
     "mixpanel": "^0.11.0",
     "mixpanel-browser": "^2.38.0",
     "monocle-ts": "^2.1.0",
-    "next": "^9.4.1",
+    "next": "^11.1.0",
     "parse-link-header": "^1.0.1",
     "pino": "^6.2.1",
     "pino-logflare": "^0.1.0",
